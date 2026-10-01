@@ -7,7 +7,7 @@ Last updated: 2026-10-02
 | Phase | Status | Deliverables | Verification | Planned Commit |
 |---|---|---|---|---|
 | 0 Architecture and roadmap | complete | Requirements, architecture decisions, scope, progress tracker, README baseline | Documentation review and `git diff --check` | `docs: define project architecture and implementation roadmap` |
-| 1 Application scaffold | not-started | Python package, configuration, dependencies, test tooling, CI | Import smoke test, Ruff, Pytest | `chore: scaffold risk engine and quality gates` |
+| 1 Application scaffold | complete | Python package, configuration, dependencies, test tooling, CI | Import smoke test, Ruff, Pytest | `chore: scaffold risk engine and quality gates` |
 | 2 Data ingestion | not-started | GDELT, Bluesky and fixture adapters, normalization, deduplication, provenance | Adapter and normalization tests | `feat(data): ingest and normalize news and social text` |
 | 3 NLP risk engine | not-started | Entity resolution, sentiment, event classification, impact scoring | Golden NLP fixtures and boundary tests | `feat(nlp): generate explainable financial risk signals` |
 | 4 Stress engine | not-started | Synthetic portfolio, scenario matrix, valuation and reconciliation | Asset-level and portfolio-level tests | `feat(stress): simulate event driven portfolio losses` |
@@ -18,8 +18,8 @@ Last updated: 2026-10-02
 
 ## Current Phase
 
-Phase 0 is complete. Phase 1 will create the executable Python 3.11 application
-scaffold and quality gates without implementing business functionality prematurely.
+Phase 1 is complete. Phase 2 will implement the common document contract, GDELT,
+Bluesky and offline fixture adapters, normalization, deduplication, and provenance.
 
 ## Decisions
 
@@ -44,6 +44,15 @@ scaffold and quality gates without implementing business functionality premature
 - Captured functional requirements, data-governance constraints, architecture,
   interfaces, test strategy, scope boundaries, and phased commit history.
 - Verified the documentation patch with `git diff --check` before commit.
+
+### 2026-10-02 Phase 1
+
+- Added an installable `src`-layout Python package and diagnostic CLI.
+- Added validated environment configuration with safe offline defaults.
+- Added consistent logging configuration and a documented environment template.
+- Added Pytest and Ruff configuration, smoke tests, and Python 3.11 GitHub Actions CI.
+- Verified locally on Python 3.13: configuration check passed, Ruff reported no
+  findings, and all 8 Pytest tests passed.
 
 ## Risks and Blockers
 

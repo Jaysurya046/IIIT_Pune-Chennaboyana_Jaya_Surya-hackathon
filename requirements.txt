@@ -1,0 +1,3 @@
+# Runtime dependencies are introduced with the phase that uses them.
+# Installing this file installs the local package and its declared dependencies.
+-e .

@@ -1,0 +1,40 @@
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and local configuration
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+build/
+dist/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Runtime data, databases, logs, and downloaded models
+data/runtime/
+data/raw/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+models/
+.cache/
+huggingface/
+
+# Generated presentation and video artifacts are added deliberately later
+docs/rendered/

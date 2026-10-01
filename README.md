@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 0 complete - architecture and delivery roadmap defined
+**Implementation Status:** Phase 1 complete - application scaffold and quality gates ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -58,8 +58,28 @@ recorded under `data/`. No proprietary or confidential client data will be used.
 
 ## 4. Quickstart & Installation
 
-Runtime and exact commands will be added in Phase 1 after the executable application
-scaffold is introduced. The planned runtime is Python 3.11.
+Runtime: Python 3.11 through 3.13. CI verifies Python 3.11 on Ubuntu; local development
+has been verified on Python 3.13 on Windows.
+
+```bash
+git clone https://github.com/Jaysurya046/IIIT_Pune-Chennaboyana_Jaya_Surya-hackathon.git
+cd IIIT_Pune-Chennaboyana_Jaya_Surya-hackathon
+python -m venv .venv
+```
+
+Activate the environment with `.venv\Scripts\Activate.ps1` on Windows PowerShell or
+`source .venv/bin/activate` on macOS/Linux, then run:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m risk_engine check
+python -m ruff check .
+python -m pytest
+```
+
+Copy `.env.example` to `.env` only when local overrides are required. Do not commit
+the resulting `.env` file. Live ingestion and dashboard commands will be added with
+their implementation phases.
 
 ## 5. Key Results & Domain Impact
 
