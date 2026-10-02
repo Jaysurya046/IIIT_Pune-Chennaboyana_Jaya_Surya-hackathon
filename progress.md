@@ -12,14 +12,14 @@ Last updated: 2026-10-02
 | 3 NLP risk engine | complete | Entity resolution, sentiment, event classification, impact scoring | Golden NLP fixtures and boundary tests | `feat(nlp): generate explainable financial risk signals` |
 | 4 Stress engine | complete | Synthetic portfolio, scenario matrix, valuation and reconciliation | Asset-level and portfolio-level tests | `feat(stress): simulate event driven portfolio losses` |
 | 5 API and persistence | complete | SQLite repositories and versioned FastAPI endpoints | API contract and persistence tests | `feat(api): expose risk signals and stress results` |
-| 6 Dashboard | not-started | Signal monitor and portfolio stress views | Dashboard smoke test and manual walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
+| 6 Dashboard | complete | Signal monitor and portfolio stress views | Dashboard contract tests and rendered walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
 | 7 Validation | not-started | End-to-end tests, benchmark, failure and performance checks | Offline suite and recorded metrics | `test: validate the complete risk intelligence workflow` |
 | 8 Implementation documentation | not-started | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
 
 ## Current Phase
 
-Phase 5 is complete. Phase 6 will implement the Streamlit monitoring and portfolio
-stress dashboard against the versioned API.
+Phase 6 is complete. Phase 7 will validate the complete offline workflow, benchmark
+quality and performance, and exercise documented failure paths.
 
 ## Decisions
 
@@ -123,6 +123,27 @@ stress dashboard against the versioned API.
 - Verified locally on Python 3.13: Ruff reported no findings, all 61 Pytest tests
   passed, dependency checks succeeded, and the offline API workflow required no
   network access.
+
+### 2026-10-02 Phase 6
+
+- Added a typed, sanitized HTTP client so the Streamlit layer consumes the Phase 5 API
+  without duplicating ingestion, NLP, persistence, or stress orchestration.
+- Added global event, impact, source, and entity filters with KPI, event-distribution,
+  sentiment/impact, exact-value, explanation, and provenance views.
+- Added a Stress Lab that records trigger decisions and displays aggregate values,
+  expected loss, applied assumptions, and reconciled asset-class, sector, issuer, and
+  instrument breakdowns from one persisted API response.
+- Added source-health monitoring and an explicit fixture-only ingestion plus
+  deterministic-analysis workflow for reproducible first-run data.
+- Labeled fixture records, portfolio exposure, and stress scenarios as synthetic and
+  documented source systems, metric definitions, update behavior, and limitations.
+- Added the `dashboard` CLI command, current Streamlit/Pandas/Plotly dependencies, API
+  URL configuration, dashboard guide, and expanded architecture decisions.
+- Verified the populated dashboard against a real local API: the rendered script had
+  three task tabs, seven KPI cards, and source-backed evidence tables without runtime
+  exceptions.
+- Verified locally on Python 3.13: Ruff reported no findings, all 69 Pytest tests
+  passed, and the installed dependency set passed `pip check`.
 
 ## Risks and Blockers
 

@@ -183,6 +183,43 @@ shows source health, a filterable risk-signal stream, provenance, impact-score f
 scenario assumptions, and portfolio loss breakdowns by asset class, sector, issuer,
 and instrument.
 
+The UI is split into three task-oriented workspaces:
+
+- **Risk signals** applies event, minimum-impact, source, and entity filters through the
+  API. It pairs overview metrics and distributions with an exact signal register, then
+  exposes rationale, normalized impact factors, model revisions, and source provenance
+  for the selected record.
+- **Stress lab** submits the selected signal identifier to the stress endpoint and
+  renders its persisted trigger decision. Triggered outcomes show before/after values,
+  losses by asset class and issuer, instrument-level reconciliation, and applied shock
+  assumptions from one validated response.
+- **Source health** shows the latest per-source operational outcomes and provides an
+  explicit fixture-ingestion plus deterministic-analysis action for a reproducible
+  first run.
+
+```mermaid
+flowchart LR
+    U[Analyst filters or action] --> S[Streamlit dashboard]
+    S -->|typed HTTP request| A[FastAPI v1]
+    A --> R[(SQLite repositories)]
+    A --> E[NLP and stress services]
+    R -->|validated response| A
+    E -->|validated response| A
+    A -->|signals, status, portfolio or decision| S
+```
+
+The dashboard HTTP client validates every response against the same Pydantic contracts
+used by the API. Transport, status, and response-validation failures become bounded
+messages that identify the endpoint without echoing upstream bodies. Read views use a
+15-second cache; the refresh control clears it. The API remains the system of record,
+and the UI performs only aggregation for presentation, with Decimal reconciliation
+checks before stress breakdowns are displayed.
+
+The default page uses a summary-to-detail hierarchy and maintains the same filter scope
+across charts, tables, and the stress selector. Empty databases, empty filter results,
+API outages, skipped triggers, and scenarios with no applied shocks each have explicit
+states. Fixture records, the portfolio, and scenarios are labeled synthetic in context.
+
 ## Core Data Contracts
 
 `RawDocument` contains the normalized text and complete source provenance.

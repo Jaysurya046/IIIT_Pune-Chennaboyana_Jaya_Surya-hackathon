@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 5 complete - persistence and versioned API ready
+**Implementation Status:** Phase 6 complete - interactive monitoring dashboard ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -83,10 +83,9 @@ python -m pytest
 ```
 
 Copy `.env.example` to `.env` only when local overrides are required. Do not commit
-the resulting `.env` file. Live ingestion and dashboard commands will be added with
-their implementation phases. The fixture command currently exercises both source
-types through validation, normalization, provenance capture, and deduplication without
-requiring network access.
+the resulting `.env` file. The fixture commands exercise both source types through
+validation, normalization, provenance capture, and deduplication without requiring
+network access.
 
 The analysis command defaults to a transparent deterministic NLP implementation. To
 run the pinned FinBERT sentiment and MiniLM semantic event models, install the optional
@@ -112,6 +111,17 @@ The complete endpoint workflow and error semantics are documented in
 [docs/api.md](docs/api.md). The default SQLite database is created under the ignored
 `data/runtime/` directory.
 
+With the API running, start the Phase 6 dashboard in a second terminal:
+
+```bash
+python -m risk_engine dashboard --host 127.0.0.1 --port 8501 --api-url http://127.0.0.1:8000
+```
+
+Open `http://127.0.0.1:8501`. On an empty database, use **Source health** to run the
+explicit fixture ingestion and deterministic analysis workflow. The dashboard guide,
+filter behavior, metric definitions, and source classifications are documented in
+[docs/dashboard.md](docs/dashboard.md).
+
 The GDELT adapter is credential-free. Bluesky search availability varies by AppView;
 when authentication is required, provide a short-lived bearer token only through the
 ignored `RISK_ENGINE_BLUESKY_BEARER_TOKEN` environment setting.
@@ -130,6 +140,11 @@ they are not forecasts, calibrated regulatory stress results, or investment advi
 Phase 5 exposes the complete offline workflow through nine documented HTTP endpoints
 and preserves ingestion runs, source status, signals, entity indexes, and stress
 decisions across process restarts.
+
+Phase 6 adds a typed API-backed monitoring interface with global event, impact, source,
+and entity filters; source provenance and score explanations; an explicit stress
+trigger; exact asset-class, sector, issuer, and instrument reconciliation; and clear
+labels for all synthetic fixture, portfolio, and scenario outputs.
 
 ## Development Progress
 
