@@ -58,3 +58,22 @@ claimed to be API captures or evidence about real organizations.
 
 Checksums are recorded in `data/sources.yaml`. Any fixture edit requires updating its
 checksum and noting the change in `progress.md`.
+
+## NLP Evaluation and Configuration
+
+`data/evaluation/nlp_golden.json` is a project-authored synthetic regression set. Its
+eight cases cover every event-taxonomy category and expected deterministic sentiment
+and issuer matches. It protects implementation behavior but is deliberately not
+presented as evidence of real-world model accuracy.
+
+`data/nlp/issuer_watchlist.json` contains only fictional companies and aliases.
+`data/nlp/event_taxonomy.json` contains the project-authored category descriptions,
+keywords, and prototype severity priors. These configuration artifacts and the golden
+set are checksummed in `data/sources.yaml`.
+
+Model identifiers, immutable revisions, published licensing information, and known
+limitations are recorded in `data/models.yaml`. Model weights are downloaded into the
+ignored cache directory only when `model` mode is selected; no weights are committed.
+The default `deterministic` mode uses transparent project-authored rules so tests and
+offline demonstrations remain reproducible. Mode selection is explicit and a failed
+model load is never silently replaced with deterministic output.

@@ -27,3 +27,22 @@ fixture_artifacts:
     redistribution: project-authored under repository license
     sha256: 867550276a2863ccc204ad6dc7af13f330b6a03a201fb46daff5a08fb1df202c
     assumptions: Bluesky-shaped records; not captured from the live service
+
+  - path: data/evaluation/nlp_golden.json
+    classification: synthetic
+    redistribution: project-authored under repository license
+    sha256: b54efa00a8c7766f41fda6ea6718dcaf0b0c582bb6bb2f051f9e6d088d4d6f71
+    assumptions: regression cases are illustrative and do not measure real-world accuracy
+
+configuration_artifacts:
+  - path: data/nlp/issuer_watchlist.json
+    classification: synthetic
+    redistribution: project-authored under repository license
+    sha256: 3317a8118c630e4710080d9d5cdc730055dab134d00626a37ce29cca952a83e6
+    assumptions: all issuers, tickers, sectors, and aliases are fictional
+
+  - path: data/nlp/event_taxonomy.json
+    classification: project-authored
+    redistribution: project-authored under repository license
+    sha256: 5bdfdb88f5dd62ba7fe23f0a000f2588648d5a122abc03c9b9b0a83db194d48f
+    assumptions: severity priors are prototype assumptions, not calibrated loss estimates

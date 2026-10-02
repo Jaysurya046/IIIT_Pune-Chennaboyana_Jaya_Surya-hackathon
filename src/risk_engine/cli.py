@@ -13,6 +13,7 @@ from risk_engine.ingestion.adapters import FixtureAdapter
 from risk_engine.ingestion.models import IngestionRequest
 from risk_engine.ingestion.service import IngestionService
 from risk_engine.logging_config import configure_logging
+from risk_engine.nlp.factory import build_risk_engine
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -30,7 +31,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     fixture_parser.add_argument("--query", default="financial risk")
     fixture_parser.add_argument("--limit", type=int, default=25)
+    analyze_parser = subparsers.add_parser(
+        "analyze-fixtures", help="generate risk signals from deterministic source fixtures"
+    )
+    analyze_parser.add_argument("--query", default="financial risk")
+    analyze_parser.add_argument("--limit", type=int, default=25)
+    analyze_parser.add_argument("--nlp-mode", choices=sorted(Settings.ALLOWED_NLP_MODES))
     return parser
+
+
+def _run_fixtures(settings: Settings, query: str, limit: int):
+    sample_dir = Path(settings.data_dir) / "sample"
+    service = IngestionService(
+        [
+            FixtureAdapter(sample_dir / "gdelt_articles.json"),
+            FixtureAdapter(sample_dir / "bluesky_posts.json"),
+        ],
+        max_text_length=settings.max_text_length,
+    )
+    return service.run(IngestionRequest(query=query, limit=limit))
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -45,16 +64,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "ingest-fixtures":
-        sample_dir = Path(settings.data_dir) / "sample"
-        service = IngestionService(
-            [
-                FixtureAdapter(sample_dir / "gdelt_articles.json"),
-                FixtureAdapter(sample_dir / "bluesky_posts.json"),
-            ],
-            max_text_length=settings.max_text_length,
-        )
-        result = service.run(IngestionRequest(query=args.query, limit=args.limit))
+        result = _run_fixtures(settings, args.query, args.limit)
         print(result.model_dump_json(indent=2))
         return 0 if result.failed_source_count == 0 else 1
+
+    if args.command == "analyze-fixtures":
+        result = _run_fixtures(settings, args.query, args.limit)
+        if result.failed_source_count:
+            print(result.model_dump_json(indent=2))
+            return 1
+        engine = build_risk_engine(settings, mode=args.nlp_mode)
+        signals = engine.analyze(result.documents)
+        print(json.dumps([signal.model_dump(mode="json") for signal in signals], indent=2))
+        return 0
 
     raise AssertionError(f"Unhandled command: {args.command}")

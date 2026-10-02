@@ -23,6 +23,7 @@ def test_settings_read_environment_overrides(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setenv("RISK_ENGINE_LOG_LEVEL", "debug")
     monkeypatch.setenv("RISK_ENGINE_OFFLINE_MODE", "no")
     monkeypatch.setenv("RISK_ENGINE_BLUESKY_BEARER_TOKEN", "secret-token")
+    monkeypatch.setenv("RISK_ENGINE_NLP_MODE", "model")
 
     settings = Settings.from_env()
 
@@ -30,6 +31,7 @@ def test_settings_read_environment_overrides(monkeypatch: pytest.MonkeyPatch) ->
     assert settings.log_level == "DEBUG"
     assert settings.offline_mode is False
     assert settings.bluesky_bearer_token == "secret-token"
+    assert settings.nlp_mode == "model"
     assert settings.public_summary()["bluesky_auth_configured"] is True
     assert "bluesky_bearer_token" not in settings.public_summary()
 
@@ -48,4 +50,11 @@ def test_settings_reject_insecure_source_url(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setenv("RISK_ENGINE_GDELT_BASE_URL", "http://example.test")
 
     with pytest.raises(ValueError, match="must use HTTPS"):
+        Settings.from_env()
+
+
+def test_settings_reject_unknown_nlp_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("RISK_ENGINE_NLP_MODE", "automatic")
+
+    with pytest.raises(ValueError, match="RISK_ENGINE_NLP_MODE"):
         Settings.from_env()

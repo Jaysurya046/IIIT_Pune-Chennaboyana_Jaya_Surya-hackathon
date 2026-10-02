@@ -60,6 +60,7 @@ class Settings:
     ALLOWED_LOG_LEVELS: ClassVar[frozenset[str]] = frozenset(
         {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
     )
+    ALLOWED_NLP_MODES: ClassVar[frozenset[str]] = frozenset({"deterministic", "model"})
 
     app_name: str = "RiskSignal Engine"
     environment: str = "development"
@@ -72,6 +73,12 @@ class Settings:
     gdelt_base_url: str = "https://api.gdeltproject.org/api/v2/doc/doc"
     bluesky_base_url: str = "https://public.api.bsky.app"
     bluesky_bearer_token: str | None = None
+    nlp_mode: str = "deterministic"
+    sentiment_model_id: str = "ProsusAI/finbert"
+    sentiment_model_revision: str = "4556d13015211d73dccd3fdd39d39232506f3e43"
+    event_model_id: str = "sentence-transformers/all-MiniLM-L6-v2"
+    event_model_revision: str = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+    model_cache_dir: Path = Path(".cache/huggingface")
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -97,6 +104,25 @@ class Settings:
                 "RISK_ENGINE_BLUESKY_BASE_URL", "https://public.api.bsky.app"
             ).strip(),
             bluesky_bearer_token=os.getenv("RISK_ENGINE_BLUESKY_BEARER_TOKEN") or None,
+            nlp_mode=os.getenv("RISK_ENGINE_NLP_MODE", "deterministic").strip().lower(),
+            sentiment_model_id=os.getenv(
+                "RISK_ENGINE_SENTIMENT_MODEL_ID", "ProsusAI/finbert"
+            ).strip(),
+            sentiment_model_revision=os.getenv(
+                "RISK_ENGINE_SENTIMENT_MODEL_REVISION",
+                "4556d13015211d73dccd3fdd39d39232506f3e43",
+            ).strip(),
+            event_model_id=os.getenv(
+                "RISK_ENGINE_EVENT_MODEL_ID",
+                "sentence-transformers/all-MiniLM-L6-v2",
+            ).strip(),
+            event_model_revision=os.getenv(
+                "RISK_ENGINE_EVENT_MODEL_REVISION",
+                "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+            ).strip(),
+            model_cache_dir=Path(
+                os.getenv("RISK_ENGINE_MODEL_CACHE_DIR", ".cache/huggingface")
+            ),
         )
         settings.validate()
         return settings
@@ -110,6 +136,9 @@ class Settings:
         if self.log_level not in self.ALLOWED_LOG_LEVELS:
             allowed = ", ".join(sorted(self.ALLOWED_LOG_LEVELS))
             raise ValueError(f"RISK_ENGINE_LOG_LEVEL must be one of: {allowed}")
+        if self.nlp_mode not in self.ALLOWED_NLP_MODES:
+            allowed = ", ".join(sorted(self.ALLOWED_NLP_MODES))
+            raise ValueError(f"RISK_ENGINE_NLP_MODE must be one of: {allowed}")
         if not self.database_url:
             raise ValueError("RISK_ENGINE_DATABASE_URL must not be empty")
         if not self.gdelt_base_url.startswith("https://"):
@@ -122,6 +151,7 @@ class Settings:
 
         summary = asdict(self)
         summary["data_dir"] = str(self.data_dir)
+        summary["model_cache_dir"] = str(self.model_cache_dir)
         token = summary.pop("bluesky_bearer_token")
         summary["bluesky_auth_configured"] = bool(token)
         return summary

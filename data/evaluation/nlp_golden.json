@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "version": "2026-10-02",
+  "synthetic": true,
+  "description": "Project-authored cases covering every event category for deterministic regression testing.",
+  "cases": [
+    {
+      "case_id": "geo-001",
+      "text": "Sanctions and armed conflict disrupt Northstar Energy shipments and create losses.",
+      "expected_event": "Geopolitical",
+      "expected_sentiment": "negative",
+      "expected_entities": ["northstar-energy"]
+    },
+    {
+      "case_id": "macro-001",
+      "text": "A recession and higher interest rate outlook raise losses for Aurora Bank.",
+      "expected_event": "Macroeconomic",
+      "expected_sentiment": "negative",
+      "expected_entities": ["aurora-bank"]
+    },
+    {
+      "case_id": "credit-001",
+      "text": "Aurora Bank reports a missed payment and default in a lending portfolio.",
+      "expected_event": "Credit Event",
+      "expected_sentiment": "negative",
+      "expected_entities": ["aurora-bank"]
+    },
+    {
+      "case_id": "ma-001",
+      "text": "Northstar Energy announces an acquisition expected to support profit growth.",
+      "expected_event": "Merger or Acquisition",
+      "expected_sentiment": "positive",
+      "expected_entities": ["northstar-energy"]
+    },
+    {
+      "case_id": "product-001",
+      "text": "Aurora Bank launches a new platform after approval, supporting growth.",
+      "expected_event": "Product Launch",
+      "expected_sentiment": "positive",
+      "expected_entities": ["aurora-bank"]
+    },
+    {
+      "case_id": "reg-001",
+      "text": "A regulator imposes a fine and penalty on Northstar Energy.",
+      "expected_event": "Regulatory",
+      "expected_sentiment": "negative",
+      "expected_entities": ["northstar-energy"]
+    },
+    {
+      "case_id": "ops-001",
+      "text": "A cyber breach causes an outage at Atlas Manufacturing.",
+      "expected_event": "Operational",
+      "expected_sentiment": "negative",
+      "expected_entities": ["atlas-manufacturing"]
+    },
+    {
+      "case_id": "other-001",
+      "text": "Meridian Shipping reports stable operations with no major changes.",
+      "expected_event": "Other",
+      "expected_sentiment": "neutral",
+      "expected_entities": ["meridian-shipping"]
+    }
+  ]
+}

@@ -15,6 +15,15 @@ def test_fixture_checksums_match_source_manifest() -> None:
         "data/sample/bluesky_posts.json": (
             "867550276a2863ccc204ad6dc7af13f330b6a03a201fb46daff5a08fb1df202c"
         ),
+        "data/evaluation/nlp_golden.json": (
+            "b54efa00a8c7766f41fda6ea6718dcaf0b0c582bb6bb2f051f9e6d088d4d6f71"
+        ),
+        "data/nlp/issuer_watchlist.json": (
+            "3317a8118c630e4710080d9d5cdc730055dab134d00626a37ce29cca952a83e6"
+        ),
+        "data/nlp/event_taxonomy.json": (
+            "5bdfdb88f5dd62ba7fe23f0a000f2588648d5a122abc03c9b9b0a83db194d48f"
+        ),
     }
 
     for filename, checksum in expected.items():

@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 2 complete - news and social ingestion pipeline ready
+**Implementation Status:** Phase 3 complete - explainable NLP risk signals ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -76,6 +76,7 @@ Activate the environment with `.venv\Scripts\Activate.ps1` on Windows PowerShell
 python -m pip install -r requirements-dev.txt
 python -m risk_engine check
 python -m risk_engine ingest-fixtures --query "portfolio risk"
+python -m risk_engine analyze-fixtures --query "portfolio risk"
 python -m ruff check .
 python -m pytest
 ```
@@ -86,15 +87,31 @@ their implementation phases. The fixture command currently exercises both source
 types through validation, normalization, provenance capture, and deduplication without
 requiring network access.
 
+The analysis command defaults to a transparent deterministic NLP implementation. To
+run the pinned FinBERT sentiment and MiniLM semantic event models, install the optional
+dependencies and explicitly select model mode:
+
+```bash
+python -m pip install -r requirements-nlp.txt
+python -m risk_engine analyze-fixtures --query "portfolio risk" --nlp-mode model
+```
+
+The first model-mode run downloads weights into the ignored cache directory. Exact
+model revisions, license metadata, and limitations are recorded in
+[data/models.yaml](data/models.yaml); downloaded weights are not committed.
+
 The GDELT adapter is credential-free. Bluesky search availability varies by AppView;
 when authentication is required, provide a short-lived bearer token only through the
 ignored `RISK_ENGINE_BLUESKY_BEARER_TOKEN` environment setting.
 
 ## 5. Key Results & Domain Impact
 
-Results will be populated from the tested implementation rather than estimated in
-advance. Planned evidence includes NLP benchmark metrics, end-to-end processing time,
-sample risk signals, and reconciled portfolio losses for triggered stress scenarios.
+The deterministic Phase 3 regression set contains eight synthetic cases covering all
+event categories and currently passes all expected issuer, sentiment, and event checks.
+Every generated signal retains its signed sentiment, event evidence, weighted impact
+factors, model/configuration versions, and source provenance. This synthetic benchmark
+guards behavior; it is not a claim of performance on real financial text. Portfolio
+loss results will be added after the stress engine is implemented.
 
 ## Development Progress
 

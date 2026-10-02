@@ -105,6 +105,12 @@ The result is rounded and clamped to the inclusive range 1 through 10. The indiv
 factors and model revisions are stored with each signal so the score can be explained
 and reproduced.
 
+Two explicit execution modes share the same output contracts. `model` mode uses the
+pinned FinBERT and MiniLM revisions documented in `data/models.yaml`. `deterministic`
+mode uses versioned rules for offline CI and demonstrations. The selected mode is
+visible in each signal's model versions; model failures do not silently fall back to
+rules.
+
 ### Persistence and API
 
 SQLite is the initial persistence layer because it keeps local setup deterministic and

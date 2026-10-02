@@ -1,5 +1,6 @@
 * text=auto
 
 # Fixture checksums must be identical across Windows, macOS, and Linux clones.
-data/sample/*.json text eol=lf
+data/**/*.json text eol=lf
 data/sources.yaml text eol=lf
+data/models.yaml text eol=lf

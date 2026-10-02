@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "version": "2026-10-02",
+  "categories": [
+    {
+      "event_type": "Geopolitical",
+      "description": "War, sanctions, armed conflict, political instability, trade restrictions, or cross-border disruption.",
+      "severity_prior": 0.9,
+      "keywords": ["war", "sanctions", "armed conflict", "blockade", "trade restriction", "geopolitical"]
+    },
+    {
+      "event_type": "Macroeconomic",
+      "description": "Inflation, interest rates, recession, unemployment, currency moves, or central-bank policy.",
+      "severity_prior": 0.8,
+      "keywords": ["inflation", "interest rate", "policy rate", "recession", "unemployment", "central bank", "currency"]
+    },
+    {
+      "event_type": "Credit Event",
+      "description": "Default, missed payment, bankruptcy, credit downgrade, restructuring, or widening credit risk.",
+      "severity_prior": 0.95,
+      "keywords": ["default", "missed payment", "bankruptcy", "downgrade", "restructuring", "credit spread", "bond spread"]
+    },
+    {
+      "event_type": "Merger or Acquisition",
+      "description": "A merger, acquisition, takeover, divestiture, or material corporate combination.",
+      "severity_prior": 0.65,
+      "keywords": ["merger", "acquisition", "acquire", "takeover", "divestiture"]
+    },
+    {
+      "event_type": "Product Launch",
+      "description": "A new product, service, platform, approval, or commercial launch.",
+      "severity_prior": 0.4,
+      "keywords": ["product launch", "launches", "launched", "new platform", "new product", "approval"]
+    },
+    {
+      "event_type": "Regulatory",
+      "description": "Regulatory action, investigation, fine, penalty, compliance breach, or legal restriction.",
+      "severity_prior": 0.75,
+      "keywords": ["regulator", "regulatory", "investigation", "fine", "penalty", "compliance", "antitrust"]
+    },
+    {
+      "event_type": "Operational",
+      "description": "Operational outage, cyber incident, accident, recall, supply disruption, or facility closure.",
+      "severity_prior": 0.7,
+      "keywords": ["outage", "cyber breach", "cyberattack", "accident", "recall", "shipping disruption", "factory closure", "supply disruption"]
+    },
+    {
+      "event_type": "Other",
+      "description": "Financially relevant information that does not fit another defined event category.",
+      "severity_prior": 0.2,
+      "keywords": []
+    }
+  ]
+}

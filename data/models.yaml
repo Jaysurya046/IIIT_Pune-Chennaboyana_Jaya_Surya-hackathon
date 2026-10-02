@@ -1,0 +1,26 @@
+schema_version: 1
+
+models:
+  - purpose: financial sentiment
+    model_id: ProsusAI/finbert
+    revision: 4556d13015211d73dccd3fdd39d39232506f3e43
+    source: https://huggingface.co/ProsusAI/finbert
+    license: not declared in the published model metadata
+    redistribution: weights are downloaded at runtime and are not committed
+    limitations: English financial text; three-class positive, negative, and neutral output
+
+  - purpose: event semantic similarity
+    model_id: sentence-transformers/all-MiniLM-L6-v2
+    revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+    source: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+    license: Apache-2.0
+    redistribution: weights are downloaded at runtime and are not committed
+    limitations: English sentence and short-paragraph embeddings; long text is truncated
+
+baselines:
+  - id: deterministic-sentiment-v1
+    purpose: offline tests and demonstration fallback
+    source: project-authored transparent financial polarity lexicon
+  - id: deterministic-event-2026-10-02
+    purpose: offline tests and demonstration fallback
+    source: project-authored taxonomy keyword matching

@@ -9,7 +9,7 @@ Last updated: 2026-10-02
 | 0 Architecture and roadmap | complete | Requirements, architecture decisions, scope, progress tracker, README baseline | Documentation review and `git diff --check` | `docs: define project architecture and implementation roadmap` |
 | 1 Application scaffold | complete | Python package, configuration, dependencies, test tooling, CI | Import smoke test, Ruff, Pytest | `chore: scaffold risk engine and quality gates` |
 | 2 Data ingestion | complete | GDELT, Bluesky and fixture adapters, normalization, deduplication, provenance | Adapter and normalization tests | `feat(data): ingest and normalize news and social text` |
-| 3 NLP risk engine | not-started | Entity resolution, sentiment, event classification, impact scoring | Golden NLP fixtures and boundary tests | `feat(nlp): generate explainable financial risk signals` |
+| 3 NLP risk engine | complete | Entity resolution, sentiment, event classification, impact scoring | Golden NLP fixtures and boundary tests | `feat(nlp): generate explainable financial risk signals` |
 | 4 Stress engine | not-started | Synthetic portfolio, scenario matrix, valuation and reconciliation | Asset-level and portfolio-level tests | `feat(stress): simulate event driven portfolio losses` |
 | 5 API and persistence | not-started | SQLite repositories and versioned FastAPI endpoints | API contract and persistence tests | `feat(api): expose risk signals and stress results` |
 | 6 Dashboard | not-started | Signal monitor and portfolio stress views | Dashboard smoke test and manual walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
@@ -18,8 +18,8 @@ Last updated: 2026-10-02
 
 ## Current Phase
 
-Phase 2 is complete. Phase 3 will implement issuer resolution, FinBERT sentiment,
-event classification, explainable impact scoring, and golden NLP evaluation fixtures.
+Phase 3 is complete. Phase 4 will implement the synthetic portfolio, scenario mapping,
+asset-level stress models, and portfolio reconciliation.
 
 ## Decisions
 
@@ -71,6 +71,23 @@ event classification, explainable impact scoring, and golden NLP evaluation fixt
   Bluesky returned HTTP 403 without credentials, confirming the need for bounded
   retries, optional Bluesky authentication, source-level error reporting, and the
   deterministic offline path.
+
+### 2026-10-02 Phase 3
+
+- Added strict contracts for issuer matches, sentiment, event classifications,
+  weighted impact factors, and fully traceable risk signals.
+- Added versioned fictional issuer resolution, a transparent sentiment baseline,
+  keyword event classification, and an explicit `Other` fallback.
+- Added lazy adapters for the pinned FinBERT and MiniLM revisions without requiring
+  model dependencies or downloads during CI.
+- Implemented the documented 1-10 impact formula, 72-hour recency decay, and
+  cross-source corroboration in a deterministic two-pass pipeline.
+- Added a synthetic eight-case golden set covering every event category and recorded
+  checksums, assumptions, revisions, licensing metadata, and limitations.
+- Added an offline `analyze-fixtures` command that produces six explainable signals
+  from the two source types.
+- Verified locally on Python 3.13: Ruff reported no findings and all 38 Pytest tests
+  passed without network access or downloaded model weights.
 
 ## Risks and Blockers
 

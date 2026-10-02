@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "version": "2026-10-02",
+  "synthetic": true,
+  "entities": [
+    {
+      "entity_id": "northstar-energy",
+      "name": "Northstar Energy",
+      "ticker": "NSEY",
+      "sector": "Energy",
+      "country": "United States",
+      "aliases": ["Northstar Energy", "Northstar"]
+    },
+    {
+      "entity_id": "aurora-bank",
+      "name": "Aurora Bank",
+      "ticker": "AUBK",
+      "sector": "Banking",
+      "country": "United Kingdom",
+      "aliases": ["Aurora Bank", "Aurora"]
+    },
+    {
+      "entity_id": "meridian-shipping",
+      "name": "Meridian Shipping",
+      "ticker": "MDSH",
+      "sector": "Transportation",
+      "country": "Singapore",
+      "aliases": ["Meridian Shipping", "Meridian"]
+    },
+    {
+      "entity_id": "atlas-manufacturing",
+      "name": "Atlas Manufacturing",
+      "ticker": "ATMF",
+      "sector": "Industrials",
+      "country": "Germany",
+      "aliases": ["Atlas Manufacturing", "Atlas"]
+    }
+  ]
+}
