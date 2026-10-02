@@ -11,7 +11,7 @@ from risk_engine.cli import main
 
 
 def test_package_has_version() -> None:
-    assert __version__ == "0.1.0"
+    assert __version__ == "0.2.0"
 
 
 def test_check_command_prints_public_configuration(
@@ -24,3 +24,16 @@ def test_check_command_prints_public_configuration(
     assert exit_code == 0
     assert payload["app_name"] == "RiskSignal Engine"
     assert payload["offline_mode"] is True
+
+
+def test_fixture_command_processes_both_sources(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(["ingest-fixtures", "--query", "portfolio risk"])
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert len(payload["documents"]) == 6
+    assert {status["source"] for status in payload["sources"]} == {"gdelt", "bluesky"}
+    assert all(document["provenance"]["synthetic"] for document in payload["documents"])

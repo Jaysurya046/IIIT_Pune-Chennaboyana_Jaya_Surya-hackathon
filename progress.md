@@ -8,7 +8,7 @@ Last updated: 2026-10-02
 |---|---|---|---|---|
 | 0 Architecture and roadmap | complete | Requirements, architecture decisions, scope, progress tracker, README baseline | Documentation review and `git diff --check` | `docs: define project architecture and implementation roadmap` |
 | 1 Application scaffold | complete | Python package, configuration, dependencies, test tooling, CI | Import smoke test, Ruff, Pytest | `chore: scaffold risk engine and quality gates` |
-| 2 Data ingestion | not-started | GDELT, Bluesky and fixture adapters, normalization, deduplication, provenance | Adapter and normalization tests | `feat(data): ingest and normalize news and social text` |
+| 2 Data ingestion | complete | GDELT, Bluesky and fixture adapters, normalization, deduplication, provenance | Adapter and normalization tests | `feat(data): ingest and normalize news and social text` |
 | 3 NLP risk engine | not-started | Entity resolution, sentiment, event classification, impact scoring | Golden NLP fixtures and boundary tests | `feat(nlp): generate explainable financial risk signals` |
 | 4 Stress engine | not-started | Synthetic portfolio, scenario matrix, valuation and reconciliation | Asset-level and portfolio-level tests | `feat(stress): simulate event driven portfolio losses` |
 | 5 API and persistence | not-started | SQLite repositories and versioned FastAPI endpoints | API contract and persistence tests | `feat(api): expose risk signals and stress results` |
@@ -18,8 +18,8 @@ Last updated: 2026-10-02
 
 ## Current Phase
 
-Phase 1 is complete. Phase 2 will implement the common document contract, GDELT,
-Bluesky and offline fixture adapters, normalization, deduplication, and provenance.
+Phase 2 is complete. Phase 3 will implement issuer resolution, FinBERT sentiment,
+event classification, explainable impact scoring, and golden NLP evaluation fixtures.
 
 ## Decisions
 
@@ -54,9 +54,29 @@ Bluesky and offline fixture adapters, normalization, deduplication, and provenan
 - Verified locally on Python 3.13: configuration check passed, Ruff reported no
   findings, and all 8 Pytest tests passed.
 
+### 2026-10-02 Phase 2
+
+- Added strict Pydantic contracts for source records, normalized documents,
+  provenance, ingestion requests, and per-source outcomes.
+- Added live GDELT DOC and Bluesky AppView adapters with bounded requests, safe error
+  messages, response validation, dependency injection, and mocked contract tests.
+- Added deterministic synthetic news and social fixtures with documented provenance
+  and SHA-256 checksums.
+- Added Unicode and URL normalization, maximum-text validation, stable identifiers,
+  content hashes, and within-source deduplication that preserves cross-source evidence.
+- Added failure-isolated orchestration and an offline CLI ingestion command.
+- Verified locally on Python 3.13: Ruff reported no findings, all 21 Pytest tests
+  passed, and the offline command produced six normalized documents from two sources.
+- Live smoke requests reached both configured services. GDELT returned HTTP 429 and
+  Bluesky returned HTTP 403 without credentials, confirming the need for bounded
+  retries, optional Bluesky authentication, source-level error reporting, and the
+  deterministic offline path.
+
 ## Risks and Blockers
 
 - Live public APIs can be unavailable or rate-limited; offline fixtures are mandatory.
+- Bluesky `searchPosts` may require provider-specific authentication; the live adapter
+  supports an optional environment-supplied bearer token and never logs or displays it.
 - First-run model downloads may be slow; model revisions and warm-up instructions must
   be documented and the demo environment prepared in advance.
 - Public content can have redistribution constraints; only permitted metadata or

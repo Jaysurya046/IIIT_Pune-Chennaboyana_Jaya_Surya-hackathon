@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "source": "bluesky",
+  "source_type": "social",
+  "synthetic": true,
+  "description": "Synthetic Bluesky-shaped posts for deterministic offline demonstrations.",
+  "records": [
+    {
+      "source_id": "at://did:plc:risksignal-demo/app.bsky.feed.post/news001",
+      "text": "Watching Northstar Energy closely after reports of shipping delays and wider credit spreads.",
+      "url": "https://bsky.app/profile/marketwatcher.example/post/news001",
+      "published_at": "2026-09-30T08:30:00Z",
+      "retrieved_at": "2026-10-01T00:00:00Z",
+      "author": "marketwatcher.example",
+      "language": "en",
+      "metadata": {
+        "author_did": "did:plc:risksignal-demo",
+        "fixture_origin": "synthetic"
+      }
+    },
+    {
+      "source_id": "at://did:plc:trade-demo/app.bsky.feed.post/news002",
+      "text": "Aurora Bank's new trade finance platform could reduce processing time for exporters.",
+      "url": "https://bsky.app/profile/tradeobserver.example/post/news002",
+      "published_at": "2026-09-30T11:00:00Z",
+      "retrieved_at": "2026-10-01T00:00:00Z",
+      "author": "tradeobserver.example",
+      "language": "en",
+      "metadata": {
+        "author_did": "did:plc:trade-demo",
+        "fixture_origin": "synthetic"
+      }
+    },
+    {
+      "source_id": "at://did:plc:macro-demo/app.bsky.feed.post/news003",
+      "text": "The inflation surprise may keep interest rates higher for longer and pressure bond portfolios.",
+      "url": "https://bsky.app/profile/macrobrief.example/post/news003",
+      "published_at": "2026-09-30T13:45:00Z",
+      "retrieved_at": "2026-10-01T00:00:00Z",
+      "author": "macrobrief.example",
+      "language": "en",
+      "metadata": {
+        "author_did": "did:plc:macro-demo",
+        "fixture_origin": "synthetic"
+      }
+    }
+  ]
+}

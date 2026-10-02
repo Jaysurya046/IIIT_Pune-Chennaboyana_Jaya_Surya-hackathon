@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 1 complete - application scaffold and quality gates ready
+**Implementation Status:** Phase 2 complete - news and social ingestion pipeline ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -55,6 +55,8 @@ The full design and interface decisions are documented in
 Every committed dataset or fixture will have a source URL or synthetic declaration,
 retrieval details, transformations, redistribution notes, assumptions, and checksum
 recorded under `data/`. No proprietary or confidential client data will be used.
+See [data/README.md](data/README.md) and the machine-readable
+[source manifest](data/sources.yaml) for the current provenance record.
 
 ## 4. Quickstart & Installation
 
@@ -73,13 +75,20 @@ Activate the environment with `.venv\Scripts\Activate.ps1` on Windows PowerShell
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m risk_engine check
+python -m risk_engine ingest-fixtures --query "portfolio risk"
 python -m ruff check .
 python -m pytest
 ```
 
 Copy `.env.example` to `.env` only when local overrides are required. Do not commit
 the resulting `.env` file. Live ingestion and dashboard commands will be added with
-their implementation phases.
+their implementation phases. The fixture command currently exercises both source
+types through validation, normalization, provenance capture, and deduplication without
+requiring network access.
+
+The GDELT adapter is credential-free. Bluesky search availability varies by AppView;
+when authentication is required, provide a short-lived bearer token only through the
+ignored `RISK_ENGINE_BLUESKY_BEARER_TOKEN` environment setting.
 
 ## 5. Key Results & Domain Impact
 

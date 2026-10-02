@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "risk-signal-engine"
-version = "0.1.0"
+version = "0.2.0"
 description = "Explainable NLP financial risk signals and portfolio stress testing"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
@@ -12,7 +12,10 @@ license = { file = "LICENSE" }
 authors = [
   { name = "Chennaboyana Jaya Surya", email = "112315046@cse.iiitp.ac.in" },
 ]
-dependencies = []
+dependencies = [
+  "httpx>=0.28,<1",
+  "pydantic>=2.10,<3",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -30,7 +33,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.pytest.ini_options]
-addopts = "--strict-config --strict-markers -q"
+addopts = "--strict-config --strict-markers -p no:cacheprovider -q"
 testpaths = ["tests"]
 
 [tool.ruff]

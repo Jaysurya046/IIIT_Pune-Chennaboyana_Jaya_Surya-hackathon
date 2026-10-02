@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "source": "gdelt",
+  "source_type": "news",
+  "synthetic": true,
+  "description": "Synthetic GDELT-shaped headlines for deterministic offline demonstrations.",
+  "records": [
+    {
+      "source_id": "https://news.example.org/markets/northstar-spreads",
+      "title": "Northstar Energy bond spreads widen after regional shipping disruption",
+      "text": "Northstar Energy bond spreads widen after regional shipping disruption",
+      "url": "https://news.example.org/markets/northstar-spreads?utm_source=offline-demo",
+      "published_at": "2026-09-30T08:15:00Z",
+      "retrieved_at": "2026-10-01T00:00:00Z",
+      "language": "en",
+      "metadata": {
+        "domain": "news.example.org",
+        "source_country": "US",
+        "fixture_origin": "synthetic"
+      }
+    },
+    {
+      "source_id": "https://finance.example.net/banking/aurora-product",
+      "title": "Aurora Bank launches a digital trade finance platform for exporters",
+      "text": "Aurora Bank launches a digital trade finance platform for exporters",
+      "url": "https://finance.example.net/banking/aurora-product",
+      "published_at": "2026-09-30T10:45:00Z",
+      "retrieved_at": "2026-10-01T00:00:00Z",
+      "language": "en",
+      "metadata": {
+        "domain": "finance.example.net",
+        "source_country": "GB",
+        "fixture_origin": "synthetic"
+      }
+    },
+    {
+      "source_id": "https://wire.example.com/economy/rates",
+      "title": "Unexpected inflation increase raises expectations of higher policy rates",
+      "text": "Unexpected inflation increase raises expectations of higher policy rates",
+      "url": "https://wire.example.com/economy/rates#markets",
+      "published_at": "2026-09-30T13:30:00Z",
+      "retrieved_at": "2026-10-01T00:00:00Z",
+      "language": "en",
+      "metadata": {
+        "domain": "wire.example.com",
+        "source_country": "US",
+        "fixture_origin": "synthetic"
+      }
+    }
+  ]
+}

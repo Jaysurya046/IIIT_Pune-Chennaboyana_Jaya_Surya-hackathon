@@ -22,12 +22,16 @@ def test_settings_read_environment_overrides(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setenv("RISK_ENGINE_ENVIRONMENT", "test")
     monkeypatch.setenv("RISK_ENGINE_LOG_LEVEL", "debug")
     monkeypatch.setenv("RISK_ENGINE_OFFLINE_MODE", "no")
+    monkeypatch.setenv("RISK_ENGINE_BLUESKY_BEARER_TOKEN", "secret-token")
 
     settings = Settings.from_env()
 
     assert settings.environment == "test"
     assert settings.log_level == "DEBUG"
     assert settings.offline_mode is False
+    assert settings.bluesky_bearer_token == "secret-token"
+    assert settings.public_summary()["bluesky_auth_configured"] is True
+    assert "bluesky_bearer_token" not in settings.public_summary()
 
 
 @pytest.mark.parametrize("value", ["sometimes", "2", "enabled"])

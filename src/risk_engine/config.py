@@ -24,6 +24,32 @@ def _read_boolean(name: str, default: bool) -> bool:
     raise ValueError(f"{name} must be one of: true, false, 1, 0, yes, no, on, off")
 
 
+def _read_positive_float(name: str, default: float) -> float:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    try:
+        value = float(raw_value)
+    except ValueError as error:
+        raise ValueError(f"{name} must be a number") from error
+    if value <= 0:
+        raise ValueError(f"{name} must be greater than zero")
+    return value
+
+
+def _read_positive_integer(name: str, default: int) -> int:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    try:
+        value = int(raw_value)
+    except ValueError as error:
+        raise ValueError(f"{name} must be an integer") from error
+    if value <= 0:
+        raise ValueError(f"{name} must be greater than zero")
+    return value
+
+
 @dataclass(frozen=True, slots=True)
 class Settings:
     """Validated settings shared by future application components."""
@@ -41,8 +67,11 @@ class Settings:
     offline_mode: bool = True
     data_dir: Path = Path("data")
     database_url: str = "sqlite:///data/runtime/risksignal.db"
+    request_timeout_seconds: float = 10.0
+    max_text_length: int = 10_000
     gdelt_base_url: str = "https://api.gdeltproject.org/api/v2/doc/doc"
     bluesky_base_url: str = "https://public.api.bsky.app"
+    bluesky_bearer_token: str | None = None
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -56,6 +85,10 @@ class Settings:
             database_url=os.getenv(
                 "RISK_ENGINE_DATABASE_URL", "sqlite:///data/runtime/risksignal.db"
             ).strip(),
+            request_timeout_seconds=_read_positive_float(
+                "RISK_ENGINE_REQUEST_TIMEOUT_SECONDS", 10.0
+            ),
+            max_text_length=_read_positive_integer("RISK_ENGINE_MAX_TEXT_LENGTH", 10_000),
             gdelt_base_url=os.getenv(
                 "RISK_ENGINE_GDELT_BASE_URL",
                 "https://api.gdeltproject.org/api/v2/doc/doc",
@@ -63,6 +96,7 @@ class Settings:
             bluesky_base_url=os.getenv(
                 "RISK_ENGINE_BLUESKY_BASE_URL", "https://public.api.bsky.app"
             ).strip(),
+            bluesky_bearer_token=os.getenv("RISK_ENGINE_BLUESKY_BEARER_TOKEN") or None,
         )
         settings.validate()
         return settings
@@ -88,4 +122,6 @@ class Settings:
 
         summary = asdict(self)
         summary["data_dir"] = str(self.data_dir)
+        token = summary.pop("bluesky_bearer_token")
+        summary["bluesky_auth_configured"] = bool(token)
         return summary
