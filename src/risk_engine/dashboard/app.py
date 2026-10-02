@@ -90,12 +90,19 @@ def _apply_styles() -> None:
             padding: 0.85rem 1rem;
         }
         [data-testid="stMetricLabel"] { color: var(--muted); }
+        [data-testid="stMetricValue"] { color: var(--ink); }
         [data-testid="stSidebar"] { border-right: 1px solid var(--line); }
         .source-note {
             border-left: 4px solid #f9a825; background: #fff9e6; padding: .75rem 1rem;
             border-radius: 4px; color: #5d4a00; margin: .5rem 0 1rem;
         }
         a:focus, button:focus, input:focus { outline: 3px solid #90caf9 !important; }
+        @media (max-width: 900px) {
+            [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
+            [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+                flex: 1 1 100% !important; width: 100% !important; min-width: 0 !important;
+            }
+        }
         @media (max-width: 760px) { .block-container { padding: 1rem; } }
         </style>
         """,
@@ -210,12 +217,14 @@ def _render_signals(
             event_distribution_figure(response.items),
             width="stretch",
             config={"displaylogo": False},
+            theme=None,
         )
     with chart_right:
         st.plotly_chart(
             sentiment_impact_figure(response.items),
             width="stretch",
             config={"displaylogo": False},
+            theme=None,
         )
 
     st.subheader("Signal register")
@@ -270,6 +279,7 @@ def _render_stress_result(response: StressTestResponse) -> None:
             asset_class_figure(result),
             width="stretch",
             config={"displaylogo": False},
+            theme=None,
         )
         st.dataframe(
             pd.DataFrame(stress_by_asset_class(result)),
@@ -281,6 +291,7 @@ def _render_stress_result(response: StressTestResponse) -> None:
             issuer_loss_figure(result),
             width="stretch",
             config={"displaylogo": False},
+            theme=None,
         )
         st.dataframe(
             pd.DataFrame(stress_by_issuer(result)),
@@ -406,7 +417,7 @@ def main() -> None:
         page_title="RiskSignal Monitor",
         page_icon="📉",
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="auto",
     )
     _apply_styles()
     st.title("RiskSignal Monitor")

@@ -35,3 +35,6 @@ jobs:
 
       - name: Run tests
         run: python -m pytest
+
+      - name: Run offline validation benchmark
+        run: python -m risk_engine validate --max-seconds 10

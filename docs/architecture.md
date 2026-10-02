@@ -267,6 +267,20 @@ downloads are reproducible.
 - An offline end-to-end test covering both source types through stress results.
 - A documented benchmark that distinguishes synthetic evaluation data from real data.
 
+Phase 7 implements this strategy through `python -m risk_engine validate`. The command
+recalculates every source-manifest checksum, validates fixture identity and timestamps,
+runs exact-match deterministic NLP regression cases, exercises both fixture sources
+through SQLite persistence, independently reconciles raw portfolio values and
+instrument stress totals, reopens the database, and enforces a configurable runtime
+budget. It emits a strict JSON report and returns a non-zero exit code on failure.
+
+The stress portion uses an explicit synthetic boundary probe: it copies one persisted
+entity-bearing fixture signal and changes only its impact score to 8. This proves the
+strictly-greater-than-7 trigger and downstream workflow without misrepresenting the
+fixture's observed deterministic score. CI runs the validator after the complete test
+suite. Detailed scope, baseline values, and limitations are recorded in
+`docs/validation.md`.
+
 ## Scope Boundaries
 
 The initial implementation excludes live trading, investment recommendations,

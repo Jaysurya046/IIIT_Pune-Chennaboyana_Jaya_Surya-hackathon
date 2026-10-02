@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 6 complete - interactive monitoring dashboard ready
+**Implementation Status:** Phase 7 complete - offline validation and benchmark ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -78,6 +78,7 @@ python -m risk_engine check
 python -m risk_engine ingest-fixtures --query "portfolio risk"
 python -m risk_engine analyze-fixtures --query "portfolio risk"
 python -m risk_engine stress-fixtures --query "portfolio risk"
+python -m risk_engine validate --output data/runtime/validation-report.json
 python -m ruff check .
 python -m pytest
 ```
@@ -145,6 +146,12 @@ Phase 6 adds a typed API-backed monitoring interface with global event, impact, 
 and entity filters; source provenance and score explanations; an explicit stress
 trigger; exact asset-class, sector, issuer, and instrument reconciliation; and clear
 labels for all synthetic fixture, portfolio, and scenario outputs.
+
+Phase 7 adds a repeatable offline validation command covering source-manifest
+integrity, the synthetic NLP golden set, the full persisted workflow, independently
+recomputed portfolio and stress totals, failure paths, dashboard filter/reset behavior,
+and a bounded performance check. The baseline and its interpretation limits are in
+[docs/validation.md](docs/validation.md).
 
 ## Development Progress
 

@@ -56,6 +56,11 @@ def build_parser() -> argparse.ArgumentParser:
     dashboard_parser.add_argument("--host", default="127.0.0.1")
     dashboard_parser.add_argument("--port", type=int, default=8501)
     dashboard_parser.add_argument("--api-url", default="http://127.0.0.1:8000")
+    validation_parser = subparsers.add_parser(
+        "validate", help="run the reproducible offline validation benchmark"
+    )
+    validation_parser.add_argument("--max-seconds", type=float, default=5.0)
+    validation_parser.add_argument("--output", type=Path)
     return parser
 
 
@@ -108,6 +113,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             "false",
         ]
         return subprocess.run(command, env=environment, check=False).returncode
+
+    if args.command == "validate":
+        from risk_engine.validation import run_validation
+
+        report = run_validation(data_dir=settings.data_dir, max_seconds=args.max_seconds)
+        payload = report.model_dump_json(indent=2)
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(f"{payload}\n", encoding="utf-8")
+        print(payload)
+        return 0 if report.passed else 1
 
     if args.command == "ingest-fixtures":
         result = _run_fixtures(settings, args.query, args.limit)
