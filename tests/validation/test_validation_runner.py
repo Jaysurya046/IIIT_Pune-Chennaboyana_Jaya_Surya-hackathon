@@ -17,7 +17,7 @@ def test_validation_report_covers_the_complete_offline_workflow(tmp_path: Path) 
     )
 
     assert report.passed is True
-    assert report.application_version == "0.7.0"
+    assert report.application_version == "0.8.0"
     assert report.classification == "synthetic-offline-validation"
     assert report.source_integrity.artifact_count == 7
     assert report.source_integrity.fixture_record_count == 6

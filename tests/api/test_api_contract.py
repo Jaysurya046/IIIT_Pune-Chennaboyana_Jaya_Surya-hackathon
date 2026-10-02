@@ -46,7 +46,7 @@ def test_health_empty_status_and_openapi_contract(api_client) -> None:
     schema = client.get("/openapi.json").json()
 
     assert health.status_code == 200
-    assert health.json()["version"] == "0.7.0"
+    assert health.json()["version"] == "0.8.0"
     assert health.json()["database"] == "ok"
     assert sources.json()["latest_run_id"] is None
     expected_paths = {

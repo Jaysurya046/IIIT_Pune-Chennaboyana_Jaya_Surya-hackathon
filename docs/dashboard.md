@@ -2,7 +2,7 @@
 
 ## Purpose and Audience
 
-RiskSignal Monitor is the Phase 6 decision-support interface for analysts evaluating
+RiskSignal Monitor is the decision-support interface for analysts evaluating
 unstructured financial-risk signals and their illustrative portfolio effects. It is a
 local Streamlit application and a read/write client of the versioned FastAPI service;
 it does not calculate signals, scenarios, or valuations itself.

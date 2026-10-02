@@ -39,8 +39,8 @@ retrieval time, language, author when public, synthetic flag, and content hash.
   posts may no longer be returned.
 - Lexicon: <https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/feed/searchPosts.json>.
 
-Before final submission, current source terms and any retention restrictions will be
-reviewed again. Live responses will not be committed automatically.
+Before using live retrieval or making a final submission, review current source terms
+and retention restrictions. Live responses are not committed automatically.
 
 Live adapters apply bounded retries to transport failures, rate limits, and transient
 server errors. Terminal errors contain only the source and exception class rather than

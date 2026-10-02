@@ -2,7 +2,7 @@
 
 ## Purpose
 
-RiskSignal Engine will ingest unstructured financial news and social-media text,
+RiskSignal Engine ingests unstructured financial news and social-media text,
 produce structured and explainable financial-risk signals, and demonstrate those
 signals through an event-driven portfolio stress-testing application.
 
@@ -10,6 +10,11 @@ The implementation must process at least two source types and produce a sentimen
 score, event classification, and impact score. The selected downstream application
 is strategic portfolio stress testing. Tactical index rebalancing remains a possible
 future extension but is not part of the initial implementation.
+
+![RiskSignal Engine architecture](architecture.png)
+
+The editable vector source is stored at `docs/assets/architecture.svg`; the PNG is the
+high-resolution reviewer and presentation asset required by the submission structure.
 
 ## Success Criteria
 
@@ -128,7 +133,7 @@ rejects live requests with HTTP 409, and live failures are persisted as source o
 without substituting fixture data. Resource misses return HTTP 404 and contract
 validation failures return HTTP 422.
 
-The versioned API will provide:
+The versioned API provides:
 
 - `GET /health`
 - `GET /api/v1/sources/status`
@@ -232,17 +237,17 @@ versions, and creation timestamp.
 before and after measures, total loss, loss percentage, expected-loss change, and
 instrument-level details.
 
-These contracts will be implemented as strict Pydantic models. Unknown event types,
+These contracts are implemented as strict Pydantic models. Unknown event types,
 out-of-range scores, naive timestamps, and missing provenance fields will be rejected.
 
 ## Dataset and Model Governance
 
-All runnable demo data will live under `data/`. A machine-readable source manifest and
-a human-readable data guide will record source URLs, retrieval dates, access method,
+All runnable demo data lives under `data/`. A machine-readable source manifest and
+a human-readable data guide record source URLs, retrieval dates, access method,
 license or terms link, redistribution status, transformations, assumptions, checksums,
 and whether each artifact is public, synthetic, or derived.
 
-The repository will not contain API keys, model weights, runtime databases, bulk API
+The repository does not contain API keys, model weights, runtime databases, bulk API
 dumps, scraped article bodies, real client data, or confidential S&P Global or Crisil
 information. Model identifiers and immutable revisions will be documented so first-run
 downloads are reproducible.
@@ -289,10 +294,10 @@ multi-user authentication, production-scale streaming infrastructure, Module A,
 cloud deployment, presentation creation, and video recording.
 
 The recorded walkthrough may run for up to ten minutes under the submission guidance,
-while the deterministic live demonstration path will be designed to fit within five
-minutes as required by the problem statement.
+while the deterministic live demonstration runbook fits within five minutes as
+required by the problem statement. Both paths are defined in `docs/demo-script.md`.
 
-## Target Repository Layout
+## Repository Layout
 
 ```text
 README.md
@@ -309,4 +314,4 @@ tests/
 ```
 
 Large generated artifacts, model caches, runtime data, and local environment files
-will remain outside version control.
+remain outside version control.

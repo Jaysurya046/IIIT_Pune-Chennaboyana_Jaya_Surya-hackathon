@@ -58,7 +58,7 @@ Recorded on 2026-10-03 using Python 3.13 on Windows in deterministic offline mod
 | Independently summed portfolio value | USD 55,500,000.00 |
 | Boundary stress illustrative loss | USD 717,000.00 |
 | Stress reconciliation difference | USD 0.00 |
-| Complete validation runtime | 0.147 seconds |
+| Complete validation runtime | 0.119 seconds |
 | Local runtime budget | 5.000 seconds |
 
 The accuracy rows are exact-match results on a small synthetic regression set designed

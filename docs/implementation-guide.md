@@ -1,0 +1,169 @@
+# Reproducible Implementation Guide
+
+## What This Guide Reproduces
+
+This guide starts the complete RiskSignal Engine prototype from a clean checkout. The
+default path is deliberately offline: it reads two committed synthetic source bundles,
+normalizes and analyzes six records, persists explainable signals in SQLite, exposes
+them through FastAPI, and renders the Streamlit monitoring and stress-testing UI.
+
+The offline path is the reviewer path because it is deterministic and does not depend
+on third-party availability, credentials, or downloaded model weights. Live public
+adapters and pinned-model mode are optional extensions, not hidden prerequisites.
+
+## Prerequisites
+
+- Git.
+- Python 3.11, 3.12, or 3.13.
+- A terminal that can run two long-lived local processes.
+- Network access only for the initial package installation.
+
+The implementation has been exercised on Windows with Python 3.13. GitHub Actions
+checks Python 3.11 on Ubuntu. No database server, API key, container runtime, or GPU is
+required for the default workflow.
+
+## Clean Installation
+
+```bash
+git clone https://github.com/Jaysurya046/IIIT_Pune-Chennaboyana_Jaya_Surya-hackathon.git
+cd IIIT_Pune-Chennaboyana_Jaya_Surya-hackathon
+python -m venv .venv
+```
+
+Activate the environment:
+
+```powershell
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
+
+```bash
+# macOS or Linux
+source .venv/bin/activate
+```
+
+Install the declared development environment and verify the configuration:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
+python -m risk_engine check
+```
+
+The expected diagnostic identifies RiskSignal Engine 0.8.0, offline mode, the local
+runtime data directory, and the deterministic NLP mode. A local `.env` is optional;
+copy `.env.example` only when overrides are needed and never commit the resulting file.
+
+## Fast Offline Proof
+
+Run the complete machine-readable validation before starting the UI:
+
+```bash
+python -m risk_engine validate --output data/runtime/validation-report.json
+```
+
+A successful report has `"passed": true`. It checks every manifested artifact,
+the eight-case synthetic NLP regression set, the persisted ingestion-to-stress path,
+independent portfolio and loss totals, and the configured runtime budget. The output
+file is ignored because its timestamp and timings are execution-specific.
+
+Individual command-line stages are also available:
+
+```bash
+python -m risk_engine ingest-fixtures --query "portfolio risk"
+python -m risk_engine analyze-fixtures --query "portfolio risk"
+python -m risk_engine stress-fixtures --query "portfolio risk"
+```
+
+These commands are useful for inspecting contracts, but each is a self-contained
+demonstration. Use the API workflow below when persistence across steps matters.
+
+## Start the Application
+
+Start the API in terminal one:
+
+```bash
+python -m risk_engine serve --host 127.0.0.1 --port 8000
+```
+
+Verify `http://127.0.0.1:8000/health`, then start the dashboard in terminal two:
+
+```bash
+python -m risk_engine dashboard --host 127.0.0.1 --port 8501 --api-url http://127.0.0.1:8000
+```
+
+Open `http://127.0.0.1:8501`. In **Source health**, run **Ingest and analyze
+fixtures**. The UI explicitly requests fixture ingestion and deterministic analysis;
+it never presents this action as live data.
+
+The dashboard has three workspaces:
+
+1. **Risk signals** filters the persisted stream and exposes score explanations,
+   entity matches, model versions, and source provenance.
+2. **Stress lab** evaluates a selected signal against the strict impact-greater-than-7
+   trigger and shows the persisted decision and reconciled portfolio result.
+3. **Source health** reports per-source outcomes and owns the repeatable fixture action.
+
+Interactive API documentation is available at `http://127.0.0.1:8000/docs`.
+
+## Optional Live and Model Modes
+
+The GDELT adapter uses a public endpoint. Bluesky search availability depends on the
+AppView provider and may require a short-lived bearer token:
+
+```text
+RISK_ENGINE_OFFLINE_MODE=false
+RISK_ENGINE_BLUESKY_BEARER_TOKEN=<local secret when required>
+```
+
+Keep secrets only in the ignored `.env` file or process environment. Live failures are
+recorded per source and are never replaced silently with fixtures.
+
+Pinned FinBERT and MiniLM adapters require the optional dependency group and model
+downloads:
+
+```bash
+python -m pip install -r requirements-nlp.txt
+python -m risk_engine analyze-fixtures --query "portfolio risk" --nlp-mode model
+```
+
+Model identifiers, revisions, license metadata, and limitations are recorded in
+`data/models.yaml`. A failed model request raises an explicit error; it does not fall
+back to deterministic rules.
+
+## Quality Gates
+
+Run the same local checks used to prepare the submission:
+
+```bash
+python -m ruff check .
+python -m pytest
+python -m pip check
+python -m risk_engine validate --max-seconds 5
+```
+
+CI installs `requirements-dev.txt`, runs Ruff and Pytest, and then executes the offline
+validator with a ten-second allowance for shared runners.
+
+## Runtime Files and Reset
+
+SQLite databases, JSON validation reports, logs, caches, and downloaded model weights
+are ignored. The default database is `data/runtime/risksignal.db`. To restart the demo
+from an empty state, stop the API and remove only that runtime database; committed
+fixtures and configuration under `data/` must remain unchanged.
+
+## Troubleshooting
+
+| Symptom | Check |
+|---|---|
+| Dashboard reports that the API is unavailable | Start the API on port 8000 or pass the matching `--api-url` |
+| Port already in use | Stop the existing local process or choose another port for both commands |
+| No signals are visible | Run the fixture action in **Source health**, then refresh the dashboard |
+| Live request returns HTTP 409 | Set `RISK_ENGINE_OFFLINE_MODE=false` intentionally before using live mode |
+| Bluesky returns an authorization error | Supply a permitted bearer token or use the reproducible fixture path |
+| Model dependencies or weights are missing | Install `requirements-nlp.txt`; deterministic mode remains available offline |
+| Validation reports a checksum mismatch | Restore the manifested artifact or deliberately update its checksum and provenance record |
+
+For endpoint contracts, dashboard metric definitions, dataset provenance, and recorded
+validation evidence, see `docs/api.md`, `docs/dashboard.md`,
+`docs/dataset-guide.md`, and `docs/validation.md`.

@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 7 complete - offline validation and benchmark ready
+**Implementation Status:** Phase 8 complete - implementation and reproducibility baseline ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -14,10 +14,10 @@ news and social-media text into machine-readable risk signals. Each signal inclu
 a sentiment score, event classification, impact score, entity references, source
 provenance, and an explanation of the factors that produced the score.
 
-The first downstream application is strategic portfolio stress testing. Events with
+The implemented downstream application is strategic portfolio stress testing. Events with
 an impact score greater than 7 trigger an appropriate scenario against a fictional
 wholesale-banking portfolio containing loans, bonds, equities, and derivatives. The
-application will show portfolio value and expected loss before and after the stress,
+application shows portfolio value and expected loss before and after the stress,
 with breakdowns by issuer, sector, asset class, and instrument.
 
 The implementation prioritizes a reproducible offline demonstration while retaining
@@ -27,7 +27,9 @@ results are stable.
 
 ## 2. Architecture & Tech Stack
 
-The planned flow is:
+![RiskSignal Engine architecture](docs/architecture.png)
+
+The implemented flow is:
 
 ```text
 GDELT / Bluesky / fixtures
@@ -40,7 +42,7 @@ GDELT / Bluesky / fixtures
         -> Streamlit dashboard
 ```
 
-Planned stack: Python 3.11, FastAPI, Pydantic, SQLite, Hugging Face
+Stack: Python 3.11–3.13, FastAPI, Pydantic, SQLite, Hugging Face
 Transformers, Sentence Transformers, Pandas, Streamlit, Plotly, Pytest, and Ruff.
 The full design and interface decisions are documented in
 [docs/architecture.md](docs/architecture.md).
@@ -52,11 +54,13 @@ The full design and interface decisions are documented in
 - Small offline fixtures matching both source schemas for deterministic evaluation.
 - A fully synthetic portfolio with fictional counterparties and transactions.
 
-Every committed dataset or fixture will have a source URL or synthetic declaration,
+Every committed dataset or fixture has a source URL or synthetic declaration,
 retrieval details, transformations, redistribution notes, assumptions, and checksum
-recorded under `data/`. No proprietary or confidential client data will be used.
+recorded under `data/`. No proprietary or confidential client data is used.
 See [data/README.md](data/README.md) and the machine-readable
-[source manifest](data/sources.yaml) for the current provenance record.
+[source manifest](data/sources.yaml) for the provenance record. The consolidated
+[dataset and assumption guide](docs/dataset-guide.md) distinguishes public interfaces,
+committed synthetic artifacts, optional models, and the claims each source can support.
 
 ## 4. Quickstart & Installation
 
@@ -112,7 +116,7 @@ The complete endpoint workflow and error semantics are documented in
 [docs/api.md](docs/api.md). The default SQLite database is created under the ignored
 `data/runtime/` directory.
 
-With the API running, start the Phase 6 dashboard in a second terminal:
+With the API running, start the dashboard in a second terminal:
 
 ```bash
 python -m risk_engine dashboard --host 127.0.0.1 --port 8501 --api-url http://127.0.0.1:8000
@@ -152,6 +156,38 @@ integrity, the synthetic NLP golden set, the full persisted workflow, independen
 recomputed portfolio and stress totals, failure paths, dashboard filter/reset behavior,
 and a bounded performance check. The baseline and its interpretation limits are in
 [docs/validation.md](docs/validation.md).
+
+The final implementation delivers two optional live adapters, six committed fixture
+records, eight event categories, a USD 55.50 million synthetic portfolio, nine API
+endpoints, and three dashboard workspaces. The recorded offline baseline matched all
+seven artifact checksums and all eight authored NLP cases, recovered all six persisted
+signals after reopening SQLite, and reconciled the boundary-probe stress result to
+USD 0.00 difference. These are synthetic regression and implementation results, not
+real-world accuracy, market forecasts, or investment advice.
+
+The complete evidence and interpretation are in [docs/results.md](docs/results.md).
+
+## Reviewer Guide
+
+- [Reproducible implementation guide](docs/implementation-guide.md) — clean setup,
+  complete run path, optional modes, quality gates, and troubleshooting.
+- [Architecture decisions](docs/architecture.md) — components, contracts, scoring,
+  valuation, persistence, reliability, and scope boundaries.
+- [Dataset source and assumption guide](docs/dataset-guide.md) — public interfaces,
+  synthetic artifacts, transformations, redistribution, and limitations.
+- [Validation evidence](docs/validation.md) — independent checks, recorded baseline,
+  failure paths, and caveats.
+- [Results and domain impact](docs/results.md) — implemented capability, evidence,
+  usefulness, limitations, and next steps.
+- [Demonstration runbook](docs/demo-script.md) — separate five-minute live and
+  up-to-ten-minute recorded walkthroughs.
+- [API guide](docs/api.md) and [dashboard guide](docs/dashboard.md) — operational
+  contracts, filters, metrics, and error semantics.
+
+Presentation and YouTube recording remain intentionally deferred. When created, the
+deck will be limited to five–seven slides and the unlisted YouTube link and deck link
+will replace the placeholders at the top of this README. Both links and the public
+repository must be tested from an incognito window before submission.
 
 ## Development Progress
 

@@ -14,12 +14,12 @@ Last updated: 2026-10-03
 | 5 API and persistence | complete | SQLite repositories and versioned FastAPI endpoints | API contract and persistence tests | `feat(api): expose risk signals and stress results` |
 | 6 Dashboard | complete | Signal monitor and portfolio stress views | Dashboard contract tests and rendered walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
 | 7 Validation | complete | End-to-end tests, benchmark, failure and performance checks | Offline suite and recorded metrics | `test: validate the complete risk intelligence workflow` |
-| 8 Implementation documentation | not-started | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
+| 8 Implementation documentation | complete | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
 
 ## Current Phase
 
-Phase 7 is complete. Phase 8 will finalize the implementation guide, architecture
-image, consolidated results, demo script, and clean-clone rehearsal.
+All implementation phases are complete. Presentation and video production remain
+deferred until requested, as planned.
 
 ## Decisions
 
@@ -172,6 +172,36 @@ image, consolidated results, demo script, and clean-clone rehearsal.
 - Verified the completed phase locally: Ruff reported no findings, all 77 Pytest tests
   passed, the installed package reports version 0.7.0, and `pip check` found no broken
   requirements. One upstream Starlette test-client deprecation warning remains.
+
+### 2026-10-03 Phase 8
+
+- Rechecked the original problem statement and submission guidelines, including the
+  public-repository, dataset-clarity, incremental-history, five-minute live demo, and
+  up-to-ten-minute recorded walkthrough requirements.
+- Added a reviewer-ready implementation guide with clean installation, offline proof,
+  service startup, optional live/model modes, quality gates, runtime reset, and
+  troubleshooting instructions.
+- Added an 1800x1050 architecture PNG and editable SVG showing both source types,
+  ingestion, explainable NLP, persistence, API, stress engine, dashboard, provenance,
+  and validation responsibilities; visually inspected the final raster output.
+- Added a dataset guide that separates public live interfaces from every committed
+  synthetic or project-authored artifact and records use, transformation, retention,
+  model, portfolio, scenario, and change assumptions.
+- Consolidated implemented results and domain impact without presenting the synthetic
+  exact-match set as real-world accuracy or the illustrative stress output as advice.
+- Added separate five-minute live and up-to-ten-minute recorded demonstration runbooks,
+  including setup, disclosure, likely jury questions, and future link-access checks.
+- Refreshed the mandatory README sections, embedded the architecture image, added a
+  reviewer documentation index, and retained explicit deck and video placeholders.
+- Added automated checks for required Phase 8 artifacts, README structure, local links,
+  high-resolution PNG dimensions, dataset disclosures, and both demo time limits.
+- Bumped the implementation version to 0.8.0 and verified locally: all 83 Pytest tests
+  passed, Ruff reported no findings, `pip check` found no broken requirements, and the
+  offline validation benchmark passed. One upstream Starlette warning remains.
+- Rehearsed the committed Phase 8 snapshot from an independent clean clone and Python
+  3.13 virtual environment using the declared requirements. The configuration check, Ruff, all 83
+  tests, `pip check`, and the offline validator passed; the clean-clone validator took
+  0.179 seconds against its 5-second budget and reconciled stress loss to USD 0.00.
 
 ## Risks and Blockers
 
