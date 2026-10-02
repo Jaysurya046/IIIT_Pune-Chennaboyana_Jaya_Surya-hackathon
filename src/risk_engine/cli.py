@@ -44,6 +44,9 @@ def build_parser() -> argparse.ArgumentParser:
     stress_parser.add_argument("--query", default="financial risk")
     stress_parser.add_argument("--limit", type=int, default=25)
     stress_parser.add_argument("--nlp-mode", choices=sorted(Settings.ALLOWED_NLP_MODES))
+    serve_parser = subparsers.add_parser("serve", help="run the versioned FastAPI service")
+    serve_parser.add_argument("--host", default="127.0.0.1")
+    serve_parser.add_argument("--port", type=int, default=8000)
     return parser
 
 
@@ -68,6 +71,14 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "check":
         print(json.dumps(settings.public_summary(), indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "serve":
+        import uvicorn
+
+        from risk_engine.api.app import create_app
+
+        uvicorn.run(create_app(settings), host=args.host, port=args.port)
         return 0
 
     if args.command == "ingest-fixtures":

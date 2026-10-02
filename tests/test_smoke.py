@@ -11,7 +11,7 @@ from risk_engine.cli import main
 
 
 def test_package_has_version() -> None:
-    assert __version__ == "0.4.0"
+    assert __version__ == "0.5.0"
 
 
 def test_check_command_prints_public_configuration(

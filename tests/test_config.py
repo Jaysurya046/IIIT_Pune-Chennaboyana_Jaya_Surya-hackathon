@@ -53,6 +53,13 @@ def test_settings_reject_insecure_source_url(monkeypatch: pytest.MonkeyPatch) ->
         Settings.from_env()
 
 
+def test_settings_reject_non_sqlite_database(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("RISK_ENGINE_DATABASE_URL", "postgresql://example.test/risk")
+
+    with pytest.raises(ValueError, match="sqlite:///"):
+        Settings.from_env()
+
+
 def test_settings_reject_unknown_nlp_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("RISK_ENGINE_NLP_MODE", "automatic")
 

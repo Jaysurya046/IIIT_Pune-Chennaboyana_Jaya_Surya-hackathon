@@ -6,6 +6,7 @@ from datetime import datetime
 
 import httpx
 
+from risk_engine import __version__
 from risk_engine.ingestion.adapters.base import SourceAdapterError
 from risk_engine.ingestion.http import get_json
 from risk_engine.ingestion.models import IngestionRequest, SourceRecord, SourceType
@@ -31,7 +32,7 @@ class GdeltAdapter:
         self._client = client or httpx.Client(
             timeout=timeout_seconds,
             follow_redirects=True,
-            headers={"User-Agent": "RiskSignalEngine/0.2"},
+            headers={"User-Agent": f"RiskSignalEngine/{__version__}"},
         )
         self._max_attempts = max_attempts
 

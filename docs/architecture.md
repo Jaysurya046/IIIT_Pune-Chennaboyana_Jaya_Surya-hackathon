@@ -117,6 +117,17 @@ SQLite is the initial persistence layer because it keeps local setup determinist
 requires no external service. Repository interfaces will isolate persistence details so
 a server database can be introduced later without changing the NLP or stress services.
 
+The SQLite repository owns an explicit schema version. It stores complete validated
+JSON payloads for lossless contract reconstruction and normalized columns/indexes for
+signal filtering by event, impact, source, and entity. Writes use transactions and
+foreign keys connect source outcomes to ingestion runs, entities to signals, and stress
+decisions to their triggering signals. Runtime database files remain ignored.
+
+API ingestion requires an explicit `fixtures` or `live` source mode. Offline mode
+rejects live requests with HTTP 409, and live failures are persisted as source outcomes
+without substituting fixture data. Resource misses return HTTP 404 and contract
+validation failures return HTTP 422.
+
 The versioned API will provide:
 
 - `GET /health`
@@ -128,6 +139,10 @@ The versioned API will provide:
 - `POST /api/v1/stress-tests`
 - `GET /api/v1/stress-tests/{result_id}`
 - `GET /api/v1/portfolio/summary`
+
+The request/response workflow and examples are documented in `docs/api.md`. The API
+keeps orchestration in an application-service layer so HTTP handlers do not duplicate
+ingestion, NLP, stress, or persistence logic.
 
 ### Stress-testing application
 

@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 
 import httpx
 
+from risk_engine import __version__
 from risk_engine.ingestion.adapters.base import SourceAdapterError
 from risk_engine.ingestion.http import get_json
 from risk_engine.ingestion.models import IngestionRequest, SourceRecord, SourceType
@@ -30,7 +31,7 @@ class BlueskyAdapter:
     ) -> None:
         self._base_url = base_url.rstrip("/")
         self._owns_client = client is None
-        headers = {"User-Agent": "RiskSignalEngine/0.2"}
+        headers = {"User-Agent": f"RiskSignalEngine/{__version__}"}
         if bearer_token:
             headers["Authorization"] = f"Bearer {bearer_token}"
         self._client = client or httpx.Client(

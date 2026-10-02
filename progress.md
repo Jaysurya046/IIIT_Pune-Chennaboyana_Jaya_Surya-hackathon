@@ -11,15 +11,15 @@ Last updated: 2026-10-02
 | 2 Data ingestion | complete | GDELT, Bluesky and fixture adapters, normalization, deduplication, provenance | Adapter and normalization tests | `feat(data): ingest and normalize news and social text` |
 | 3 NLP risk engine | complete | Entity resolution, sentiment, event classification, impact scoring | Golden NLP fixtures and boundary tests | `feat(nlp): generate explainable financial risk signals` |
 | 4 Stress engine | complete | Synthetic portfolio, scenario matrix, valuation and reconciliation | Asset-level and portfolio-level tests | `feat(stress): simulate event driven portfolio losses` |
-| 5 API and persistence | not-started | SQLite repositories and versioned FastAPI endpoints | API contract and persistence tests | `feat(api): expose risk signals and stress results` |
+| 5 API and persistence | complete | SQLite repositories and versioned FastAPI endpoints | API contract and persistence tests | `feat(api): expose risk signals and stress results` |
 | 6 Dashboard | not-started | Signal monitor and portfolio stress views | Dashboard smoke test and manual walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
 | 7 Validation | not-started | End-to-end tests, benchmark, failure and performance checks | Offline suite and recorded metrics | `test: validate the complete risk intelligence workflow` |
 | 8 Implementation documentation | not-started | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
 
 ## Current Phase
 
-Phase 4 is complete. Phase 5 will implement SQLite repositories and versioned FastAPI
-endpoints for ingestion, signals, stress results, and portfolio summaries.
+Phase 5 is complete. Phase 6 will implement the Streamlit monitoring and portfolio
+stress dashboard against the versioned API.
 
 ## Decisions
 
@@ -105,6 +105,24 @@ endpoints for ingestion, signals, stress results, and portfolio summaries.
   and checksums.
 - Verified locally on Python 3.13: Ruff reported no findings and all 52 Pytest tests
   passed without network access.
+
+### 2026-10-02 Phase 5
+
+- Added a schema-versioned SQLite repository using transactions, foreign keys, stable
+  identifiers, normalized filter indexes, and validated full-payload reconstruction.
+- Persisted ingestion runs, source outcomes, risk signals, resolved-entity indexes,
+  stress trigger decisions, and triggered stress results across process restarts.
+- Added the versioned FastAPI service with health, source status, ingestion, analysis,
+  signal list/detail, stress run/detail, and portfolio summary endpoints.
+- Added pagination and event, impact, source, and entity filters with explicit HTTP
+  404, 409, and 422 behavior.
+- Enforced explicit fixture/live source selection so offline mode never silently makes
+  network requests or substitutes fixtures for failed live calls.
+- Added the `serve` CLI command, interactive OpenAPI documentation, and a durable API
+  workflow guide.
+- Verified locally on Python 3.13: Ruff reported no findings, all 61 Pytest tests
+  passed, dependency checks succeeded, and the offline API workflow required no
+  network access.
 
 ## Risks and Blockers
 

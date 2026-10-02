@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 4 complete - portfolio stress engine ready
+**Implementation Status:** Phase 5 complete - persistence and versioned API ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -101,6 +101,17 @@ The first model-mode run downloads weights into the ignored cache directory. Exa
 model revisions, license metadata, and limitations are recorded in
 [data/models.yaml](data/models.yaml); downloaded weights are not committed.
 
+Start the local API with:
+
+```bash
+python -m risk_engine serve --host 127.0.0.1 --port 8000
+```
+
+The interactive API documentation is then available at `http://127.0.0.1:8000/docs`.
+The complete endpoint workflow and error semantics are documented in
+[docs/api.md](docs/api.md). The default SQLite database is created under the ignored
+`data/runtime/` directory.
+
 The GDELT adapter is credential-free. Bluesky search availability varies by AppView;
 when authentication is required, provide a short-lived bearer token only through the
 ignored `RISK_ENGINE_BLUESKY_BEARER_TOKEN` environment setting.
@@ -116,6 +127,9 @@ increase. Instrument losses reconcile exactly to the portfolio result.
 
 These figures demonstrate the implemented calculations against synthetic assumptions;
 they are not forecasts, calibrated regulatory stress results, or investment advice.
+Phase 5 exposes the complete offline workflow through nine documented HTTP endpoints
+and preserves ingestion runs, source status, signals, entity indexes, and stress
+decisions across process restarts.
 
 ## Development Progress
 

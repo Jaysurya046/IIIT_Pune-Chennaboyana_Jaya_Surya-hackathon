@@ -143,8 +143,8 @@ class Settings:
             raise ValueError(f"RISK_ENGINE_NLP_MODE must be one of: {allowed}")
         if self.stress_trigger_threshold > 9:
             raise ValueError("RISK_ENGINE_STRESS_TRIGGER_THRESHOLD must be between 1 and 9")
-        if not self.database_url:
-            raise ValueError("RISK_ENGINE_DATABASE_URL must not be empty")
+        if not self.database_url.startswith("sqlite:///"):
+            raise ValueError("RISK_ENGINE_DATABASE_URL must use the sqlite:/// scheme")
         if not self.gdelt_base_url.startswith("https://"):
             raise ValueError("RISK_ENGINE_GDELT_BASE_URL must use HTTPS")
         if not self.bluesky_base_url.startswith("https://"):
