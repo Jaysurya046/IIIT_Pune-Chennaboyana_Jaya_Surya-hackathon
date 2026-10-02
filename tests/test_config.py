@@ -24,6 +24,7 @@ def test_settings_read_environment_overrides(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setenv("RISK_ENGINE_OFFLINE_MODE", "no")
     monkeypatch.setenv("RISK_ENGINE_BLUESKY_BEARER_TOKEN", "secret-token")
     monkeypatch.setenv("RISK_ENGINE_NLP_MODE", "model")
+    monkeypatch.setenv("RISK_ENGINE_STRESS_TRIGGER_THRESHOLD", "8")
 
     settings = Settings.from_env()
 
@@ -32,14 +33,13 @@ def test_settings_read_environment_overrides(monkeypatch: pytest.MonkeyPatch) ->
     assert settings.offline_mode is False
     assert settings.bluesky_bearer_token == "secret-token"
     assert settings.nlp_mode == "model"
+    assert settings.stress_trigger_threshold == 8
     assert settings.public_summary()["bluesky_auth_configured"] is True
     assert "bluesky_bearer_token" not in settings.public_summary()
 
 
 @pytest.mark.parametrize("value", ["sometimes", "2", "enabled"])
-def test_settings_reject_invalid_boolean(
-    monkeypatch: pytest.MonkeyPatch, value: str
-) -> None:
+def test_settings_reject_invalid_boolean(monkeypatch: pytest.MonkeyPatch, value: str) -> None:
     monkeypatch.setenv("RISK_ENGINE_OFFLINE_MODE", value)
 
     with pytest.raises(ValueError, match="RISK_ENGINE_OFFLINE_MODE"):
@@ -57,4 +57,13 @@ def test_settings_reject_unknown_nlp_mode(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setenv("RISK_ENGINE_NLP_MODE", "automatic")
 
     with pytest.raises(ValueError, match="RISK_ENGINE_NLP_MODE"):
+        Settings.from_env()
+
+
+def test_settings_reject_unreachable_stress_threshold(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RISK_ENGINE_STRESS_TRIGGER_THRESHOLD", "10")
+
+    with pytest.raises(ValueError, match="between 1 and 9"):
         Settings.from_env()

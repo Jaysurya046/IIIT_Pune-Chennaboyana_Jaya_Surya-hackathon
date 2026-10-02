@@ -24,6 +24,12 @@ def test_fixture_checksums_match_source_manifest() -> None:
         "data/nlp/event_taxonomy.json": (
             "5bdfdb88f5dd62ba7fe23f0a000f2588648d5a122abc03c9b9b0a83db194d48f"
         ),
+        "data/portfolio/portfolio.json": (
+            "a95e73f2bff2bcb0c5b7bb13493c8eef5b00fe24dac7d4584f54007b87b530f9"
+        ),
+        "data/portfolio/scenarios.json": (
+            "b90de73bf1bb68644dfcaeac5512bd3f60be97d6541c3ef7da751b011f2de479"
+        ),
     }
 
     for filename, checksum in expected.items():

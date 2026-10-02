@@ -46,3 +46,15 @@ configuration_artifacts:
     redistribution: project-authored under repository license
     sha256: 5bdfdb88f5dd62ba7fe23f0a000f2588648d5a122abc03c9b9b0a83db194d48f
     assumptions: severity priors are prototype assumptions, not calibrated loss estimates
+
+  - path: data/portfolio/portfolio.json
+    classification: synthetic
+    redistribution: project-authored under repository license
+    sha256: a95e73f2bff2bcb0c5b7bb13493c8eef5b00fe24dac7d4584f54007b87b530f9
+    assumptions: fictional USD positions created only to demonstrate simplified stress models
+
+  - path: data/portfolio/scenarios.json
+    classification: synthetic
+    redistribution: project-authored under repository license
+    sha256: b90de73bf1bb68644dfcaeac5512bd3f60be97d6541c3ef7da751b011f2de479
+    assumptions: illustrative shocks are not forecasts, calibrated risk measures, or advice

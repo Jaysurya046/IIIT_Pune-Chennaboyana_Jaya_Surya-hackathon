@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "portfolio_id": "synthetic-wholesale-portfolio",
+  "version": "2026-10-02",
+  "name": "RiskSignal Synthetic Wholesale Portfolio",
+  "base_currency": "USD",
+  "synthetic": true,
+  "positions": [
+    {
+      "asset_class": "bond",
+      "instrument_id": "BOND-NSEY-01",
+      "issuer_id": "northstar-energy",
+      "issuer_name": "Northstar Energy",
+      "sector": "Energy",
+      "currency": "USD",
+      "market_value": "10000000.00",
+      "duration_years": "5.20",
+      "spread_duration_years": "4.80"
+    },
+    {
+      "asset_class": "loan",
+      "instrument_id": "LOAN-NSEY-01",
+      "issuer_id": "northstar-energy",
+      "issuer_name": "Northstar Energy",
+      "sector": "Energy",
+      "currency": "USD",
+      "market_value": "8000000.00",
+      "probability_of_default": "0.025",
+      "loss_given_default": "0.45"
+    },
+    {
+      "asset_class": "bond",
+      "instrument_id": "BOND-AUBK-01",
+      "issuer_id": "aurora-bank",
+      "issuer_name": "Aurora Bank",
+      "sector": "Banking",
+      "currency": "USD",
+      "market_value": "12000000.00",
+      "duration_years": "3.70",
+      "spread_duration_years": "3.20"
+    },
+    {
+      "asset_class": "equity",
+      "instrument_id": "EQUITY-AUBK-01",
+      "issuer_id": "aurora-bank",
+      "issuer_name": "Aurora Bank",
+      "sector": "Banking",
+      "currency": "USD",
+      "market_value": "6000000.00"
+    },
+    {
+      "asset_class": "loan",
+      "instrument_id": "LOAN-MDSH-01",
+      "issuer_id": "meridian-shipping",
+      "issuer_name": "Meridian Shipping",
+      "sector": "Transportation",
+      "currency": "USD",
+      "market_value": "9000000.00",
+      "probability_of_default": "0.035",
+      "loss_given_default": "0.50"
+    },
+    {
+      "asset_class": "derivative",
+      "instrument_id": "DERIV-MDSH-01",
+      "issuer_id": "meridian-shipping",
+      "issuer_name": "Meridian Shipping",
+      "sector": "Transportation",
+      "currency": "USD",
+      "market_value": "2000000.00",
+      "delta_exposure": "4000000.00",
+      "dv01": "800.00"
+    },
+    {
+      "asset_class": "equity",
+      "instrument_id": "EQUITY-ATMF-01",
+      "issuer_id": "atlas-manufacturing",
+      "issuer_name": "Atlas Manufacturing",
+      "sector": "Industrials",
+      "currency": "USD",
+      "market_value": "7000000.00"
+    },
+    {
+      "asset_class": "derivative",
+      "instrument_id": "DERIV-ATMF-01",
+      "issuer_id": "atlas-manufacturing",
+      "issuer_name": "Atlas Manufacturing",
+      "sector": "Industrials",
+      "currency": "USD",
+      "market_value": "1500000.00",
+      "delta_exposure": "3000000.00",
+      "dv01": "500.00"
+    }
+  ]
+}

@@ -77,3 +77,17 @@ ignored cache directory only when `model` mode is selected; no weights are commi
 The default `deterministic` mode uses transparent project-authored rules so tests and
 offline demonstrations remain reproducible. Mode selection is explicit and a failed
 model load is never silently replaced with deterministic output.
+
+## Synthetic Portfolio and Scenarios
+
+`data/portfolio/portfolio.json` is a fictional USD portfolio with eight positions
+covering loans, bonds, equities, and derivatives. Its companies align with the
+fictional issuer watchlist. Values, credit parameters, durations, delta exposures,
+and DV01 measures are project-authored solely to exercise the prototype calculations.
+
+`data/portfolio/scenarios.json` maps each event category to one explicit set of shocks.
+Macroeconomic and geopolitical scenarios apply portfolio-wide; issuer-specific events
+apply only to resolved entities. These shocks are illustrative assumptions rather
+than forecasts, calibrated regulatory stress tests, investment advice, or evidence
+about real institutions. Both files are versioned and checksummed in
+`data/sources.yaml`.

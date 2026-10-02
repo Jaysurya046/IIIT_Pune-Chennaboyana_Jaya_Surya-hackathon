@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "version": "2026-10-02",
+  "synthetic": true,
+  "description": "Project-authored illustrative shocks for the synthetic portfolio; not forecasts or investment advice.",
+  "scenarios": [
+    {
+      "scenario_id": "geopolitical-disruption",
+      "event_type": "Geopolitical",
+      "name": "Geopolitical disruption",
+      "scope": "portfolio",
+      "rate_shock_bps": "75",
+      "credit_spread_shock_bps": "180",
+      "loan_pd_multiplier": "1.80",
+      "loan_lgd_addon": "0.08",
+      "equity_price_shock": "-0.22",
+      "derivative_underlying_shock": "-0.18"
+    },
+    {
+      "scenario_id": "macro-tightening",
+      "event_type": "Macroeconomic",
+      "name": "Macroeconomic tightening",
+      "scope": "portfolio",
+      "rate_shock_bps": "150",
+      "credit_spread_shock_bps": "100",
+      "loan_pd_multiplier": "1.40",
+      "loan_lgd_addon": "0.04",
+      "equity_price_shock": "-0.15",
+      "derivative_underlying_shock": "-0.12"
+    },
+    {
+      "scenario_id": "issuer-credit-event",
+      "event_type": "Credit Event",
+      "name": "Issuer credit deterioration",
+      "scope": "resolved_entities",
+      "rate_shock_bps": "25",
+      "credit_spread_shock_bps": "400",
+      "loan_pd_multiplier": "3.00",
+      "loan_lgd_addon": "0.20",
+      "equity_price_shock": "-0.35",
+      "derivative_underlying_shock": "-0.25"
+    },
+    {
+      "scenario_id": "merger-integration-risk",
+      "event_type": "Merger or Acquisition",
+      "name": "Merger integration risk",
+      "scope": "resolved_entities",
+      "rate_shock_bps": "20",
+      "credit_spread_shock_bps": "40",
+      "loan_pd_multiplier": "1.15",
+      "loan_lgd_addon": "0.02",
+      "equity_price_shock": "-0.08",
+      "derivative_underlying_shock": "-0.06"
+    },
+    {
+      "scenario_id": "product-execution-risk",
+      "event_type": "Product Launch",
+      "name": "Product execution risk",
+      "scope": "resolved_entities",
+      "rate_shock_bps": "10",
+      "credit_spread_shock_bps": "25",
+      "loan_pd_multiplier": "1.10",
+      "loan_lgd_addon": "0.01",
+      "equity_price_shock": "-0.05",
+      "derivative_underlying_shock": "-0.04"
+    },
+    {
+      "scenario_id": "regulatory-enforcement",
+      "event_type": "Regulatory",
+      "name": "Regulatory enforcement",
+      "scope": "resolved_entities",
+      "rate_shock_bps": "20",
+      "credit_spread_shock_bps": "150",
+      "loan_pd_multiplier": "1.60",
+      "loan_lgd_addon": "0.08",
+      "equity_price_shock": "-0.25",
+      "derivative_underlying_shock": "-0.15"
+    },
+    {
+      "scenario_id": "operational-disruption",
+      "event_type": "Operational",
+      "name": "Operational disruption",
+      "scope": "resolved_entities",
+      "rate_shock_bps": "15",
+      "credit_spread_shock_bps": "120",
+      "loan_pd_multiplier": "1.50",
+      "loan_lgd_addon": "0.06",
+      "equity_price_shock": "-0.20",
+      "derivative_underlying_shock": "-0.18"
+    },
+    {
+      "scenario_id": "unclassified-monitoring",
+      "event_type": "Other",
+      "name": "Unclassified monitoring",
+      "scope": "portfolio",
+      "rate_shock_bps": "0",
+      "credit_spread_shock_bps": "0",
+      "loan_pd_multiplier": "1.00",
+      "loan_lgd_addon": "0.00",
+      "equity_price_shock": "0.00",
+      "derivative_underlying_shock": "0.00"
+    }
+  ]
+}

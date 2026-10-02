@@ -10,7 +10,7 @@ Last updated: 2026-10-02
 | 1 Application scaffold | complete | Python package, configuration, dependencies, test tooling, CI | Import smoke test, Ruff, Pytest | `chore: scaffold risk engine and quality gates` |
 | 2 Data ingestion | complete | GDELT, Bluesky and fixture adapters, normalization, deduplication, provenance | Adapter and normalization tests | `feat(data): ingest and normalize news and social text` |
 | 3 NLP risk engine | complete | Entity resolution, sentiment, event classification, impact scoring | Golden NLP fixtures and boundary tests | `feat(nlp): generate explainable financial risk signals` |
-| 4 Stress engine | not-started | Synthetic portfolio, scenario matrix, valuation and reconciliation | Asset-level and portfolio-level tests | `feat(stress): simulate event driven portfolio losses` |
+| 4 Stress engine | complete | Synthetic portfolio, scenario matrix, valuation and reconciliation | Asset-level and portfolio-level tests | `feat(stress): simulate event driven portfolio losses` |
 | 5 API and persistence | not-started | SQLite repositories and versioned FastAPI endpoints | API contract and persistence tests | `feat(api): expose risk signals and stress results` |
 | 6 Dashboard | not-started | Signal monitor and portfolio stress views | Dashboard smoke test and manual walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
 | 7 Validation | not-started | End-to-end tests, benchmark, failure and performance checks | Offline suite and recorded metrics | `test: validate the complete risk intelligence workflow` |
@@ -18,8 +18,8 @@ Last updated: 2026-10-02
 
 ## Current Phase
 
-Phase 3 is complete. Phase 4 will implement the synthetic portfolio, scenario mapping,
-asset-level stress models, and portfolio reconciliation.
+Phase 4 is complete. Phase 5 will implement SQLite repositories and versioned FastAPI
+endpoints for ingestion, signals, stress results, and portfolio summaries.
 
 ## Decisions
 
@@ -88,6 +88,23 @@ asset-level stress models, and portfolio reconciliation.
   from the two source types.
 - Verified locally on Python 3.13: Ruff reported no findings and all 38 Pytest tests
   passed without network access or downloaded model weights.
+
+### 2026-10-02 Phase 4
+
+- Added a versioned synthetic USD portfolio with eight positions covering loans,
+  bonds, equities, and derivatives across the four fictional issuers.
+- Added a versioned scenario matrix mapping every event category to explicit,
+  project-authored shocks and portfolio-wide or resolved-entity scope.
+- Implemented Decimal-based duration, expected-loss, direct equity shock, delta, and
+  DV01 calculations with monetary rounding to cents.
+- Added strict `StressDecision`, `StressResult`, and instrument-result contracts,
+  configurable impact-score triggering, stable identifiers, and scenario provenance.
+- Enforced portfolio-to-instrument loss reconciliation within USD 0.01 and retained
+  before/after expected loss for loan positions.
+- Added the `stress-fixtures` offline command and documented all synthetic assumptions
+  and checksums.
+- Verified locally on Python 3.13: Ruff reported no findings and all 52 Pytest tests
+  passed without network access.
 
 ## Risks and Blockers
 

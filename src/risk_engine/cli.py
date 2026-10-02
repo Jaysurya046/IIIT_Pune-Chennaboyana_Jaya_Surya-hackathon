@@ -14,6 +14,7 @@ from risk_engine.ingestion.models import IngestionRequest
 from risk_engine.ingestion.service import IngestionService
 from risk_engine.logging_config import configure_logging
 from risk_engine.nlp.factory import build_risk_engine
+from risk_engine.stress.factory import build_stress_engine
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -37,6 +38,12 @@ def build_parser() -> argparse.ArgumentParser:
     analyze_parser.add_argument("--query", default="financial risk")
     analyze_parser.add_argument("--limit", type=int, default=25)
     analyze_parser.add_argument("--nlp-mode", choices=sorted(Settings.ALLOWED_NLP_MODES))
+    stress_parser = subparsers.add_parser(
+        "stress-fixtures", help="analyze fixtures and apply the configured stress trigger"
+    )
+    stress_parser.add_argument("--query", default="financial risk")
+    stress_parser.add_argument("--limit", type=int, default=25)
+    stress_parser.add_argument("--nlp-mode", choices=sorted(Settings.ALLOWED_NLP_MODES))
     return parser
 
 
@@ -68,13 +75,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(result.model_dump_json(indent=2))
         return 0 if result.failed_source_count == 0 else 1
 
-    if args.command == "analyze-fixtures":
+    if args.command in {"analyze-fixtures", "stress-fixtures"}:
         result = _run_fixtures(settings, args.query, args.limit)
         if result.failed_source_count:
             print(result.model_dump_json(indent=2))
             return 1
         engine = build_risk_engine(settings, mode=args.nlp_mode)
         signals = engine.analyze(result.documents)
+        if args.command == "stress-fixtures":
+            decisions = build_stress_engine(settings).run_many(signals)
+            print(json.dumps([item.model_dump(mode="json") for item in decisions], indent=2))
+            return 0
         print(json.dumps([signal.model_dump(mode="json") for signal in signals], indent=2))
         return 0
 

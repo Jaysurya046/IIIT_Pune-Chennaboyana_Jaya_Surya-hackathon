@@ -3,7 +3,7 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 3 complete - explainable NLP risk signals ready
+**Implementation Status:** Phase 4 complete - portfolio stress engine ready
 **Demo Video Link:** To be added after implementation
 **Slide Deck Link:** To be added after implementation
 
@@ -77,6 +77,7 @@ python -m pip install -r requirements-dev.txt
 python -m risk_engine check
 python -m risk_engine ingest-fixtures --query "portfolio risk"
 python -m risk_engine analyze-fixtures --query "portfolio risk"
+python -m risk_engine stress-fixtures --query "portfolio risk"
 python -m ruff check .
 python -m pytest
 ```
@@ -106,12 +107,15 @@ ignored `RISK_ENGINE_BLUESKY_BEARER_TOKEN` environment setting.
 
 ## 5. Key Results & Domain Impact
 
-The deterministic Phase 3 regression set contains eight synthetic cases covering all
-event categories and currently passes all expected issuer, sentiment, and event checks.
-Every generated signal retains its signed sentiment, event evidence, weighted impact
-factors, model/configuration versions, and source provenance. This synthetic benchmark
-guards behavior; it is not a claim of performance on real financial text. Portfolio
-loss results will be added after the stress engine is implemented.
+The deterministic NLP regression set contains eight synthetic cases covering every
+event category. The Phase 4 portfolio contains eight fictional positions across four
+asset classes. In the tested issuer credit-event scenario, the two Northstar Energy
+positions move from a portfolio total of USD 55.50 million to USD 53.15 million: a
+USD 2.35 million illustrative loss, including a USD 0.30 million expected-loss
+increase. Instrument losses reconcile exactly to the portfolio result.
+
+These figures demonstrate the implemented calculations against synthetic assumptions;
+they are not forecasts, calibrated regulatory stress results, or investment advice.
 
 ## Development Progress
 

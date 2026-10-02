@@ -11,7 +11,7 @@ from risk_engine.cli import main
 
 
 def test_package_has_version() -> None:
-    assert __version__ == "0.3.0"
+    assert __version__ == "0.4.0"
 
 
 def test_check_command_prints_public_configuration(
@@ -50,3 +50,15 @@ def test_analyze_fixture_command_generates_explainable_signals(
     assert all(1 <= signal["impact_score"] <= 10 for signal in payload)
     assert all(signal["impact_factors"] for signal in payload)
     assert all(signal["model_versions"] for signal in payload)
+
+
+def test_stress_fixture_command_records_trigger_decisions(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(["stress-fixtures", "--query", "portfolio risk"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert len(payload) == 6
+    assert all(decision["trigger_threshold"] == 7 for decision in payload)
+    assert all(not decision["triggered"] for decision in payload)

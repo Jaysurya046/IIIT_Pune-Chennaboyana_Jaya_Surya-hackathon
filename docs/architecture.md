@@ -140,10 +140,26 @@ models. Scenario shocks are configuration data rather than code.
 - Equities use direct percentage price shocks.
 - Derivatives use delta and DV01 approximations.
 
+The implemented approximations are:
+
+```text
+bond value after = value x (1 - duration x rate shock - spread duration x spread shock)
+loan expected loss = exposure x probability of default x loss given default
+loan value after = value - (stressed expected loss - base expected loss)
+equity value after = value x (1 + configured price shock)
+derivative P&L = delta exposure x underlying shock - DV01 x rate shock in basis points
+```
+
+Signals trigger only when their impact score is strictly greater than the configured
+threshold of 7. Macroeconomic and geopolitical scenarios apply to the whole portfolio;
+other event scenarios apply to resolved issuer identifiers. A missing issuer therefore
+produces an explicit zero-position result rather than silently stressing unrelated
+positions.
+
 Stress results retain the triggering signal, scenario version, affected scope, applied
 shocks, before and after values, expected-loss change, and instrument-level results.
-Portfolio totals must reconcile to the sum of instrument results within a documented
-numeric tolerance.
+Portfolio totals must reconcile to the sum of instrument results within USD 0.01.
+Calculations use decimal arithmetic and monetary outputs are rounded half-up to cents.
 
 ### Dashboard
 

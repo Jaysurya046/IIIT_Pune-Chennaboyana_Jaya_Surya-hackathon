@@ -79,6 +79,7 @@ class Settings:
     event_model_id: str = "sentence-transformers/all-MiniLM-L6-v2"
     event_model_revision: str = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
     model_cache_dir: Path = Path(".cache/huggingface")
+    stress_trigger_threshold: int = 7
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -120,8 +121,9 @@ class Settings:
                 "RISK_ENGINE_EVENT_MODEL_REVISION",
                 "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
             ).strip(),
-            model_cache_dir=Path(
-                os.getenv("RISK_ENGINE_MODEL_CACHE_DIR", ".cache/huggingface")
+            model_cache_dir=Path(os.getenv("RISK_ENGINE_MODEL_CACHE_DIR", ".cache/huggingface")),
+            stress_trigger_threshold=_read_positive_integer(
+                "RISK_ENGINE_STRESS_TRIGGER_THRESHOLD", 7
             ),
         )
         settings.validate()
@@ -139,6 +141,8 @@ class Settings:
         if self.nlp_mode not in self.ALLOWED_NLP_MODES:
             allowed = ", ".join(sorted(self.ALLOWED_NLP_MODES))
             raise ValueError(f"RISK_ENGINE_NLP_MODE must be one of: {allowed}")
+        if self.stress_trigger_threshold > 9:
+            raise ValueError("RISK_ENGINE_STRESS_TRIGGER_THRESHOLD must be between 1 and 9")
         if not self.database_url:
             raise ValueError("RISK_ENGINE_DATABASE_URL must not be empty")
         if not self.gdelt_base_url.startswith("https://"):
