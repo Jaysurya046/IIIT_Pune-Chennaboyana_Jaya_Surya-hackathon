@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from risk_engine.ingestion.models import RawDocument
+from risk_engine.ingestion.models import RawDocument, ensure_utc
 from risk_engine.ingestion.time import utc_now
 from risk_engine.nlp.entity import IssuerResolver
 from risk_engine.nlp.events import EventClassifier
@@ -67,7 +67,14 @@ class RiskSignalEngine:
                 sources.add(candidate.document.provenance.source)
         return min(1.0, max(0.0, (len(sources) - 1) / 2))
 
-    def analyze(self, documents: Iterable[RawDocument]) -> tuple[RiskSignal, ...]:
+    def analyze(
+        self,
+        documents: Iterable[RawDocument],
+        *,
+        as_of: datetime | None = None,
+    ) -> tuple[RiskSignal, ...]:
+        """Analyze documents at one explicit, timezone-aware point in time."""
+
         analyzed: list[_AnalyzedDocument] = []
         for document in documents:
             text = " ".join(part for part in (document.title, document.text) if part)
@@ -81,7 +88,7 @@ class RiskSignalEngine:
             )
 
         batch = tuple(analyzed)
-        created_at = self._clock()
+        created_at = ensure_utc(as_of if as_of is not None else self._clock())
         signals: list[RiskSignal] = []
         versions = {
             "entity_resolution": self._resolver.model_version,

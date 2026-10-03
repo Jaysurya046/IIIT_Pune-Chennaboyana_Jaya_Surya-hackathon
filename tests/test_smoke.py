@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 
 import pytest
 
@@ -50,6 +51,11 @@ def test_analyze_fixture_command_generates_explainable_signals(
     assert all(1 <= signal["impact_score"] <= 10 for signal in payload)
     assert all(signal["impact_factors"] for signal in payload)
     assert all(signal["model_versions"] for signal in payload)
+    expected_as_of = datetime(2026, 10, 1, tzinfo=UTC)
+    assert all(
+        datetime.fromisoformat(signal["created_at"].replace("Z", "+00:00")) == expected_as_of
+        for signal in payload
+    )
 
 
 def test_stress_fixture_command_records_trigger_decisions(

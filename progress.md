@@ -15,7 +15,7 @@ Last updated: 2026-10-03
 | 6 Dashboard | complete | Signal monitor and portfolio stress views | Dashboard contract tests and rendered walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
 | 7 Validation | complete | End-to-end tests, benchmark, failure and performance checks | Offline suite and recorded metrics | `test: validate the complete risk intelligence workflow` |
 | 8 Implementation documentation | complete | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
-| 9 Deterministic as-of time (P0 T1) | planned | Stable fixture/replay recency and scores | Frozen-time NLP and API tests | `fix(nlp): anchor replay recency to batch time` |
+| 9 Deterministic as-of time (P0 T1) | complete | Stable fixture/replay recency and scores | Frozen-time NLP, API, CLI and validation tests | `fix(nlp): anchor replay recency to batch time` |
 | 10 Organic replay trigger (P0 T2) | planned | New synthetic replay mode and natural 8+ signal | Exact-score replay and stress tests | `feat(replay): add organic high-impact stress scenario` |
 | 11 Hypothetical what-if (P0 T3) | planned | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
 | 12 Real-data benchmark (P1 T4) | planned | External CSV evaluation and documented metrics | Metric, CLI and failure tests | `feat(benchmark): compare deterministic and model NLP quality` |
@@ -30,11 +30,11 @@ Last updated: 2026-10-03
 
 ## Current Phase
 
-The original eight implementation phases are complete. Phase 9 is next: deterministic
-as-of time. Phases 9–16 are the required P0/P1 improvement path; Phases 17–20 are
-optional P2 work. Phase 20 is blocked until a permitted transaction dataset is supplied.
-The detailed sequence and task gates are in
-[docs/improvement-plan.md](docs/improvement-plan.md).
+The original eight implementation phases and improvement Phase 9 are complete. Phase
+10 is next: an organic replay trigger. Phases 10–16 are the remaining required P0/P1
+improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
+permitted transaction dataset is supplied. The detailed sequence and task gates are
+in [docs/improvement-plan.md](docs/improvement-plan.md).
 
 ## Decisions
 
@@ -51,6 +51,8 @@ The detailed sequence and task gates are in
 - Use one numbered phase and one conventional commit for each improvement task.
 - Treat replay, fixtures, live data, model mode, and hypothetical simulation as explicit
   non-interchangeable modes with no silent fallback.
+- Anchor fixture/replay recency to the latest batch retrieval time; keep live analysis
+  on its timezone-aware UTC clock.
 - Keep organizer-provided DOCX files out of the implementation repository; their
   requirements are captured in the README and architecture decision record.
 
@@ -240,6 +242,22 @@ The detailed sequence and task gates are in
 - Verified the roadmap change with Ruff, all 83 tests, the offline validator, and
   `git diff --check`. The validator again matched 7/7 artifacts, persisted 6/6 signals,
   reconciled to USD 0.00, and completed in 0.121 seconds.
+
+### 2026-10-03 Phase 9
+
+- Added an optional, timezone-aware `as_of` argument to `RiskSignalEngine.analyze` and
+  normalized it to UTC before using the same value for recency and signal creation.
+- Added a strict synthetic-batch policy that selects the maximum document retrieval
+  timestamp and rejects mixed or live provenance instead of silently using wall time.
+- Applied the policy to API fixture/replay analysis, fixture CLI commands, persistence
+  tests, and the complete offline validator; live analysis retains the engine clock.
+- Added regression tests proving identical signals with clocks ten years apart, clear
+  rejection of naive timestamps, stable API and CLI timestamps, and live-clock use.
+- Left all checksummed sample fixtures and the seven-artifact source manifest unchanged.
+- Passed the mandatory Phase 9 gate: Ruff reported no findings, all 86 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 7/7
+  artifacts, persisted 6/6 signals, reconciled to USD 0.00, and completed in 0.165
+  seconds against its 5-second budget.
 
 ## Risks and Blockers
 

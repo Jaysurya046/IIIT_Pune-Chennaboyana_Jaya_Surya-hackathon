@@ -2,11 +2,29 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from datetime import datetime
+
 from risk_engine.config import Settings
+from risk_engine.ingestion.models import RawDocument
 from risk_engine.nlp.engine import RiskSignalEngine
 from risk_engine.nlp.entity import IssuerResolver
 from risk_engine.nlp.events import EmbeddingEventClassifier, KeywordEventClassifier
 from risk_engine.nlp.sentiment import FinBertSentimentAnalyzer, RuleBasedSentimentAnalyzer
+
+
+def synthetic_batch_as_of(documents: Sequence[RawDocument]) -> datetime | None:
+    """Return the latest retrieval time for an explicitly synthetic batch.
+
+    An empty batch has no analysis time. Mixed or live provenance is rejected so a
+    fixture/replay caller cannot silently switch to wall-clock scoring.
+    """
+
+    if not documents:
+        return None
+    if any(not document.provenance.synthetic for document in documents):
+        raise ValueError("synthetic batch contains non-synthetic provenance")
+    return max(document.provenance.retrieved_at for document in documents)
 
 
 def build_risk_engine(settings: Settings, *, mode: str | None = None) -> RiskSignalEngine:

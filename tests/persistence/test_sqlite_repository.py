@@ -6,7 +6,7 @@ from risk_engine.config import Settings
 from risk_engine.ingestion.adapters import FixtureAdapter
 from risk_engine.ingestion.models import IngestionRequest
 from risk_engine.ingestion.service import IngestionService
-from risk_engine.nlp.factory import build_risk_engine
+from risk_engine.nlp.factory import build_risk_engine, synthetic_batch_as_of
 from risk_engine.persistence import SQLiteStore
 from risk_engine.stress.factory import build_stress_engine
 
@@ -29,7 +29,10 @@ def test_ingestion_and_signal_round_trip_with_filters(tmp_path: Path) -> None:
     settings = _settings(tmp_path / "repository.db")
     store = SQLiteStore(settings.database_url)
     ingestion = store.save_ingestion(_ingestion_result())
-    signals = build_risk_engine(settings).analyze(ingestion.result.documents)
+    signals = build_risk_engine(settings).analyze(
+        ingestion.result.documents,
+        as_of=synthetic_batch_as_of(ingestion.result.documents),
+    )
 
     assert store.save_signals(signals) == 6
     restored_run = store.get_ingestion(ingestion.run_id)
@@ -60,7 +63,10 @@ def test_store_is_durable_and_recovers_stress_result(tmp_path: Path) -> None:
     settings = _settings(tmp_path / "durable.db")
     store = SQLiteStore(settings.database_url)
     ingestion = store.save_ingestion(_ingestion_result())
-    signal = build_risk_engine(settings).analyze(ingestion.result.documents)[0]
+    signal = build_risk_engine(settings).analyze(
+        ingestion.result.documents,
+        as_of=synthetic_batch_as_of(ingestion.result.documents),
+    )[0]
     high_impact_signal = signal.model_copy(update={"impact_score": 8})
     store.save_signals([high_impact_signal])
     decision_record = store.save_stress_decision(
@@ -82,7 +88,12 @@ def test_signal_pagination_is_stable(tmp_path: Path) -> None:
     settings = _settings(tmp_path / "pagination.db")
     store = SQLiteStore(settings.database_url)
     ingestion = store.save_ingestion(_ingestion_result())
-    store.save_signals(build_risk_engine(settings).analyze(ingestion.result.documents))
+    store.save_signals(
+        build_risk_engine(settings).analyze(
+            ingestion.result.documents,
+            as_of=synthetic_batch_as_of(ingestion.result.documents),
+        )
+    )
 
     first_page, total = store.list_signals(limit=2, offset=0)
     second_page, repeated_total = store.list_signals(limit=2, offset=2)

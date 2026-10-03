@@ -16,7 +16,7 @@ from risk_engine.ingestion.adapters import FixtureAdapter
 from risk_engine.ingestion.models import IngestionRequest
 from risk_engine.ingestion.service import IngestionService
 from risk_engine.logging_config import configure_logging
-from risk_engine.nlp.factory import build_risk_engine
+from risk_engine.nlp.factory import build_risk_engine, synthetic_batch_as_of
 from risk_engine.stress.factory import build_stress_engine
 
 
@@ -136,7 +136,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(result.model_dump_json(indent=2))
             return 1
         engine = build_risk_engine(settings, mode=args.nlp_mode)
-        signals = engine.analyze(result.documents)
+        signals = engine.analyze(
+            result.documents,
+            as_of=synthetic_batch_as_of(result.documents),
+        )
         if args.command == "stress-fixtures":
             decisions = build_stress_engine(settings).run_many(signals)
             print(json.dumps([item.model_dump(mode="json") for item in decisions], indent=2))

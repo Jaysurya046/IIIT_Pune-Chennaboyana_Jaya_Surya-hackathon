@@ -102,6 +102,8 @@ the real analysis clock. The selected policy is explicit at every call site.
 - `src/risk_engine/validation/runner.py`
 - `tests/nlp/test_engine.py`
 - `tests/api/test_api_contract.py`
+- `tests/persistence/test_sqlite_repository.py`
+- `tests/test_smoke.py`
 - `tests/validation/test_validation_runner.py`
 - `docs/architecture.md`
 - `progress.md`

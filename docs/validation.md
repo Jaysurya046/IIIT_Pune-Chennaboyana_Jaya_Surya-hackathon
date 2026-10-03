@@ -30,7 +30,7 @@ command with a 10-second budget to accommodate shared runners.
 | Dataset integrity | Seven artifacts declared in `data/sources.yaml` | Recalculate every SHA-256 checksum; require bounded `data/` paths and explicit synthetic or project-authored classification |
 | Fixture quality | Three GDELT-shaped and three Bluesky-shaped records | Require non-empty text and source IDs, unique IDs, publication no later than retrieval, and two explicitly synthetic bundles |
 | NLP regression | Eight cases in `data/evaluation/nlp_golden.json` | Independently run deterministic entity, sentiment, and event components and compare exact expected outputs |
-| Offline workflow | Both committed fixture adapters | Ingest, normalize, analyze, persist, reopen SQLite, and compare unique document/signal counts and provenance |
+| Offline workflow | Both committed fixture adapters | Ingest, normalize, analyze at the batch's latest retrieval time, persist, reopen SQLite, and compare unique document/signal counts and provenance |
 | Portfolio totals | Raw position values in `portfolio.json` | Independently sum raw values and reconcile API breakdowns by asset class, sector, and issuer |
 | Stress calculation | Synthetic impact-8 boundary probe | Persist a copied entity-bearing signal with only its impact score set to 8, run its configured scenario, and independently sum instrument before, after, and loss values |
 | Dashboard behavior | Real local API populated with both fixture sources | Render the Streamlit app, apply the Operational event filter, reset to All, and submit a stress decision |
@@ -75,6 +75,8 @@ one local measurement of the deterministic path and is not a latency SLA.
 - Corrupt fixture content produces a bounded error without echoing its payload.
 - Missing optional model dependencies raise explicit errors and never fall back to
   deterministic rules under a model-mode request.
+- Explicit fixture/replay analysis time is timezone-aware and stable across wall-clock
+  dates; live provenance retains wall-clock analysis behavior.
 - An incompatible future SQLite schema fails closed.
 - Impact 7 is skipped; impact 8 triggers stress testing.
 - Entity-scoped scenarios with no resolved entity produce an explicit zero-position

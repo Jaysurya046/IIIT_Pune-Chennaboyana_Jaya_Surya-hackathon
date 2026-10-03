@@ -110,6 +110,15 @@ The result is rounded and clamped to the inclusive range 1 through 10. The indiv
 factors and model revisions are stored with each signal so the score can be explained
 and reproduced.
 
+Recency is evaluated against one timezone-aware analysis timestamp. Callers may pass
+that timestamp explicitly to `RiskSignalEngine.analyze`; otherwise the engine uses its
+UTC clock. Fixture and replay batches are identified by their explicit synthetic
+provenance and use the maximum `retrieved_at` in the batch as `as_of`. This makes their
+`created_at`, recency factors, and impact scores independent of the calendar date. A
+mixed or non-synthetic batch is rejected by the synthetic batch-time helper, while live
+analysis continues to use the real analysis clock. No mode silently falls back to a
+different timing policy.
+
 Two explicit execution modes share the same output contracts. `model` mode uses the
 pinned FinBERT and MiniLM revisions documented in `data/models.yaml`. `deterministic`
 mode uses versioned rules for offline CI and demonstrations. The selected mode is

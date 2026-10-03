@@ -21,7 +21,7 @@ from risk_engine.ingestion.adapters import BlueskyAdapter, FixtureAdapter, Gdelt
 from risk_engine.ingestion.models import IngestionRequest
 from risk_engine.ingestion.service import IngestionService
 from risk_engine.nlp.engine import RiskSignalEngine
-from risk_engine.nlp.factory import build_risk_engine
+from risk_engine.nlp.factory import build_risk_engine, synthetic_batch_as_of
 from risk_engine.persistence.sqlite import SQLiteStore
 from risk_engine.stress.config import load_portfolio
 from risk_engine.stress.factory import build_stress_engine
@@ -109,7 +109,16 @@ class RiskApplicationService:
         if engine is None:
             engine = build_risk_engine(self.settings, mode=mode)
             self._nlp_engines[mode] = engine
-        signals = engine.analyze(record.result.documents)
+        documents = record.result.documents
+        contains_synthetic_provenance = any(
+            document.provenance.synthetic for document in documents
+        )
+        as_of = (
+            synthetic_batch_as_of(documents)
+            if contains_synthetic_provenance
+            else None
+        )
+        signals = engine.analyze(documents, as_of=as_of)
         self.store.save_signals(signals)
         return AnalysisResponse(run_id=run_id, signal_count=len(signals), signals=signals)
 

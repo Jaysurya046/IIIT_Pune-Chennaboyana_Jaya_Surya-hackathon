@@ -217,6 +217,11 @@ def _workflow_metrics(data_dir: Path, database_path: Path) -> WorkflowMetrics:
         issues.append("Offline workflow produced duplicate signal identifiers.")
     if synthetic_signal_count != len(analysis.signals):
         issues.append("Offline workflow produced a signal without synthetic provenance.")
+    expected_as_of = max(
+        item.provenance.retrieved_at for item in documents.result.documents
+    )
+    if any(item.created_at != expected_as_of for item in analysis.signals):
+        issues.append("Offline workflow did not use the batch retrieval time for analysis.")
 
     portfolio = service.portfolio_summary()
     expected_total = _expected_portfolio_total(data_dir)

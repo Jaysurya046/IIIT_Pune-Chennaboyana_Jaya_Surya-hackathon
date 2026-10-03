@@ -1,5 +1,6 @@
 """Contract tests for the versioned offline FastAPI workflow."""
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -68,6 +69,11 @@ def test_offline_ingestion_analysis_and_signal_queries(api_client) -> None:
     analysis = _ingest_and_analyze(client)
 
     assert analysis["signal_count"] == 6
+    expected_as_of = datetime(2026, 10, 1, tzinfo=UTC)
+    assert all(
+        datetime.fromisoformat(signal["created_at"].replace("Z", "+00:00")) == expected_as_of
+        for signal in analysis["signals"]
+    )
     signal = analysis["signals"][0]
     listing = client.get(
         "/api/v1/signals",
