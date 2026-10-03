@@ -53,6 +53,8 @@ The full design and interface decisions are documented in
 - Live public social posts from the Bluesky AppView API.
 - Small offline fixtures matching both source schemas for deterministic evaluation.
 - A fully synthetic portfolio with fictional counterparties and transactions.
+- Financial PhraseBank v1.0 `sentences_allagree` for an optional, non-commercial local
+  sentiment benchmark; its raw and derived files are not committed.
 
 Every committed dataset or fixture has a source URL or synthetic declaration,
 retrieval details, transformations, redistribution notes, assumptions, and checksum
@@ -61,6 +63,9 @@ See [data/README.md](data/README.md) and the machine-readable
 [source manifest](data/sources.yaml) for the provenance record. The consolidated
 [dataset and assumption guide](docs/dataset-guide.md) distinguishes public interfaces,
 committed synthetic artifacts, optional models, and the claims each source can support.
+The external benchmark's immutable source, CC BY-NC-SA 3.0 terms, local checksum,
+selection rules, metrics, and limitations are recorded in
+[docs/benchmark.md](docs/benchmark.md).
 
 ## 4. Quickstart & Installation
 
@@ -102,6 +107,7 @@ dependencies and explicitly select model mode:
 ```bash
 python -m pip install -r requirements-nlp.txt
 python -m risk_engine analyze-fixtures --query "portfolio risk" --nlp-mode model
+python -m risk_engine benchmark --dataset <csv> --text-col <name> --label-col <name>
 ```
 
 The first model-mode run downloads weights into the ignored cache directory. Exact
@@ -135,6 +141,20 @@ when authentication is required, provide a short-lived bearer token only through
 ignored `RISK_ENGINE_BLUESKY_BEARER_TOKEN` environment setting.
 
 ## 5. Key Results & Domain Impact
+
+The external Financial PhraseBank v1.0 all-agree evaluation compares both sentiment
+modes on the same 2,264 expert-labelled financial sentences. The model's published
+training data includes Financial PhraseBank, so these are implementation-comparison
+metrics rather than an out-of-sample generalization claim.
+
+| Mode | Accuracy | Macro-F1 | Negative actual → N/Neu/P | Neutral actual → N/Neu/P | Positive actual → N/Neu/P |
+|---|---:|---:|---:|---:|---:|
+| Deterministic v1 | 0.6767 | 0.4302 | 13/199/91 | 7/1342/42 | 31/362/177 |
+| Pinned FinBERT | 0.9717 | 0.9625 | 298/1/4 | 19/1345/27 | 12/1/557 |
+
+Cells show predicted negative/neutral/positive counts for each actual class. Dataset
+provenance, licence restrictions, exact model revision, checksum, environment, metric
+definitions, and interpretation limits are in [docs/benchmark.md](docs/benchmark.md).
 
 The deterministic NLP regression set contains eight synthetic cases covering every
 event category. The Phase 4 portfolio contains eight fictional positions across four
@@ -182,6 +202,8 @@ The complete evidence and interpretation are in [docs/results.md](docs/results.m
   synthetic artifacts, transformations, redistribution, and limitations.
 - [Validation evidence](docs/validation.md) — independent checks, recorded baseline,
   failure paths, and caveats.
+- [External sentiment benchmark](docs/benchmark.md) — immutable source, licence,
+  reproducible command, real-data metrics, confusion matrices, and limitations.
 - [Results and domain impact](docs/results.md) — implemented capability, evidence,
   usefulness, limitations, and next steps.
 - [Demonstration runbook](docs/demo-script.md) — separate five-minute live and

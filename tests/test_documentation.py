@@ -83,6 +83,16 @@ def test_dataset_guide_preserves_source_classification_and_caveats() -> None:
     assert len(re.findall(r"sha256: [0-9a-f]{64}", manifest)) == 9
 
 
+def test_external_benchmark_documents_source_license_and_claim_boundary() -> None:
+    benchmark = (ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8")
+
+    assert "Financial PhraseBank v1.0" in benchmark
+    assert "598b6aad98f7c8d67be161b12a4b5f2497e07edd" in benchmark
+    assert "CC BY-NC-SA 3.0" in benchmark
+    assert "a7a3128b1380b32d27f28b29c5f57c662492fd6ae6293a778d02593ef5bedae1" in benchmark
+    assert "not an out-of-sample generalization estimate" in benchmark
+
+
 def test_demo_runbook_covers_both_time_limits_and_data_disclosure() -> None:
     content = (ROOT / "docs" / "demo-script.md").read_text(encoding="utf-8")
 

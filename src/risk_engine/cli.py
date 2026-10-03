@@ -11,12 +11,14 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from risk_engine import __version__
+from risk_engine.benchmarking import BenchmarkDataError, run_benchmark
 from risk_engine.config import Settings
 from risk_engine.ingestion.adapters import FixtureAdapter
 from risk_engine.ingestion.models import IngestionRequest
 from risk_engine.ingestion.service import IngestionService
 from risk_engine.logging_config import configure_logging
 from risk_engine.nlp.factory import build_risk_engine, synthetic_batch_as_of
+from risk_engine.nlp.sentiment import ModelDependencyError
 from risk_engine.stress.factory import build_stress_engine
 
 
@@ -66,6 +68,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     validation_parser.add_argument("--max-seconds", type=float, default=5.0)
     validation_parser.add_argument("--output", type=Path)
+    benchmark_parser = subparsers.add_parser(
+        "benchmark", help="compare deterministic and model sentiment on an external CSV"
+    )
+    benchmark_parser.add_argument("--dataset", type=Path, required=True)
+    benchmark_parser.add_argument("--text-col", required=True)
+    benchmark_parser.add_argument("--label-col", required=True)
+    benchmark_parser.add_argument("--output", type=Path)
+    benchmark_parser.add_argument("--markdown-output", type=Path)
     return parser
 
 
@@ -141,6 +151,36 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.output.write_text(f"{payload}\n", encoding="utf-8")
         print(payload)
         return 0 if report.passed else 1
+
+    if args.command == "benchmark":
+        try:
+            report = run_benchmark(
+                args.dataset,
+                text_column=args.text_col,
+                label_column=args.label_col,
+                settings=settings,
+            )
+        except (BenchmarkDataError, ModelDependencyError, OSError) as error:
+            print(
+                json.dumps(
+                    {
+                        "classification": "benchmark-error",
+                        "error_type": type(error).__name__,
+                        "message": str(error),
+                    }
+                ),
+                file=sys.stderr,
+            )
+            return 1
+        payload = report.model_dump_json(indent=2)
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(f"{payload}\n", encoding="utf-8")
+        if args.markdown_output is not None:
+            args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
+            args.markdown_output.write_text(f"{report.to_markdown()}\n", encoding="utf-8")
+        print(payload)
+        return 0
 
     if args.command == "ingest-fixtures":
         result = _run_fixtures(settings, args.query, args.limit)

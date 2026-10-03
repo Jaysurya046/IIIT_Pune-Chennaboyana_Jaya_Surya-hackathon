@@ -27,9 +27,15 @@ an artifact no longer matches its manifest entry.
 | `data/nlp/event_taxonomy.json` | Project-authored configuration | Event labels and severity priors | Yes | Priors are prototype assumptions, not calibrated risk estimates |
 | `data/portfolio/portfolio.json` | Synthetic portfolio | Stress valuation | Yes | Eight fictional USD positions across four asset classes |
 | `data/portfolio/scenarios.json` | Synthetic scenario matrix | Event-to-shock mapping | Yes | Shocks are illustrative, not forecasts or regulatory scenarios |
+| Financial PhraseBank v1.0 `sentences_allagree` | Public, expert-labelled financial news sentences | Optional sentiment benchmark | No | CC BY-NC-SA 3.0; non-commercial use; model-training overlap |
 
 The manifest groups nine checksummed artifacts because the two public interfaces are
 described as live sources rather than committed datasets.
+
+The external benchmark dataset is also not part of the committed-artifact count. Its
+immutable distribution reference, archive and derived-file checksums, selection rule,
+licence, measured results, and training-overlap limitation are documented separately in
+[the benchmark record](benchmark.md).
 
 ## Public Live Interfaces
 

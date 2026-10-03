@@ -18,7 +18,7 @@ Last updated: 2026-10-04
 | 9 Deterministic as-of time (P0 T1) | complete | Stable fixture/replay recency and scores | Frozen-time NLP, API, CLI and validation tests | `fix(nlp): anchor replay recency to batch time` |
 | 10 Organic replay trigger (P0 T2) | complete | New synthetic replay mode and natural 8+ signal | Exact-score replay, API, CLI and AppTest coverage | `feat(replay): add organic high-impact stress scenario` |
 | 11 Hypothetical what-if (P0 T3) | complete | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
-| 12 Real-data benchmark (P1 T4) | planned | External CSV evaluation and documented metrics | Metric, CLI and failure tests | `feat(benchmark): compare deterministic and model NLP quality` |
+| 12 Real-data benchmark (P1 T4) | complete | External CSV evaluation and documented metrics | Metric, CLI, failure and real-data evidence | `feat(benchmark): compare deterministic and model NLP quality` |
 | 13 Model-mode hygiene (P1 T5) | planned | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
 | 14 Dashboard evidence (P1 T6) | planned | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
 | 15 Assumption honesty (P1 T7) | planned | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
@@ -30,9 +30,9 @@ Last updated: 2026-10-04
 
 ## Current Phase
 
-The original eight implementation phases and P0 improvement Phases 9–11 are complete.
-Phase 12 is next: the real-data benchmark command. Phases 12–16 are the remaining P1
-improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
+The original eight implementation phases, P0 improvement Phases 9–11, and Phase 12 are
+complete. Phase 13 is next: model-mode hygiene and mode visibility. Phases 13–16 are
+the remaining P1 improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
 permitted transaction dataset is supplied. The detailed sequence and task gates are
 in [docs/improvement-plan.md](docs/improvement-plan.md).
 
@@ -308,6 +308,33 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   passed with one upstream Starlette warning, and the offline validator matched 9/9
   artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
   0.238 seconds against its 5-second budget.
+
+### 2026-10-04 Phase 12
+
+- Started from clean synchronized commit `84fc8b0`; Ruff passed, all 99 baseline tests
+  passed with one upstream Starlette warning, and validation passed with 9/9 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.240 seconds
+  total runtime.
+- Added a strict external-CSV benchmark command with named and numeric label
+  normalization, local accuracy/macro-F1/confusion calculations, JSON and Markdown
+  outputs, input hashing, and explicit errors instead of model fallback.
+- Selected Financial PhraseBank v1.0 `sentences_allagree` at immutable dataset commit
+  `598b6aad98f7c8d67be161b12a4b5f2497e07edd` under CC BY-NC-SA 3.0. The raw archive
+  and derived 2,264-row CSV remain ignored and uncommitted.
+- Verified archive SHA-256 `0e1a06c4900fdae46091d031068601e3773ba067c7cecb5b0da1dcba5ce989a6`
+  and local CSV SHA-256 `a7a3128b1380b32d27f28b29c5f57c662492fd6ae6293a778d02593ef5bedae1`.
+- Recorded deterministic accuracy/macro-F1 of 0.6767/0.4302 and pinned FinBERT results
+  of 0.9717/0.9625, with full class counts and confusion matrices. Documented that
+  Financial PhraseBank was used to fine-tune the published model, so its score is not
+  an out-of-sample generalization estimate.
+- Added 14 offline benchmark tests covering metrics, ordering, label mappings, malformed
+  input, output files, and explicit model failure; CI performs no model or dataset
+  download.
+- Left all nine checksummed artifacts and `data/sample/*.json` untouched.
+- Passed the mandatory Phase 12 gate: Ruff reported no findings, all 114 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 9/9
+  artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
+  0.198 seconds against its 5-second budget.
 
 ## Risks and Blockers
 
