@@ -47,6 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
     stress_parser.add_argument("--query", default="financial risk")
     stress_parser.add_argument("--limit", type=int, default=25)
     stress_parser.add_argument("--nlp-mode", choices=sorted(Settings.ALLOWED_NLP_MODES))
+    replay_parser = subparsers.add_parser(
+        "replay", help="run the deterministic synthetic banking-stress replay"
+    )
+    replay_parser.add_argument("--query", default="banking stress")
+    replay_parser.add_argument("--limit", type=int, default=25)
     serve_parser = subparsers.add_parser("serve", help="run the versioned FastAPI service")
     serve_parser.add_argument("--host", default="127.0.0.1")
     serve_parser.add_argument("--port", type=int, default=8000)
@@ -70,6 +75,18 @@ def _run_fixtures(settings: Settings, query: str, limit: int):
         [
             FixtureAdapter(sample_dir / "gdelt_articles.json"),
             FixtureAdapter(sample_dir / "bluesky_posts.json"),
+        ],
+        max_text_length=settings.max_text_length,
+    )
+    return service.run(IngestionRequest(query=query, limit=limit))
+
+
+def _run_replay(settings: Settings, query: str, limit: int):
+    replay_dir = Path(settings.data_dir) / "replay"
+    service = IngestionService(
+        [
+            FixtureAdapter(replay_dir / "banking_stress_news.json"),
+            FixtureAdapter(replay_dir / "banking_stress_social.json"),
         ],
         max_text_length=settings.max_text_length,
     )
@@ -129,6 +146,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         result = _run_fixtures(settings, args.query, args.limit)
         print(result.model_dump_json(indent=2))
         return 0 if result.failed_source_count == 0 else 1
+
+    if args.command == "replay":
+        result = _run_replay(settings, args.query, args.limit)
+        if result.failed_source_count:
+            print(result.model_dump_json(indent=2))
+            return 1
+        signals = build_risk_engine(settings, mode="deterministic").analyze(
+            result.documents,
+            as_of=synthetic_batch_as_of(result.documents),
+        )
+        decisions = build_stress_engine(settings).run_many(signals)
+        print(
+            json.dumps(
+                {
+                    "classification": "synthetic-replay",
+                    "signals": [item.model_dump(mode="json") for item in signals],
+                    "decisions": [item.model_dump(mode="json") for item in decisions],
+                },
+                indent=2,
+            )
+        )
+        return 0
 
     if args.command in {"analyze-fixtures", "stress-fixtures"}:
         result = _run_fixtures(settings, args.query, args.limit)

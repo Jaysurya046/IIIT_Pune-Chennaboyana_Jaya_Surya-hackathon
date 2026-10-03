@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 def test_fixture_checksums_match_source_manifest() -> None:
@@ -17,6 +19,12 @@ def test_fixture_checksums_match_source_manifest() -> None:
         ),
         "data/evaluation/nlp_golden.json": (
             "b54efa00a8c7766f41fda6ea6718dcaf0b0c582bb6bb2f051f9e6d088d4d6f71"
+        ),
+        "data/replay/banking_stress_news.json": (
+            "75fd2c87c0868ae9852b4bef0d2b06d37dda6c9ce3e9bc5d6c70a2519678d13e"
+        ),
+        "data/replay/banking_stress_social.json": (
+            "d1474a86e5e14eaeb95fa7d546d44206661affbd6c0229f18ad9bc705b80f5e5"
         ),
         "data/nlp/issuer_watchlist.json": (
             "3317a8118c630e4710080d9d5cdc730055dab134d00626a37ce29cca952a83e6"
@@ -37,3 +45,24 @@ def test_fixture_checksums_match_source_manifest() -> None:
         assert digest == checksum
         assert f"path: {filename}" in manifest
         assert f"sha256: {checksum}" in manifest
+
+    assert len(expected) == 9
+
+
+def test_replay_bundles_are_synthetic_reserved_domain_records() -> None:
+    replay_paths = sorted(Path("data/replay").glob("*.json"))
+    payloads = [json.loads(path.read_text(encoding="utf-8")) for path in replay_paths]
+    records = [record for payload in payloads for record in payload["records"]]
+
+    assert len(replay_paths) == 2
+    assert len(records) == 4
+    assert all(payload["synthetic"] is True for payload in payloads)
+    assert {payload["source_type"] for payload in payloads} == {"news", "social"}
+    assert len({record["source_id"] for record in records}) == 4
+    assert all((urlsplit(record["url"]).hostname or "").endswith(".example") for record in records)
+    assert all(record["metadata"]["historical_inspiration"] for record in records)
+    assert all(
+        record["metadata"].get("copied_article_text") is False
+        or record["metadata"].get("copied_post_text") is False
+        for record in records
+    )

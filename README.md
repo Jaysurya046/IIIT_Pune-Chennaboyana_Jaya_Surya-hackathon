@@ -82,6 +82,7 @@ python -m risk_engine check
 python -m risk_engine ingest-fixtures --query "portfolio risk"
 python -m risk_engine analyze-fixtures --query "portfolio risk"
 python -m risk_engine stress-fixtures --query "portfolio risk"
+python -m risk_engine replay
 python -m risk_engine validate --output data/runtime/validation-report.json
 python -m ruff check .
 python -m pytest
@@ -90,7 +91,9 @@ python -m pytest
 Copy `.env.example` to `.env` only when local overrides are required. Do not commit
 the resulting `.env` file. The fixture commands exercise both source types through
 validation, normalization, provenance capture, and deduplication without requiring
-network access.
+network access. The separate `replay` command runs four checksummed synthetic records
+through the unchanged deterministic engine and produces an organic triggered stress
+result without editing a signal score.
 
 The analysis command defaults to a transparent deterministic NLP implementation. To
 run the pinned FinBERT sentiment and MiniLM semantic event models, install the optional
@@ -123,9 +126,9 @@ python -m risk_engine dashboard --host 127.0.0.1 --port 8501 --api-url http://12
 ```
 
 Open `http://127.0.0.1:8501`. On an empty database, use **Source health** to run the
-explicit fixture ingestion and deterministic analysis workflow. The dashboard guide,
-filter behavior, metric definitions, and source classifications are documented in
-[docs/dashboard.md](docs/dashboard.md).
+explicit fixture workflow or separate synthetic banking-stress replay. The dashboard
+guide, filter behavior, metric definitions, and source classifications are documented
+in [docs/dashboard.md](docs/dashboard.md).
 
 The GDELT adapter is credential-free. Bluesky search availability varies by AppView;
 when authentication is required, provide a short-lived bearer token only through the
@@ -157,13 +160,13 @@ recomputed portfolio and stress totals, failure paths, dashboard filter/reset be
 and a bounded performance check. The baseline and its interpretation limits are in
 [docs/validation.md](docs/validation.md).
 
-The final implementation delivers two optional live adapters, six committed fixture
-records, eight event categories, a USD 55.50 million synthetic portfolio, nine API
-endpoints, and three dashboard workspaces. The recorded offline baseline matched all
-seven artifact checksums and all eight authored NLP cases, recovered all six persisted
-signals after reopening SQLite, and reconciled the boundary-probe stress result to
-USD 0.00 difference. These are synthetic regression and implementation results, not
-real-world accuracy, market forecasts, or investment advice.
+The implementation delivers two optional live adapters, six baseline fixture records,
+four separate replay records, eight event categories, a USD 55.50 million synthetic
+portfolio, nine API endpoints, and three dashboard workspaces. The current validator
+matches all nine artifact checksums and all eight authored NLP cases. The replay
+produces four exact impact-9 signals and organic persisted stress results for fictional
+Aurora Bank without score mutation. These are synthetic regression and implementation
+results, not real-world accuracy, market forecasts, or investment advice.
 
 The complete evidence and interpretation are in [docs/results.md](docs/results.md).
 

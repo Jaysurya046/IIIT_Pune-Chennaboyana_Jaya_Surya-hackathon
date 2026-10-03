@@ -12,6 +12,7 @@ from risk_engine.api.models import (
     HealthResponse,
     PortfolioSummaryResponse,
     SignalListResponse,
+    SourceMode,
     SourceStatusResponse,
     StressTestResponse,
 )
@@ -171,7 +172,12 @@ def _render_signal_detail(signal: RiskSignal) -> None:
         )
     with right:
         st.subheader("Source provenance")
-        source_kind = "Synthetic fixture" if signal.provenance.synthetic else "Live public source"
+        if signal.provenance.source.startswith("replay-"):
+            source_kind = "Synthetic replay"
+        elif signal.provenance.synthetic:
+            source_kind = "Synthetic fixture"
+        else:
+            source_kind = "Live public source"
         st.markdown(f"**Classification:** {source_kind}")
         st.markdown(f"**Source:** {signal.provenance.source}")
         st.markdown(f"**Published:** {signal.provenance.published_at.isoformat()}")
@@ -201,9 +207,9 @@ def _render_signals(
     columns[3].metric("Synthetic exposure", _money(portfolio.total_market_value))
 
     st.markdown(
-        '<div class="source-note"><strong>Data note:</strong> committed fixture records and '
-        "the portfolio are synthetic demonstration data. Values are illustrative, not forecasts "
-        "or investment advice.</div>",
+        '<div class="source-note"><strong>Data note:</strong> committed fixture/replay records '
+        "and the portfolio are synthetic demonstration data. Values are illustrative, not "
+        "forecasts or investment advice.</div>",
         unsafe_allow_html=True,
     )
 
@@ -391,7 +397,9 @@ def _render_source_health(api_url: str, status: SourceStatusResponse) -> None:
             with st.status("Running offline pipeline…", expanded=True) as pipeline_status:
                 st.write("Ingesting news and social fixtures")
                 with DashboardApiClient(api_url, timeout=30.0) as client:
-                    ingestion = client.run_ingestion(query.strip(), source_mode="fixtures")
+                    ingestion = client.run_ingestion(
+                        query.strip(), source_mode=SourceMode.FIXTURES
+                    )
                     st.write(f"Accepted {ingestion.document_count} normalized documents")
                     analysis = client.analyze(ingestion.run_id, nlp_mode="deterministic")
                     st.write(f"Generated {analysis.signal_count} explainable signals")
@@ -401,14 +409,38 @@ def _render_source_health(api_url: str, status: SourceStatusResponse) -> None:
         except DashboardApiError as error:
             st.error(str(error))
 
+    st.subheader("Synthetic banking-stress replay")
+    st.caption(
+        "This separate offline mode runs four project-authored records inspired by the general "
+        "March 2023 banking-stress pattern. It is hypothetical, synthetic, and not copied news."
+    )
+    if st.button("Ingest and analyze synthetic replay"):
+        try:
+            with st.status("Running synthetic replay...", expanded=True) as replay_status:
+                st.write("Ingesting checksummed replay news and social records")
+                with DashboardApiClient(api_url, timeout=30.0) as client:
+                    ingestion = client.run_ingestion(
+                        "banking stress", source_mode=SourceMode.REPLAY
+                    )
+                    st.write(f"Accepted {ingestion.document_count} normalized documents")
+                    analysis = client.analyze(ingestion.run_id, nlp_mode="deterministic")
+                    st.write(f"Generated {analysis.signal_count} explainable signals")
+                replay_status.update(label="Synthetic replay completed", state="complete")
+            st.cache_data.clear()
+            st.success("Replay stored. Refresh the dashboard to use it in Stress Lab.")
+        except DashboardApiError as error:
+            st.error(str(error))
+
     with st.expander("Source classification and limitations"):
         st.markdown(
             "- **Fixture mode:** committed synthetic records with checksums and provenance under "
             "`data/`; suitable for deterministic demonstrations.\n"
+            "- **Replay mode:** separate checksummed synthetic banking-stress records designed "
+            "to exercise the unchanged organic trigger path.\n"
             "- **Live mode:** public GDELT and Bluesky adapters; availability and rate "
             "limits vary.\n"
-            "- A failed live source is reported independently and is never replaced with fixture "
-            "data in the same run."
+            "- A failed live source is reported independently and is never replaced with "
+            "fixture or replay data in the same run."
         )
 
 

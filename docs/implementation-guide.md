@@ -73,6 +73,7 @@ Individual command-line stages are also available:
 python -m risk_engine ingest-fixtures --query "portfolio risk"
 python -m risk_engine analyze-fixtures --query "portfolio risk"
 python -m risk_engine stress-fixtures --query "portfolio risk"
+python -m risk_engine replay
 ```
 
 These commands are useful for inspecting contracts, but each is a self-contained
@@ -92,9 +93,10 @@ Verify `http://127.0.0.1:8000/health`, then start the dashboard in terminal two:
 python -m risk_engine dashboard --host 127.0.0.1 --port 8501 --api-url http://127.0.0.1:8000
 ```
 
-Open `http://127.0.0.1:8501`. In **Source health**, run **Ingest and analyze
-fixtures**. The UI explicitly requests fixture ingestion and deterministic analysis;
-it never presents this action as live data.
+Open `http://127.0.0.1:8501`. In **Source health**, run **Ingest and analyze synthetic
+replay** to populate four impact-9 signals and demonstrate an organic stress trigger.
+The separate fixture action remains available for the six-record baseline. Both are
+explicitly synthetic and never presented as live data.
 
 The dashboard has three workspaces:
 
@@ -102,7 +104,7 @@ The dashboard has three workspaces:
    entity matches, model versions, and source provenance.
 2. **Stress lab** evaluates a selected signal against the strict impact-greater-than-7
    trigger and shows the persisted decision and reconciled portfolio result.
-3. **Source health** reports per-source outcomes and owns the repeatable fixture action.
+3. **Source health** reports per-source outcomes and owns separate fixture/replay actions.
 
 Interactive API documentation is available at `http://127.0.0.1:8000/docs`.
 
@@ -158,7 +160,7 @@ fixtures and configuration under `data/` must remain unchanged.
 |---|---|
 | Dashboard reports that the API is unavailable | Start the API on port 8000 or pass the matching `--api-url` |
 | Port already in use | Stop the existing local process or choose another port for both commands |
-| No signals are visible | Run the fixture action in **Source health**, then refresh the dashboard |
+| No signals are visible | Run a fixture or replay action in **Source health**, then refresh the dashboard |
 | Live request returns HTTP 409 | Set `RISK_ENGINE_OFFLINE_MODE=false` intentionally before using live mode |
 | Bluesky returns an authorization error | Supply a permitted bearer token or use the reproducible fixture path |
 | Model dependencies or weights are missing | Install `requirements-nlp.txt`; deterministic mode remains available offline |

@@ -50,6 +50,13 @@ class RiskApplicationService:
             FixtureAdapter(sample_dir / "bluesky_posts.json"),
         ]
 
+    def _replay_adapters(self) -> list[FixtureAdapter]:
+        replay_dir = self.settings.data_dir / "replay"
+        return [
+            FixtureAdapter(replay_dir / "banking_stress_news.json"),
+            FixtureAdapter(replay_dir / "banking_stress_social.json"),
+        ]
+
     def _live_adapters(self) -> list[GdeltAdapter | BlueskyAdapter]:
         if self.settings.offline_mode:
             raise LiveModeDisabledError(
@@ -68,11 +75,14 @@ class RiskApplicationService:
         ]
 
     def ingest(self, request: IngestionRunRequest) -> IngestionRunResponse:
-        adapters = (
-            self._fixture_adapters()
-            if request.source_mode is SourceMode.FIXTURES
-            else self._live_adapters()
-        )
+        if request.source_mode is SourceMode.FIXTURES:
+            adapters = self._fixture_adapters()
+        elif request.source_mode is SourceMode.REPLAY:
+            adapters = self._replay_adapters()
+        elif request.source_mode is SourceMode.LIVE:
+            adapters = self._live_adapters()
+        else:  # pragma: no cover - SourceMode validation is exhaustive
+            raise AssertionError(f"Unhandled source mode: {request.source_mode}")
         try:
             result = IngestionService(
                 adapters,

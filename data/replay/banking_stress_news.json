@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "source": "replay-news",
+  "source_type": "news",
+  "synthetic": true,
+  "description": "Project-authored synthetic news replay inspired only by the general pattern of public March 2023 banking-sector stress; not copied reporting or a claim about a real institution.",
+  "records": [
+    {
+      "source_id": "https://banking-stress.example/news/aurora-funding-review",
+      "title": "Aurora Bank funding pressure prompts credit downgrade review",
+      "text": "Analysts reported a downgrade review after rapid deposit withdrawals widened Aurora Bank credit spread; contingency planning addressed restructuring risk, default exposure, and potential loss.",
+      "url": "https://banking-stress.example/news/aurora-funding-review",
+      "published_at": "2026-10-02T08:30:00Z",
+      "retrieved_at": "2026-10-02T12:00:00Z",
+      "language": "en",
+      "metadata": {
+        "domain": "banking-stress.example",
+        "fixture_origin": "project-authored synthetic replay",
+        "historical_inspiration": "general March 2023 banking-sector stress pattern",
+        "copied_article_text": false
+      }
+    },
+    {
+      "source_id": "https://banking-stress.example/news/aurora-liquidity-plan",
+      "title": "Aurora Bank explores restructuring as bond spread widens",
+      "text": "Aurora Bank outlined emergency liquidity options while investors discussed a missed payment, possible default, and further downgrade after its bond spread moved sharply wider.",
+      "url": "https://banking-stress.example/news/aurora-liquidity-plan",
+      "published_at": "2026-10-02T09:15:00Z",
+      "retrieved_at": "2026-10-02T12:00:00Z",
+      "language": "en",
+      "metadata": {
+        "domain": "banking-stress.example",
+        "fixture_origin": "project-authored synthetic replay",
+        "historical_inspiration": "general March 2023 banking-sector stress pattern",
+        "copied_article_text": false
+      }
+    }
+  ]
+}

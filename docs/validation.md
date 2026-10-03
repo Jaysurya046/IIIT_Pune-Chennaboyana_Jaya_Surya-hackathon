@@ -27,17 +27,21 @@ command with a 10-second budget to accommodate shared runners.
 
 | Area | Evidence | Validation method |
 |---|---|---|
-| Dataset integrity | Seven artifacts declared in `data/sources.yaml` | Recalculate every SHA-256 checksum; require bounded `data/` paths and explicit synthetic or project-authored classification |
+| Dataset integrity | Nine artifacts declared in `data/sources.yaml` | Recalculate every SHA-256 checksum; require bounded `data/` paths and explicit synthetic or project-authored classification |
 | Fixture quality | Three GDELT-shaped and three Bluesky-shaped records | Require non-empty text and source IDs, unique IDs, publication no later than retrieval, and two explicitly synthetic bundles |
 | NLP regression | Eight cases in `data/evaluation/nlp_golden.json` | Independently run deterministic entity, sentiment, and event components and compare exact expected outputs |
 | Offline workflow | Both committed fixture adapters | Ingest, normalize, analyze at the batch's latest retrieval time, persist, reopen SQLite, and compare unique document/signal counts and provenance |
 | Portfolio totals | Raw position values in `portfolio.json` | Independently sum raw values and reconcile API breakdowns by asset class, sector, and issuer |
 | Stress calculation | Synthetic impact-8 boundary probe | Persist a copied entity-bearing signal with only its impact score set to 8, run its configured scenario, and independently sum instrument before, after, and loss values |
-| Dashboard behavior | Real local API populated with both fixture sources | Render the Streamlit app, apply the Operational event filter, reset to All, and submit a stress decision |
+| Dashboard behavior | Real local API populated with fixtures and replay | Render the Streamlit app, trigger replay stress without score edits, apply the Operational filter, and reset to All |
 
 The impact-8 signal is a boundary probe, not an observed fixture result. Fixture signals
 remain unchanged, and their original event, source provenance, entity matches, and
 model versions are retained for the probe.
+
+The separate replay adds four project-authored synthetic records. The unchanged
+deterministic engine assigns each an exact impact score of 9 and the dashboard/API tests
+persist a triggered issuer-credit result directly from those observed replay signals.
 
 ## Recorded Baseline
 
@@ -45,7 +49,7 @@ Recorded on 2026-10-03 using Python 3.13 on Windows in deterministic offline mod
 
 | Check | Result |
 |---|---:|
-| Manifested artifacts matching checksums | 7 / 7 |
+| Manifested artifacts matching checksums | 9 / 9 |
 | Fixture records with unique source IDs | 6 / 6 |
 | Source types represented | 2 |
 | Golden taxonomy categories covered | 8 / 8 |
@@ -77,6 +81,8 @@ one local measurement of the deterministic path and is not a latency SLA.
   deterministic rules under a model-mode request.
 - Explicit fixture/replay analysis time is timezone-aware and stable across wall-clock
   dates; live provenance retains wall-clock analysis behavior.
+- Replay mode remains offline and separate from the six-record fixture mode; all four
+  replay records score 9 and trigger stress without signal mutation.
 - An incompatible future SQLite schema fails closed.
 - Impact 7 is skipped; impact 8 triggers stress testing.
 - Entity-scoped scenarios with no resolved entity produce an explicit zero-position

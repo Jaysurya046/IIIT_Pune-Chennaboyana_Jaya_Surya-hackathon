@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "source": "replay-social",
+  "source_type": "social",
+  "synthetic": true,
+  "description": "Project-authored synthetic social replay inspired only by the general pattern of public March 2023 banking-sector stress; not copied posts or a claim about a real institution.",
+  "records": [
+    {
+      "source_id": "replay://riskobserver.example/aurora-001",
+      "text": "Aurora Bank deposit flight is driving talk of a downgrade and restructuring; traders are pricing wider credit spread, default risk, and loss.",
+      "url": "https://riskobserver.example/posts/aurora-001",
+      "published_at": "2026-10-02T08:45:00Z",
+      "retrieved_at": "2026-10-02T12:00:00Z",
+      "author": "riskobserver.example",
+      "language": "en",
+      "metadata": {
+        "handle": "riskobserver.example",
+        "fixture_origin": "project-authored synthetic replay",
+        "historical_inspiration": "general March 2023 banking-sector stress pattern",
+        "copied_post_text": false
+      }
+    },
+    {
+      "source_id": "replay://marketdesk.example/aurora-002",
+      "text": "Aurora Bank bond spread has widened as missed payment concerns raise default and bankruptcy scenarios; another downgrade could deepen the loss.",
+      "url": "https://marketdesk.example/posts/aurora-002",
+      "published_at": "2026-10-02T09:35:00Z",
+      "retrieved_at": "2026-10-02T12:00:00Z",
+      "author": "marketdesk.example",
+      "language": "en",
+      "metadata": {
+        "handle": "marketdesk.example",
+        "fixture_origin": "project-authored synthetic replay",
+        "historical_inspiration": "general March 2023 banking-sector stress pattern",
+        "copied_post_text": false
+      }
+    }
+  ]
+}

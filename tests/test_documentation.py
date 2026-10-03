@@ -80,7 +80,7 @@ def test_dataset_guide_preserves_source_classification_and_caveats() -> None:
     assert "Bluesky Public AppView" in guide
     assert "synthetic" in guide.lower()
     assert "not an estimate" in guide
-    assert len(re.findall(r"sha256: [0-9a-f]{64}", manifest)) == 7
+    assert len(re.findall(r"sha256: [0-9a-f]{64}", manifest)) == 9
 
 
 def test_demo_runbook_covers_both_time_limits_and_data_disclosure() -> None:

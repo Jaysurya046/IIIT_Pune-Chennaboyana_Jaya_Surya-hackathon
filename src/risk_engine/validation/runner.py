@@ -12,6 +12,7 @@ from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from time import perf_counter
+from urllib.parse import urlsplit
 
 from risk_engine import __version__
 from risk_engine.api.models import IngestionRunRequest, SourceMode
@@ -136,6 +137,64 @@ def validate_source_integrity(data_dir: Path) -> SourceIntegrityMetrics:
         issues.append(f"Duplicate fixture source_id values: {', '.join(duplicates)}.")
     if synthetic_fixture_count != 2:
         issues.append("Expected exactly two explicitly synthetic fixture bundles.")
+
+    replay_paths = sorted((data_dir / "replay").glob("*.json"))
+    replay_source_ids: list[str] = []
+    replay_record_count = 0
+    synthetic_replay_count = 0
+    for replay_path in replay_paths:
+        try:
+            payload = json.loads(replay_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            issues.append(f"Invalid replay {replay_path.name} ({type(error).__name__}).")
+            continue
+        if payload.get("synthetic") is not True:
+            issues.append(f"Replay is not explicitly synthetic: {replay_path.name}.")
+        else:
+            synthetic_replay_count += 1
+        records = payload.get("records")
+        if not isinstance(records, list) or not records:
+            issues.append(f"Replay has no records: {replay_path.name}.")
+            continue
+        replay_record_count += len(records)
+        for record in records:
+            source_id = str(record.get("source_id", ""))
+            replay_source_ids.append(source_id)
+            if not source_id:
+                issues.append(f"Replay record has no source_id: {replay_path.name}.")
+            if not str(record.get("text", "")).strip():
+                issues.append(f"Replay record has empty text: {source_id or replay_path.name}.")
+            url = str(record.get("url", ""))
+            hostname = urlsplit(url).hostname or ""
+            if not hostname.endswith(".example"):
+                issues.append(f"Replay URL is not on a reserved .example domain: {source_id}.")
+            metadata = record.get("metadata")
+            if not isinstance(metadata, dict) or not metadata.get("historical_inspiration"):
+                issues.append(f"Replay inspiration metadata is missing: {source_id}.")
+            elif metadata.get("copied_article_text") is not False and metadata.get(
+                "copied_post_text"
+            ) is not False:
+                issues.append(f"Replay copied-text declaration is missing: {source_id}.")
+            try:
+                published_at = _parse_timestamp(str(record["published_at"]))
+                retrieved_at = _parse_timestamp(str(record["retrieved_at"]))
+                if published_at > retrieved_at:
+                    issues.append(f"Replay publication follows retrieval: {source_id}.")
+            except (KeyError, TypeError, ValueError):
+                issues.append(f"Replay record has invalid timestamps: {source_id}.")
+
+    if len(replay_paths) != 2 or synthetic_replay_count != 2:
+        issues.append("Expected exactly two explicitly synthetic replay bundles.")
+    if replay_record_count != 4:
+        issues.append("Expected exactly four synthetic replay records.")
+    all_source_ids = [*source_ids, *replay_source_ids]
+    replay_duplicates = sorted(
+        key for key, count in Counter(all_source_ids).items() if key and count > 1
+    )
+    if replay_duplicates:
+        issues.append(
+            f"Duplicate offline source_id values: {', '.join(replay_duplicates)}."
+        )
 
     return SourceIntegrityMetrics(
         artifact_count=len(entries),

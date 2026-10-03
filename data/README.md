@@ -59,6 +59,19 @@ claimed to be API captures or evidence about real organizations.
 Checksums are recorded in `data/sources.yaml`. Any fixture edit requires updating its
 checksum and noting the change in `progress.md`.
 
+## Synthetic Replay Bundle
+
+The two files under `data/replay/` form a separate four-record, offline-only scenario.
+They are hand-authored news- and social-shaped statements about fictional Aurora Bank,
+use reserved `.example` domains, and are inspired only by the general pattern of the
+public March 2023 banking-sector stress episode. They contain no copied article or post
+text and make no claim about a real issuer.
+
+Replay mode is distinct from both fixtures and live retrieval. It exists to demonstrate
+that the unchanged deterministic NLP pipeline can organically cross the impact trigger
+and run the configured synthetic stress scenario. Each replay file is checksummed in
+`data/sources.yaml`; replay records never replace a failed live source.
+
 ## NLP Evaluation and Configuration
 
 `data/evaluation/nlp_golden.json` is a project-authored synthetic regression set. Its

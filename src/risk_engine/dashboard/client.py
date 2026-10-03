@@ -15,6 +15,7 @@ from risk_engine.api.models import (
     IngestionRunResponse,
     PortfolioSummaryResponse,
     SignalListResponse,
+    SourceMode,
     SourceStatusResponse,
     StressTestResponse,
 )
@@ -130,14 +131,14 @@ class DashboardApiClient:
         self,
         query: str,
         *,
-        source_mode: str = "fixtures",
+        source_mode: SourceMode = SourceMode.FIXTURES,
         limit: int = 25,
     ) -> IngestionRunResponse:
         return self._request(
             "POST",
             "/api/v1/ingestion/run",
             IngestionRunResponse,
-            json={"query": query, "source_mode": source_mode, "limit": limit},
+            json={"query": query, "source_mode": source_mode.value, "limit": limit},
         )
 
     def analyze(self, run_id: str, *, nlp_mode: str = "deterministic") -> AnalysisResponse:

@@ -12,9 +12,10 @@ python -m risk_engine serve --host 127.0.0.1 --port 8000
 Interactive OpenAPI documentation is available at `http://127.0.0.1:8000/docs` and
 the machine-readable schema at `http://127.0.0.1:8000/openapi.json`.
 
-The default configuration is offline. API requests must select `source_mode` as
-`fixtures` or `live`; fixture data is never substituted after a live-source failure.
-Requests for live mode return HTTP 409 until `RISK_ENGINE_OFFLINE_MODE=false` is set.
+The default configuration is offline. API requests select `source_mode` as `fixtures`,
+`replay`, or `live`. Fixture and replay modes load separate checksummed synthetic
+bundles; neither is substituted after a live-source failure. Requests for live mode
+return HTTP 409 until `RISK_ENGINE_OFFLINE_MODE=false` is set.
 
 ## Version 1 Workflow
 
@@ -37,6 +38,9 @@ Example fixture ingestion request:
   "source_mode": "fixtures"
 }
 ```
+
+Use the same endpoint with `"source_mode": "replay"` and query `"banking stress"`
+to load the four-record synthetic organic-trigger scenario without network access.
 
 Example analysis request:
 
@@ -61,7 +65,7 @@ Example stress request:
 |---|---|---|
 | GET | `/health` | Application, database, version, and offline-mode health |
 | GET | `/api/v1/sources/status` | Latest persisted source outcomes |
-| POST | `/api/v1/ingestion/run` | Run fixture or explicitly enabled live ingestion |
+| POST | `/api/v1/ingestion/run` | Run fixture, replay, or explicitly enabled live ingestion |
 | POST | `/api/v1/analyze` | Analyze a persisted ingestion run |
 | GET | `/api/v1/signals` | Filter and paginate stored signals |
 | GET | `/api/v1/signals/{signal_id}` | Retrieve one signal |

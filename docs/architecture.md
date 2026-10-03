@@ -61,8 +61,9 @@ watchlist. Each adapter implements a common interface and returns source-specifi
 records without applying financial interpretation.
 
 Offline fixture adapters use committed JSON snapshots with the same normalized shape.
-They are the default for automated tests and the reproducible demonstration. A failure
-in one live source must be recorded without preventing other sources from completing.
+The six-record fixture mode remains the general regression path. A separate four-record
+replay mode uses checksummed, fictional banking-stress records to exercise the organic
+trigger. Neither offline mode makes network requests or substitutes for a live failure.
 
 ### Normalization and provenance
 
@@ -137,10 +138,11 @@ signal filtering by event, impact, source, and entity. Writes use transactions a
 foreign keys connect source outcomes to ingestion runs, entities to signals, and stress
 decisions to their triggering signals. Runtime database files remain ignored.
 
-API ingestion requires an explicit `fixtures` or `live` source mode. Offline mode
-rejects live requests with HTTP 409, and live failures are persisted as source outcomes
-without substituting fixture data. Resource misses return HTTP 404 and contract
-validation failures return HTTP 422.
+API ingestion requires an explicit `fixtures`, `replay`, or `live` source mode. Replay
+and fixtures point to separate synthetic bundles. Offline mode rejects live requests
+with HTTP 409, and live failures are persisted as source outcomes without substituting
+either synthetic mode. Resource misses return HTTP 404 and contract validation failures
+return HTTP 422.
 
 The versioned API provides:
 
@@ -207,9 +209,8 @@ The UI is split into three task-oriented workspaces:
   renders its persisted trigger decision. Triggered outcomes show before/after values,
   losses by asset class and issuer, instrument-level reconciliation, and applied shock
   assumptions from one validated response.
-- **Source health** shows the latest per-source operational outcomes and provides an
-  explicit fixture-ingestion plus deterministic-analysis action for a reproducible
-  first run.
+- **Source health** shows the latest per-source operational outcomes and provides
+  separate fixture and synthetic replay actions using deterministic analysis.
 
 ```mermaid
 flowchart LR
@@ -232,7 +233,7 @@ checks before stress breakdowns are displayed.
 The default page uses a summary-to-detail hierarchy and maintains the same filter scope
 across charts, tables, and the stress selector. Empty databases, empty filter results,
 API outages, skipped triggers, and scenarios with no applied shocks each have explicit
-states. Fixture records, the portfolio, and scenarios are labeled synthetic in context.
+states. Fixture/replay records, the portfolio, and scenarios are labeled synthetic.
 
 ## Core Data Contracts
 

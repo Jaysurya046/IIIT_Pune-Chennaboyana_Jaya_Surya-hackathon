@@ -16,9 +16,10 @@ Identifier = Annotated[str, Field(pattern=r"^[0-9a-f]{32}$")]
 
 
 class SourceMode(StrEnum):
-    """Explicit source selection; fixtures are never a silent live fallback."""
+    """Explicit source selection with no fallback between data modes."""
 
     FIXTURES = "fixtures"
+    REPLAY = "replay"
     LIVE = "live"
 
 

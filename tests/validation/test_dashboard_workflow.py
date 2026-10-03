@@ -22,7 +22,7 @@ def _available_port() -> int:
         return int(candidate.getsockname()[1])
 
 
-def test_dashboard_populated_filter_and_reset_states(tmp_path: Path, monkeypatch) -> None:
+def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkeypatch) -> None:
     port = _available_port()
     settings = Settings(
         environment="test",
@@ -62,6 +62,21 @@ def test_dashboard_populated_filter_and_reset_states(tmp_path: Path, monkeypatch
             timeout=5,
         )
         analysis.raise_for_status()
+        replay_ingestion = httpx.post(
+            f"{base_url}/api/v1/ingestion/run",
+            json={"query": "banking stress", "source_mode": "replay"},
+            timeout=5,
+        )
+        replay_ingestion.raise_for_status()
+        replay_analysis = httpx.post(
+            f"{base_url}/api/v1/analyze",
+            json={
+                "run_id": replay_ingestion.json()["run_id"],
+                "nlp_mode": "deterministic",
+            },
+            timeout=5,
+        )
+        replay_analysis.raise_for_status()
         monkeypatch.setenv("RISK_ENGINE_API_URL", base_url)
 
         dashboard = AppTest.from_file(Path("src/risk_engine/dashboard/app.py").resolve()).run(
@@ -76,9 +91,29 @@ def test_dashboard_populated_filter_and_reset_states(tmp_path: Path, monkeypatch
             "Source health",
         ]
         assert dashboard.metric[0].label == "Matching signals"
-        assert dashboard.metric[0].value == "6"
+        assert dashboard.metric[0].value == "10"
         assert len(dashboard.dataframe) >= 3
         assert len(dashboard.get("plotly_chart")) == 2
+        assert any(
+            button.label == "Ingest and analyze synthetic replay"
+            for button in dashboard.button
+        )
+
+        stress_selector = next(
+            selectbox for selectbox in dashboard.selectbox if selectbox.label == "Trigger signal"
+        )
+        high_impact_option = next(
+            option for option in stress_selector.options if option.startswith("Impact 9")
+        )
+        stress_selector.select(high_impact_option).run(timeout=30)
+        stress_button = next(
+            button for button in dashboard.button if button.label == "Run stress test"
+        )
+        stress_button.click().run(timeout=30)
+
+        assert not dashboard.exception
+        assert any(metric.label == "Illustrative loss" for metric in dashboard.metric)
+        assert any("issuer-credit-event" in message.value for message in dashboard.success)
 
         event_filter = next(
             selectbox for selectbox in dashboard.selectbox if selectbox.label == "Event type"
@@ -94,13 +129,7 @@ def test_dashboard_populated_filter_and_reset_states(tmp_path: Path, monkeypatch
         event_filter.select("All").run(timeout=30)
 
         assert not dashboard.exception
-        assert dashboard.metric[0].value == "6"
-        stress_button = next(
-            button for button in dashboard.button if button.label == "Run stress test"
-        )
-        stress_button.click().run(timeout=30)
-        assert not dashboard.exception
-        assert dashboard.warning or len(dashboard.metric) >= 11
+        assert dashboard.metric[0].value == "10"
     finally:
         server.should_exit = True
         thread.join(timeout=10)

@@ -35,24 +35,24 @@ Open `http://127.0.0.1:8501`. The API address can also be supplied through
 `RISK_ENGINE_API_URL`. The dashboard shows a bounded error state with the start command
 when the API is unavailable; it does not expose response bodies or credentials.
 
-On a new database, open **Source health**, enter a query, and choose **Ingest and analyze
-fixtures**. This workflow explicitly requests `source_mode=fixtures` and
-`nlp_mode=deterministic`, then stores the results through the API. Use **Refresh
-dashboard** to invalidate the 15-second view cache immediately.
+On a new database, open **Source health**. Choose **Ingest and analyze fixtures** for the
+six-record baseline, or **Ingest and analyze synthetic replay** for the separate
+four-record banking-stress scenario. Both use deterministic NLP and explicit source
+modes. Use **Refresh dashboard** to invalidate the 15-second view cache immediately.
 
 ## Data Sources and Classification
 
 | Displayed data | System of record | Classification | Update behavior |
 |---|---|---|---|
-| Signals, explanations, entities, provenance | `GET /api/v1/signals` | Synthetic fixture or live public source, per signal | API query; 15-second dashboard cache |
+| Signals, explanations, entities, provenance | `GET /api/v1/signals` | Synthetic fixture/replay or live public source, per signal | API query; 15-second dashboard cache |
 | Source outcomes | `GET /api/v1/sources/status` | Operational metadata | Latest persisted ingestion run |
 | Portfolio baseline | `GET /api/v1/portfolio/summary` | Fully synthetic | Versioned project configuration |
 | Stress decision and result | `POST /api/v1/stress-tests` | Synthetic scenario output | On analyst request; persisted by API |
 
-Committed fixture records include source-shaped metadata, explicit `synthetic=true`
-provenance, and checksums documented in `data/`. The fictional portfolio and authored
-scenario matrix are also synthetic. A live-source failure is shown as a failed source
-outcome and is never silently replaced with fixture data in that run.
+Committed fixture and replay records include source-shaped metadata, explicit
+`synthetic=true` provenance, and checksums documented in `data/`. Replay records use
+fictional issuers and reserved `.example` domains. A live-source failure is never
+silently replaced with either synthetic mode.
 
 ## Metric Definitions
 
@@ -89,5 +89,5 @@ limitations are documented in `data/README.md` and `docs/architecture.md`.
 Dashboard tests cover typed HTTP contracts, query filters, sanitized failures, metric
 and grouping transformations, exact stress reconciliation, figure labels, and CLI
 launch construction. The release walkthrough renders the populated Streamlit script
-against a real local API seeded from both fixture source types and verifies the title,
-three tabs, KPI cards, and tabular evidence.
+against a real local API seeded from fixture and replay source types. It verifies the
+organic impact-9 Stress Lab result, filter/reset behavior, KPI cards, and evidence tables.

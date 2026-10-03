@@ -68,3 +68,19 @@ def test_stress_fixture_command_records_trigger_decisions(
     assert len(payload) == 6
     assert all(decision["trigger_threshold"] == 7 for decision in payload)
     assert all(not decision["triggered"] for decision in payload)
+
+
+def test_replay_command_generates_organic_triggered_decisions(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(["replay"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["classification"] == "synthetic-replay"
+    assert [signal["impact_score"] for signal in payload["signals"]] == [9, 9, 9, 9]
+    assert all(decision["triggered"] for decision in payload["decisions"])
+    assert all(
+        decision["result"]["affected_scope"] == ["aurora-bank"]
+        for decision in payload["decisions"]
+    )

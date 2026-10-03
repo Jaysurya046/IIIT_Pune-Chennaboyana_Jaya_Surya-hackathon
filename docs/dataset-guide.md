@@ -20,13 +20,15 @@ an artifact no longer matches its manifest entry.
 | Bluesky Public AppView | Public social-search interface | Optional live public posts | No | Search or authentication availability can change |
 | `data/sample/gdelt_articles.json` | Synthetic, GDELT-shaped | Offline news ingestion | Yes | Three fictional records; not captured from GDELT |
 | `data/sample/bluesky_posts.json` | Synthetic, Bluesky-shaped | Offline social ingestion | Yes | Three fictional records; not captured from Bluesky |
+| `data/replay/banking_stress_news.json` | Synthetic, news-shaped replay | Organic trigger demonstration | Yes | Two fictional records; no copied reporting |
+| `data/replay/banking_stress_social.json` | Synthetic, social-shaped replay | Organic trigger demonstration | Yes | Two fictional records; no copied posts |
 | `data/evaluation/nlp_golden.json` | Synthetic regression set | Deterministic NLP behavior | Yes | Eight authored cases; not a real-world accuracy sample |
 | `data/nlp/issuer_watchlist.json` | Synthetic configuration | Entity resolution | Yes | All issuers, aliases, sectors, and tickers are fictional |
 | `data/nlp/event_taxonomy.json` | Project-authored configuration | Event labels and severity priors | Yes | Priors are prototype assumptions, not calibrated risk estimates |
 | `data/portfolio/portfolio.json` | Synthetic portfolio | Stress valuation | Yes | Eight fictional USD positions across four asset classes |
 | `data/portfolio/scenarios.json` | Synthetic scenario matrix | Event-to-shock mapping | Yes | Shocks are illustrative, not forecasts or regulatory scenarios |
 
-The manifest groups seven checksummed artifacts because the two public interfaces are
+The manifest groups nine checksummed artifacts because the two public interfaces are
 described as live sources rather than committed datasets.
 
 ## Public Live Interfaces
@@ -66,6 +68,19 @@ normalization, timestamps, URLs, language, authorship, deduplication, and proven
 Their purpose is repeatability, not representativeness. They do not support claims
 about current events, source coverage, production data quality, or financial-market
 behavior.
+
+## Synthetic Replay
+
+The four replay records are a distinct offline mode, not additions to the six baseline
+fixtures. They describe fictional Aurora Bank using reserved `.example` domains and
+are inspired only by the general pattern of the public March 2023 banking-sector stress
+episode. All prose is project-authored and paraphrased; no article or social post text
+was copied. Metadata states this inspiration and synthetic origin on every record.
+
+The replay exists to exercise an organic trigger with the unchanged deterministic
+engine. All four records resolve to the fictional issuer, classify as `Credit Event`,
+and score exactly 9 at their deterministic batch time. This is regression evidence for
+an authored scenario, not a claim about model accuracy or a real financial institution.
 
 ## NLP Evaluation and Models
 

@@ -34,6 +34,19 @@ fixture_artifacts:
     sha256: b54efa00a8c7766f41fda6ea6718dcaf0b0c582bb6bb2f051f9e6d088d4d6f71
     assumptions: regression cases are illustrative and do not measure real-world accuracy
 
+replay_artifacts:
+  - path: data/replay/banking_stress_news.json
+    classification: synthetic
+    redistribution: project-authored under repository license
+    sha256: 75fd2c87c0868ae9852b4bef0d2b06d37dda6c9ce3e9bc5d6c70a2519678d13e
+    assumptions: hand-authored fictional news-shaped replay inspired only by the general March 2023 banking-stress pattern; no copied reporting
+
+  - path: data/replay/banking_stress_social.json
+    classification: synthetic
+    redistribution: project-authored under repository license
+    sha256: d1474a86e5e14eaeb95fa7d546d44206661affbd6c0229f18ad9bc705b80f5e5
+    assumptions: hand-authored fictional social-shaped replay inspired only by the general March 2023 banking-stress pattern; no copied posts
+
 configuration_artifacts:
   - path: data/nlp/issuer_watchlist.json
     classification: synthetic

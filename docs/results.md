@@ -51,6 +51,12 @@ entity-bearing fixture signal and changes only the impact score so the strictly-
 than-7 workflow can be verified without claiming that the original fixture produced a
 high-impact observation.
 
+Phase 10 adds stronger end-to-end evidence without changing that historical baseline:
+two new checksummed replay bundles contain four fictional records, the unchanged
+deterministic engine scores all four exactly 9, and each organically triggers the
+issuer-credit scenario for fictional Aurora Bank. The illustrative portfolio loss is
+USD 3.747 million with USD 0.00 reconciliation difference. No signal score is edited.
+
 The final Phase 8 snapshot was also installed into an independent Python 3.13 virtual
 environment from a clean clone. The configuration diagnostic, Ruff, all 83 tests,
 `pip check`, and the validator passed there; the clean-clone validation run completed

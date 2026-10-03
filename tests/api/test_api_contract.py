@@ -114,6 +114,46 @@ def test_stress_decision_and_persisted_result(api_client) -> None:
     assert restored.json()["reconciliation_difference"] == "0.00"
 
 
+def test_replay_organically_triggers_and_persists_stress_result(api_client) -> None:
+    client, store = api_client
+    ingestion = client.post(
+        "/api/v1/ingestion/run",
+        json={"query": "banking stress", "source_mode": "replay"},
+    )
+
+    assert ingestion.status_code == 201
+    assert ingestion.json()["document_count"] == 4
+    assert {item["source"] for item in ingestion.json()["sources"]} == {
+        "replay-news",
+        "replay-social",
+    }
+
+    analysis = client.post(
+        "/api/v1/analyze",
+        json={"run_id": ingestion.json()["run_id"], "nlp_mode": "deterministic"},
+    )
+    signals = analysis.json()["signals"]
+
+    assert analysis.status_code == 201
+    assert [signal["impact_score"] for signal in signals] == [9, 9, 9, 9]
+    assert all(signal["entities"][0]["entity_id"] == "aurora-bank" for signal in signals)
+    persisted = store.get_signal(signals[0]["signal_id"])
+    assert persisted is not None and persisted.impact_score == 9
+
+    stress = client.post(
+        "/api/v1/stress-tests",
+        json={"signal_id": signals[0]["signal_id"]},
+    )
+    payload = stress.json()
+
+    assert stress.status_code == 200
+    assert payload["decision"]["triggered"] is True
+    assert payload["decision"]["result"]["trigger_impact_score"] == 9
+    assert payload["decision"]["result"]["affected_scope"] == ["aurora-bank"]
+    result_id = payload["decision"]["result"]["stress_id"]
+    assert client.get(f"/api/v1/stress-tests/{result_id}").status_code == 200
+
+
 def test_portfolio_summary_reconciles_breakdowns(api_client) -> None:
     client, _ = api_client
 

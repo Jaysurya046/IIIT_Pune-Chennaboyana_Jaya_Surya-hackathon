@@ -16,7 +16,7 @@ Last updated: 2026-10-03
 | 7 Validation | complete | End-to-end tests, benchmark, failure and performance checks | Offline suite and recorded metrics | `test: validate the complete risk intelligence workflow` |
 | 8 Implementation documentation | complete | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
 | 9 Deterministic as-of time (P0 T1) | complete | Stable fixture/replay recency and scores | Frozen-time NLP, API, CLI and validation tests | `fix(nlp): anchor replay recency to batch time` |
-| 10 Organic replay trigger (P0 T2) | planned | New synthetic replay mode and natural 8+ signal | Exact-score replay and stress tests | `feat(replay): add organic high-impact stress scenario` |
+| 10 Organic replay trigger (P0 T2) | complete | New synthetic replay mode and natural 8+ signal | Exact-score replay, API, CLI and AppTest coverage | `feat(replay): add organic high-impact stress scenario` |
 | 11 Hypothetical what-if (P0 T3) | planned | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
 | 12 Real-data benchmark (P1 T4) | planned | External CSV evaluation and documented metrics | Metric, CLI and failure tests | `feat(benchmark): compare deterministic and model NLP quality` |
 | 13 Model-mode hygiene (P1 T5) | planned | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
@@ -30,9 +30,9 @@ Last updated: 2026-10-03
 
 ## Current Phase
 
-The original eight implementation phases and improvement Phase 9 are complete. Phase
-10 is next: an organic replay trigger. Phases 10–16 are the remaining required P0/P1
-improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
+The original eight implementation phases and improvement Phases 9–10 are complete.
+Phase 11 is next: a clearly hypothetical what-if simulator. Phases 11–16 are the
+remaining required P0/P1 improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
 permitted transaction dataset is supplied. The detailed sequence and task gates are
 in [docs/improvement-plan.md](docs/improvement-plan.md).
 
@@ -53,6 +53,8 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   non-interchangeable modes with no silent fallback.
 - Anchor fixture/replay recency to the latest batch retrieval time; keep live analysis
   on its timezone-aware UTC clock.
+- Keep the six-record fixture mode unchanged and use a distinct four-record synthetic
+  replay mode for the organic stress-trigger demonstration.
 - Keep organizer-provided DOCX files out of the implementation repository; their
   requirements are captured in the README and architecture decision record.
 
@@ -258,6 +260,29 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   passed with one upstream Starlette warning, and the offline validator matched 7/7
   artifacts, persisted 6/6 signals, reconciled to USD 0.00, and completed in 0.165
   seconds against its 5-second budget.
+
+### 2026-10-03 Phase 10
+
+- Started from clean synchronized commit `480d0d4`; Ruff passed, all 86 baseline tests
+  passed with one upstream Starlette warning, and validation passed with 7/7 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.150 seconds
+  total runtime.
+- Added two checksummed replay bundles containing four hand-authored fictional records
+  on reserved `.example` domains. Every record identifies its general March 2023
+  banking-stress inspiration and confirms that no article or post text was copied.
+- Added explicit `replay` source selection to the API, a deterministic `replay` CLI
+  command, and a separate dashboard ingestion action without changing fixture mode.
+- Confirmed the unchanged deterministic engine resolves fictional Aurora Bank,
+  classifies all four records as `Credit Event`, and produces exact scores `[9, 9, 9,
+  9]`; all four signals organically trigger the issuer-credit scenario without score
+  mutation and produce a reconciled illustrative loss of USD 3,747,000.00.
+- Expanded source integrity from seven to nine manifested artifacts and added exact
+  NLP-factor, API persistence, CLI, provenance, and Streamlit Stress Lab coverage.
+- Left `data/sample/gdelt_articles.json` and `data/sample/bluesky_posts.json` untouched.
+- Passed the mandatory Phase 10 gate: Ruff reported no findings, all 90 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 9/9
+  artifacts, preserved the 6/6 fixture workflow, reconciled to USD 0.00, and completed
+  in 0.196 seconds against its 5-second budget.
 
 ## Risks and Blockers
 

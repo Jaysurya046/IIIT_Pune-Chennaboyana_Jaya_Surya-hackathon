@@ -16,7 +16,7 @@ Complete these steps before recording or joining a jury session:
 - Run `python -m risk_engine validate` and retain the successful console result.
 - Start the API on `127.0.0.1:8000` and confirm `/health` reports version 0.8.0.
 - Start the dashboard on `127.0.0.1:8501` and keep the tab open.
-- If the database is empty, use **Source health** to ingest and analyze fixtures.
+- If the database is empty, use **Source health** to ingest and analyze the synthetic replay.
 - Use browser zoom and window size that keep KPI cards and charts readable.
 - Close unrelated applications, notifications, terminals, and browser tabs.
 - Do not display `.env`, tokens, local usernames, or private browser content.
@@ -27,9 +27,9 @@ Complete these steps before recording or joining a jury session:
 |---|---|---|
 | 0:00–0:25 | README and architecture image | State the problem: turn news and social text into explainable risk signals and use Module B to test a synthetic portfolio. Point out the offline reproducible path. |
 | 0:25–0:55 | Terminal | Show the validation command completing successfully. Explain that it verifies checksums, golden cases, persistence, reconciliation, and runtime budget without network access. |
-| 0:55–1:30 | Source health | Show GDELT-shaped news and Bluesky-shaped social sources. State clearly that the displayed demo records are synthetic and checksummed. Run fixture ingestion if needed. |
+| 0:55–1:30 | Source health | Run the separate synthetic replay. State that its four fictional, checksummed records are inspired only by a general public banking-stress pattern and contain no copied text. |
 | 1:30–2:35 | Risk signals | Filter to one event category, then reset to All. Open one signal and show sentiment, event, impact factors, entity evidence, model versions, and source provenance. |
-| 2:35–3:45 | Stress lab | Select a signal and run the stress decision. Explain the strict score-greater-than-7 rule. Show either the auditable skipped decision or a prepared validated boundary-probe result; never imply the probe is a live observation. |
+| 2:35–3:45 | Stress lab | Select an impact-9 replay signal and run the stress decision. Explain the strict score-greater-than-7 rule and that the unchanged engine produced the score without manual editing. |
 | 3:45–4:30 | Stress result | Show before/after value, illustrative loss, applied shocks, and issuer or asset-class breakdown. Point out exact instrument reconciliation. |
 | 4:30–5:00 | Results and limitations | Summarize two sources, eight event categories, nine API endpoints, USD 55.50M synthetic exposure, and offline quality gates. Close with the synthetic-data and non-advice limitation. |
 
@@ -48,9 +48,9 @@ Use the same sequence with additional implementation detail:
 3. **1:30–2:15 — Setup.** Show the exact README commands, Python version, offline
    default, and one-command validator.
 4. **2:15–3:15 — Dataset clarity.** Show `data/sources.yaml`; distinguish public live
-   interfaces from synthetic fixtures, portfolio data, and scenario assumptions.
-5. **3:15–5:10 — End-to-end UI.** Run fixture ingestion, inspect source health, filter
-   signals, and open the explanation and provenance detail.
+   interfaces from baseline fixtures, the separate replay, portfolio data, and scenarios.
+5. **3:15–5:10 — End-to-end UI.** Run replay ingestion, inspect source health, filter
+   the impact-9 signals, and open their explanation and synthetic provenance detail.
 6. **5:10–6:40 — Stress workflow.** Explain the threshold, scenario scope, simplified
    valuation methods, and persisted decision. Demonstrate the stress result.
 7. **6:40–7:40 — Results.** Show the recorded validation metrics and reconciliation.
