@@ -1,6 +1,6 @@
 # Implementation Progress
 
-Last updated: 2026-10-03
+Last updated: 2026-10-04
 
 ## Phase Status
 
@@ -17,7 +17,7 @@ Last updated: 2026-10-03
 | 8 Implementation documentation | complete | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
 | 9 Deterministic as-of time (P0 T1) | complete | Stable fixture/replay recency and scores | Frozen-time NLP, API, CLI and validation tests | `fix(nlp): anchor replay recency to batch time` |
 | 10 Organic replay trigger (P0 T2) | complete | New synthetic replay mode and natural 8+ signal | Exact-score replay, API, CLI and AppTest coverage | `feat(replay): add organic high-impact stress scenario` |
-| 11 Hypothetical what-if (P0 T3) | planned | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
+| 11 Hypothetical what-if (P0 T3) | complete | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
 | 12 Real-data benchmark (P1 T4) | planned | External CSV evaluation and documented metrics | Metric, CLI and failure tests | `feat(benchmark): compare deterministic and model NLP quality` |
 | 13 Model-mode hygiene (P1 T5) | planned | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
 | 14 Dashboard evidence (P1 T6) | planned | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
@@ -30,9 +30,9 @@ Last updated: 2026-10-03
 
 ## Current Phase
 
-The original eight implementation phases and improvement Phases 9–10 are complete.
-Phase 11 is next: a clearly hypothetical what-if simulator. Phases 11–16 are the
-remaining required P0/P1 improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
+The original eight implementation phases and P0 improvement Phases 9–11 are complete.
+Phase 12 is next: the real-data benchmark command. Phases 12–16 are the remaining P1
+improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
 permitted transaction dataset is supplied. The detailed sequence and task gates are
 in [docs/improvement-plan.md](docs/improvement-plan.md).
 
@@ -55,6 +55,8 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   on its timezone-aware UTC clock.
 - Keep the six-record fixture mode unchanged and use a distinct four-record synthetic
   replay mode for the organic stress-trigger demonstration.
+- Keep hypothetical assumptions and results outside signal and stress-decision
+  persistence, with explicit API and dashboard labels separating them from evidence.
 - Keep organizer-provided DOCX files out of the implementation repository; their
   requirements are captured in the README and architecture decision record.
 
@@ -283,6 +285,29 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   passed with one upstream Starlette warning, and the offline validator matched 9/9
   artifacts, preserved the 6/6 fixture workflow, reconciled to USD 0.00, and completed
   in 0.196 seconds against its 5-second budget.
+
+### 2026-10-04 Phase 11
+
+- Started from clean synchronized commit `1410d6a`; Ruff passed, all 90 baseline tests
+  passed with one upstream Starlette warning, and validation passed with 9/9 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.247 seconds
+  total runtime.
+- Added `POST /api/v1/stress-tests/what-if` with strict event, unique portfolio-entity,
+  and impact assumptions; invalid contracts return HTTP 422 and unknown entities return
+  HTTP 404.
+- Reused the existing trigger, scenario, valuation, and reconciliation calculations
+  through a stable in-memory hypothetical reference without constructing a risk signal.
+- Kept hypothetical requests outside SQLite: no signal, stress-decision, or stress-result
+  row is written, and a hypothetical result ID is not retrievable from the persisted API.
+- Added a separate warned Stress Lab panel with event, entity, and impact controls,
+  skipped and triggered states, and panel-specific rendering keys so hypothetical and
+  observed/replay results can coexist without UI collisions.
+- Added stress-engine, API, typed-client, and real Streamlit AppTest coverage while
+  leaving all nine checksummed artifacts and `data/sample/*.json` untouched.
+- Passed the mandatory Phase 11 gate: Ruff reported no findings, all 99 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 9/9
+  artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
+  0.238 seconds against its 5-second budget.
 
 ## Risks and Blockers
 

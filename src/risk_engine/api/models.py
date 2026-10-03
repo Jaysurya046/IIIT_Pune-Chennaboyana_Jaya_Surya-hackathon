@@ -10,7 +10,7 @@ from pydantic import AwareDatetime, Field
 
 from risk_engine.ingestion.models import SourceRunStatus, StrictModel
 from risk_engine.nlp.models import RiskSignal
-from risk_engine.stress.models import StressDecision
+from risk_engine.stress.models import HypotheticalStressAssumptions, StressDecision
 
 Identifier = Annotated[str, Field(pattern=r"^[0-9a-f]{32}$")]
 
@@ -79,6 +79,16 @@ class StressTestRequest(StrictModel):
 
 class StressTestResponse(StrictModel):
     decision_id: Identifier
+    decision: StressDecision
+
+
+class WhatIfStressRequest(HypotheticalStressAssumptions):
+    """Strict request contract for a non-persisted hypothetical stress run."""
+
+
+class WhatIfStressResponse(StrictModel):
+    hypothetical: Literal[True] = True
+    assumptions: HypotheticalStressAssumptions
     decision: StressDecision
 
 

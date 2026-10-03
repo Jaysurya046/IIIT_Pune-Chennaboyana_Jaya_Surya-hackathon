@@ -16,6 +16,7 @@ NonNegativeMoney = Annotated[Decimal, Field(ge=0, max_digits=20, decimal_places=
 NonNegativeDecimal = Annotated[Decimal, Field(ge=0)]
 Probability = Annotated[Decimal, Field(ge=0, le=1)]
 ShockFraction = Annotated[Decimal, Field(ge=-1, le=1)]
+EntityIdentifier = Annotated[str, Field(min_length=1, max_length=100)]
 
 
 class AssetClass(StrEnum):
@@ -132,6 +133,20 @@ class ScenarioBook(StrictModel):
 
     def for_event(self, event_type: EventType) -> Scenario:
         return next(scenario for scenario in self.scenarios if scenario.event_type is event_type)
+
+
+class HypotheticalStressAssumptions(StrictModel):
+    """User-supplied assumptions for a clearly hypothetical in-memory stress run."""
+
+    event_type: EventType
+    entity_ids: Annotated[tuple[EntityIdentifier, ...], Field(min_length=1, max_length=20)]
+    impact_score: Annotated[int, Field(ge=1, le=10)]
+
+    @model_validator(mode="after")
+    def unique_entity_ids(self) -> HypotheticalStressAssumptions:
+        if len(self.entity_ids) != len(set(self.entity_ids)):
+            raise ValueError("entity_ids must be unique")
+        return self
 
 
 class InstrumentStressResult(StrictModel):

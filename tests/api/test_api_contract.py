@@ -58,6 +58,7 @@ def test_health_empty_status_and_openapi_contract(api_client) -> None:
         "/api/v1/signals",
         "/api/v1/signals/{signal_id}",
         "/api/v1/stress-tests",
+        "/api/v1/stress-tests/what-if",
         "/api/v1/stress-tests/{result_id}",
         "/api/v1/portfolio/summary",
     }
@@ -152,6 +153,104 @@ def test_replay_organically_triggers_and_persists_stress_result(api_client) -> N
     assert payload["decision"]["result"]["affected_scope"] == ["aurora-bank"]
     result_id = payload["decision"]["result"]["stress_id"]
     assert client.get(f"/api/v1/stress-tests/{result_id}").status_code == 200
+
+
+def test_hypothetical_stress_triggers_without_persistence(api_client, monkeypatch) -> None:
+    client, store = api_client
+
+    def reject_persistence(_decision):
+        raise AssertionError("hypothetical decision must not be persisted")
+
+    monkeypatch.setattr(store, "save_stress_decision", reject_persistence)
+    before_items, before_total = store.list_signals(limit=100, offset=0)
+    response = client.post(
+        "/api/v1/stress-tests/what-if",
+        json={
+            "event_type": "Credit Event",
+            "entity_ids": ["aurora-bank"],
+            "impact_score": 9,
+        },
+    )
+    payload = response.json()
+
+    assert response.status_code == 200
+    assert payload["hypothetical"] is True
+    assert payload["assumptions"] == {
+        "event_type": "Credit Event",
+        "entity_ids": ["aurora-bank"],
+        "impact_score": 9,
+    }
+    assert payload["decision"]["triggered"] is True
+    assert payload["decision"]["result"]["affected_scope"] == ["aurora-bank"]
+    result_id = payload["decision"]["result"]["stress_id"]
+    after_items, after_total = store.list_signals(limit=100, offset=0)
+
+    assert before_items == after_items == ()
+    assert before_total == after_total == 0
+    assert store.get_stress_result(result_id) is None
+    assert client.get(f"/api/v1/stress-tests/{result_id}").status_code == 404
+
+
+def test_hypothetical_stress_records_a_non_persisted_skipped_decision(api_client) -> None:
+    client, _ = api_client
+    response = client.post(
+        "/api/v1/stress-tests/what-if",
+        json={
+            "event_type": "Operational",
+            "entity_ids": ["atlas-manufacturing"],
+            "impact_score": 7,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["hypothetical"] is True
+    assert response.json()["decision"]["triggered"] is False
+    assert response.json()["decision"]["result"] is None
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {
+            "event_type": "Unsupported",
+            "entity_ids": ["aurora-bank"],
+            "impact_score": 9,
+        },
+        {
+            "event_type": "Credit Event",
+            "entity_ids": ["aurora-bank"],
+            "impact_score": 0,
+        },
+        {
+            "event_type": "Credit Event",
+            "entity_ids": ["aurora-bank", "aurora-bank"],
+            "impact_score": 9,
+        },
+        {"event_type": "Credit Event", "entity_ids": [], "impact_score": 9},
+    ],
+)
+def test_hypothetical_stress_rejects_invalid_assumptions(api_client, payload) -> None:
+    client, _ = api_client
+
+    response = client.post("/api/v1/stress-tests/what-if", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_hypothetical_stress_returns_not_found_for_unknown_entity(api_client) -> None:
+    client, _ = api_client
+
+    response = client.post(
+        "/api/v1/stress-tests/what-if",
+        json={
+            "event_type": "Credit Event",
+            "entity_ids": ["unknown-bank"],
+            "impact_score": 9,
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Unknown portfolio entity IDs: unknown-bank"
 
 
 def test_portfolio_summary_reconciles_breakdowns(api_client) -> None:

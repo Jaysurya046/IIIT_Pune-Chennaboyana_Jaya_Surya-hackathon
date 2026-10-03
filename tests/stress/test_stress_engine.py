@@ -16,6 +16,7 @@ from risk_engine.nlp.models import (
 )
 from risk_engine.stress.config import load_portfolio, load_scenario_book
 from risk_engine.stress.engine import StressEngine
+from risk_engine.stress.models import HypotheticalStressAssumptions
 
 NOW = datetime(2026, 10, 2, tzinfo=UTC)
 
@@ -147,3 +148,35 @@ def test_stress_identifier_is_stable() -> None:
 
     assert first is not None and second is not None
     assert first.stress_id == second.stress_id
+
+
+def test_hypothetical_stress_uses_assumptions_without_a_risk_signal() -> None:
+    assumptions = HypotheticalStressAssumptions(
+        event_type=EventType.CREDIT_EVENT,
+        entity_ids=("aurora-bank",),
+        impact_score=9,
+    )
+
+    first = _engine().run_hypothetical(assumptions)
+    second = _engine().run_hypothetical(assumptions)
+
+    assert first.triggered is True
+    assert first.result is not None
+    assert first.result.affected_scope == ("aurora-bank",)
+    assert first.result.affected_position_count == 2
+    assert first.result.reconciliation_difference == Decimal("0.00")
+    assert first.signal_id == second.signal_id
+    assert first.result.stress_id == second.result.stress_id
+
+
+def test_hypothetical_stress_retains_strict_trigger_boundary() -> None:
+    decision = _engine().run_hypothetical(
+        HypotheticalStressAssumptions(
+            event_type=EventType.OPERATIONAL,
+            entity_ids=("atlas-manufacturing",),
+            impact_score=7,
+        )
+    )
+
+    assert decision.triggered is False
+    assert decision.result is None

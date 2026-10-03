@@ -15,6 +15,8 @@ from risk_engine.api.models import (
     SourceMode,
     SourceStatusResponse,
     StressTestResponse,
+    WhatIfStressRequest,
+    WhatIfStressResponse,
 )
 from risk_engine.config import Settings
 from risk_engine.ingestion.adapters import BlueskyAdapter, FixtureAdapter, GdeltAdapter
@@ -31,6 +33,14 @@ from risk_engine.stress.valuation import money
 
 class LiveModeDisabledError(RuntimeError):
     """Raised when a request tries to use the network in configured offline mode."""
+
+
+class UnknownPortfolioEntityError(ValueError):
+    """Raised when hypothetical assumptions reference an unknown portfolio entity."""
+
+    def __init__(self, entity_ids: tuple[str, ...]) -> None:
+        self.entity_ids = entity_ids
+        super().__init__(f"Unknown portfolio entity IDs: {', '.join(entity_ids)}")
 
 
 class RiskApplicationService:
@@ -149,6 +159,18 @@ class RiskApplicationService:
             return None
         record = self.store.save_stress_decision(self._stress_engine.run(signal))
         return StressTestResponse(decision_id=record.decision_id, decision=record.decision)
+
+    def what_if(self, request: WhatIfStressRequest) -> WhatIfStressResponse:
+        known_entities = {position.issuer_id for position in self._portfolio.positions}
+        unknown_entities = tuple(
+            sorted(entity_id for entity_id in request.entity_ids if entity_id not in known_entities)
+        )
+        if unknown_entities:
+            raise UnknownPortfolioEntityError(unknown_entities)
+        return WhatIfStressResponse(
+            assumptions=request,
+            decision=self._stress_engine.run_hypothetical(request),
+        )
 
     @staticmethod
     def _breakdown(

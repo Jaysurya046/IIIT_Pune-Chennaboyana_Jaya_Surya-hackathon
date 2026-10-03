@@ -98,6 +98,67 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
             button.label == "Ingest and analyze synthetic replay"
             for button in dashboard.button
         )
+        assert any(
+            "Hypothetical simulation only" in message.value
+            for message in dashboard.warning
+        )
+        assert any(
+            selectbox.label == "Hypothetical event"
+            for selectbox in dashboard.selectbox
+        )
+        assert any(
+            multiselect.label == "Hypothetical entities"
+            for multiselect in dashboard.multiselect
+        )
+
+        what_if_event = next(
+            selectbox
+            for selectbox in dashboard.selectbox
+            if selectbox.label == "Hypothetical event"
+        )
+        what_if_event.select("Credit Event").run(timeout=30)
+        what_if_entities = next(
+            multiselect
+            for multiselect in dashboard.multiselect
+            if multiselect.label == "Hypothetical entities"
+        )
+        what_if_entities.set_value(["aurora-bank"]).run(timeout=30)
+        what_if_impact = next(
+            slider
+            for slider in dashboard.slider
+            if slider.label == "Hypothetical impact score"
+        )
+        what_if_impact.set_value(7).run(timeout=30)
+        what_if_button = next(
+            button
+            for button in dashboard.button
+            if button.label == "Run hypothetical simulation"
+        )
+        what_if_button.click().run(timeout=30)
+
+        assert not dashboard.exception
+        assert any("does not exceed" in message.value for message in dashboard.warning)
+        assert not any(metric.label == "Illustrative loss" for metric in dashboard.metric)
+
+        what_if_impact = next(
+            slider
+            for slider in dashboard.slider
+            if slider.label == "Hypothetical impact score"
+        )
+        what_if_impact.set_value(9).run(timeout=30)
+        what_if_button = next(
+            button
+            for button in dashboard.button
+            if button.label == "Run hypothetical simulation"
+        )
+        what_if_button.click().run(timeout=30)
+
+        assert not dashboard.exception
+        assert any(metric.label == "Illustrative loss" for metric in dashboard.metric)
+        assert any(
+            "Hypothetical assumptions: Credit Event" in caption.value
+            for caption in dashboard.caption
+        )
 
         stress_selector = next(
             selectbox for selectbox in dashboard.selectbox if selectbox.label == "Trigger signal"

@@ -4,8 +4,8 @@
 
 RiskSignal Engine implements the required AI/NLP risk pipeline and the strategic
 portfolio stress-testing module. The reproducible path processes two source types,
-produces explainable sentiment, event, entity, and impact outputs, persists them behind
-nine HTTP endpoints, and presents their downstream portfolio effect in a dashboard.
+produces explainable sentiment, event, entity, and impact outputs, serves them behind
+ten HTTP endpoints, and presents their downstream portfolio effect in a dashboard.
 
 The strongest evidence is implementation evidence: all manifested artifacts match
 their checksums, all eight synthetic taxonomy cases match their expected deterministic
@@ -20,7 +20,7 @@ contracts; they do not establish predictive accuracy on real financial text.
 | At least two text sources | GDELT news and Bluesky social adapters, plus matching offline fixtures | Adapter tests, six-record validation workflow |
 | Structured NLP output | Signed sentiment, eight event types, entity matches, 1–10 impact score, explanation factors | Strict Pydantic contracts and golden cases |
 | Downstream application | Module B event-driven stress testing | Scenario mapping, strict trigger, four valuation paths |
-| Machine-readable access | Versioned FastAPI service with nine endpoints | API contract tests and OpenAPI documentation |
+| Machine-readable access | Versioned FastAPI service with ten endpoints | API contract tests and OpenAPI documentation |
 | Visualization | Streamlit risk monitor, stress lab, and source-health workspace | Dashboard workflow and rendered checks |
 | Data-source clarity | Public interfaces separated from synthetic committed artifacts | Source manifest, checksums, synthetic flags, dataset guide |
 | Reproducibility | Default offline mode and one-command validator | CI and clean-install instructions |
@@ -56,6 +56,11 @@ two new checksummed replay bundles contain four fictional records, the unchanged
 deterministic engine scores all four exactly 9, and each organically triggers the
 issuer-credit scenario for fictional Aurora Bank. The illustrative portfolio loss is
 USD 3.747 million with USD 0.00 reconciliation difference. No signal score is edited.
+
+Phase 11 adds a separately labeled what-if path for user-selected event, entity, and
+impact assumptions. It reuses the same reconciled stress calculations but creates no
+risk signal, persisted decision, or retrievable result. Contract and dashboard tests
+cover skipped and triggered states, 404/422 behavior, and the persistent warning.
 
 The final Phase 8 snapshot was also installed into an independent Python 3.13 virtual
 environment from a clean clone. The configuration diagnostic, Ruff, all 83 tests,

@@ -145,7 +145,7 @@ increase. Instrument losses reconcile exactly to the portfolio result.
 
 These figures demonstrate the implemented calculations against synthetic assumptions;
 they are not forecasts, calibrated regulatory stress results, or investment advice.
-Phase 5 exposes the complete offline workflow through nine documented HTTP endpoints
+Phase 5 and the improvement path expose the workflow through ten documented HTTP endpoints
 and preserves ingestion runs, source status, signals, entity indexes, and stress
 decisions across process restarts.
 
@@ -162,11 +162,13 @@ and a bounded performance check. The baseline and its interpretation limits are 
 
 The implementation delivers two optional live adapters, six baseline fixture records,
 four separate replay records, eight event categories, a USD 55.50 million synthetic
-portfolio, nine API endpoints, and three dashboard workspaces. The current validator
+portfolio, ten API endpoints, and three dashboard workspaces. The current validator
 matches all nine artifact checksums and all eight authored NLP cases. The replay
 produces four exact impact-9 signals and organic persisted stress results for fictional
-Aurora Bank without score mutation. These are synthetic regression and implementation
-results, not real-world accuracy, market forecasts, or investment advice.
+Aurora Bank without score mutation. A separate what-if endpoint and warned dashboard
+panel run user-selected assumptions without creating a signal or persistent result.
+These are synthetic regression and implementation results, not real-world accuracy,
+market forecasts, or investment advice.
 
 The complete evidence and interpretation are in [docs/results.md](docs/results.md).
 

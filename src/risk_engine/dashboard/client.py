@@ -18,6 +18,7 @@ from risk_engine.api.models import (
     SourceMode,
     SourceStatusResponse,
     StressTestResponse,
+    WhatIfStressResponse,
 )
 from risk_engine.nlp.models import EventType, RiskSignal
 from risk_engine.stress.models import StressResult
@@ -155,6 +156,23 @@ class DashboardApiClient:
             "/api/v1/stress-tests",
             StressTestResponse,
             json={"signal_id": signal_id},
+        )
+
+    def run_what_if(
+        self,
+        event_type: EventType,
+        entity_ids: tuple[str, ...],
+        impact_score: int,
+    ) -> WhatIfStressResponse:
+        return self._request(
+            "POST",
+            "/api/v1/stress-tests/what-if",
+            WhatIfStressResponse,
+            json={
+                "event_type": event_type.value,
+                "entity_ids": list(entity_ids),
+                "impact_score": impact_score,
+            },
         )
 
     def stress_result(self, result_id: str) -> StressResult:

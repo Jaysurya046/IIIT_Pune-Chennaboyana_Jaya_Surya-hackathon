@@ -8,8 +8,9 @@ from datetime import datetime
 from decimal import Decimal
 
 from risk_engine.ingestion.time import utc_now
-from risk_engine.nlp.models import RiskSignal
+from risk_engine.nlp.models import EventType, RiskSignal
 from risk_engine.stress.models import (
+    HypotheticalStressAssumptions,
     Portfolio,
     Scenario,
     ScenarioBook,
@@ -47,31 +48,36 @@ class StressEngine:
         self._clock = clock
 
     @staticmethod
-    def _targets(signal: RiskSignal, scenario: Scenario) -> tuple[str, ...]:
+    def _targets(entity_ids: tuple[str, ...], scenario: Scenario) -> tuple[str, ...]:
         if scenario.scope is ScenarioScope.PORTFOLIO:
             return ("portfolio",)
-        return tuple(sorted({entity.entity_id for entity in signal.entities}))
+        return tuple(sorted(entity_ids))
 
     @staticmethod
     def _is_affected(issuer_id: str, scenario: Scenario, targets: tuple[str, ...]) -> bool:
         return scenario.scope is ScenarioScope.PORTFOLIO or issuer_id in targets
 
-    def run(self, signal: RiskSignal) -> StressDecision:
-        """Return an explicit trigger decision and, when triggered, a stress result."""
-
-        if signal.impact_score <= self._trigger_threshold:
+    def _run(
+        self,
+        *,
+        reference_id: str,
+        event_type: EventType,
+        entity_ids: tuple[str, ...],
+        impact_score: int,
+    ) -> StressDecision:
+        if impact_score <= self._trigger_threshold:
             return StressDecision(
-                signal_id=signal.signal_id,
+                signal_id=reference_id,
                 trigger_threshold=self._trigger_threshold,
                 triggered=False,
                 reason=(
-                    f"Impact score {signal.impact_score} does not exceed "
+                    f"Impact score {impact_score} does not exceed "
                     f"the trigger threshold {self._trigger_threshold}."
                 ),
             )
 
-        scenario = self._scenario_book.for_event(signal.event.event_type)
-        targets = self._targets(signal, scenario)
+        scenario = self._scenario_book.for_event(event_type)
+        targets = self._targets(entity_ids, scenario)
         instrument_results = tuple(
             value_position(
                 position,
@@ -96,13 +102,13 @@ class StressEngine:
             sum((result.expected_loss_after for result in instrument_results), Decimal(0))
         )
         identity = (
-            f"{signal.signal_id}|{scenario.scenario_id}|{self._scenario_book.version}|"
+            f"{reference_id}|{scenario.scenario_id}|{self._scenario_book.version}|"
             f"{self._portfolio.portfolio_id}|{self._portfolio.version}"
         )
         result = StressResult(
             stress_id=hashlib.sha256(identity.encode()).hexdigest()[:32],
-            signal_id=signal.signal_id,
-            trigger_impact_score=signal.impact_score,
+            signal_id=reference_id,
+            trigger_impact_score=impact_score,
             scenario_id=scenario.scenario_id,
             scenario_version=self._scenario_book.version,
             portfolio_id=self._portfolio.portfolio_id,
@@ -126,14 +132,40 @@ class StressEngine:
             created_at=self._clock(),
         )
         return StressDecision(
-            signal_id=signal.signal_id,
+            signal_id=reference_id,
             trigger_threshold=self._trigger_threshold,
             triggered=True,
             reason=(
-                f"Impact score {signal.impact_score} exceeds the trigger threshold "
+                f"Impact score {impact_score} exceeds the trigger threshold "
                 f"{self._trigger_threshold}; applied {scenario.scenario_id}."
             ),
             result=result,
+        )
+
+    def run(self, signal: RiskSignal) -> StressDecision:
+        """Return an explicit trigger decision and, when triggered, a stress result."""
+
+        return self._run(
+            reference_id=signal.signal_id,
+            event_type=signal.event.event_type,
+            entity_ids=tuple(entity.entity_id for entity in signal.entities),
+            impact_score=signal.impact_score,
+        )
+
+    def run_hypothetical(
+        self, assumptions: HypotheticalStressAssumptions
+    ) -> StressDecision:
+        """Run a hypothetical stress without constructing or persisting a risk signal."""
+
+        identity = (
+            f"hypothetical|{assumptions.event_type.value}|"
+            f"{','.join(sorted(assumptions.entity_ids))}|{assumptions.impact_score}"
+        )
+        return self._run(
+            reference_id=hashlib.sha256(identity.encode()).hexdigest()[:32],
+            event_type=assumptions.event_type,
+            entity_ids=assumptions.entity_ids,
+            impact_score=assumptions.impact_score,
         )
 
     def run_many(self, signals: Iterable[RiskSignal]) -> tuple[StressDecision, ...]:

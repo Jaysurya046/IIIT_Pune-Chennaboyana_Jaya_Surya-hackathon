@@ -153,6 +153,7 @@ The versioned API provides:
 - `GET /api/v1/signals`
 - `GET /api/v1/signals/{signal_id}`
 - `POST /api/v1/stress-tests`
+- `POST /api/v1/stress-tests/what-if`
 - `GET /api/v1/stress-tests/{result_id}`
 - `GET /api/v1/portfolio/summary`
 
@@ -192,6 +193,12 @@ shocks, before and after values, expected-loss change, and instrument-level resu
 Portfolio totals must reconcile to the sum of instrument results within USD 0.01.
 Calculations use decimal arithmetic and monetary outputs are rounded half-up to cents.
 
+The what-if path reuses the same trigger, scenario, valuation, and reconciliation code
+from explicit event, entity, and impact assumptions. It creates a stable ephemeral
+reference but no `RiskSignal`, ingestion record, stress-decision row, or stress-result
+row. Its response and dashboard panel are marked hypothetical so it cannot be confused
+with observed, fixture, or replay evidence.
+
 ### Dashboard
 
 The Streamlit dashboard consumes the API rather than duplicating business logic. It
@@ -205,10 +212,9 @@ The UI is split into three task-oriented workspaces:
   API. It pairs overview metrics and distributions with an exact signal register, then
   exposes rationale, normalized impact factors, model revisions, and source provenance
   for the selected record.
-- **Stress lab** submits the selected signal identifier to the stress endpoint and
-  renders its persisted trigger decision. Triggered outcomes show before/after values,
-  losses by asset class and issuer, instrument-level reconciliation, and applied shock
-  assumptions from one validated response.
+- **Stress lab** separates a warned, non-persisted hypothetical panel from the observed
+  or replay signal selector. Both use the same stress calculations, while only the
+  signal-driven path persists decisions and results.
 - **Source health** shows the latest per-source operational outcomes and provides
   separate fixture and synthetic replay actions using deterministic analysis.
 

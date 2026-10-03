@@ -27,6 +27,8 @@ return HTTP 409 until `RISK_ENGINE_OFFLINE_MODE=false` is set.
    source, and entity filters.
 4. `POST /api/v1/stress-tests` evaluates one stored signal against the strict trigger
    and persists the decision. Triggered decisions include a retrievable stress result.
+5. `POST /api/v1/stress-tests/what-if` evaluates explicit hypothetical assumptions in
+   memory. It creates no risk signal, decision row, or retrievable stress result.
 
 Example fixture ingestion request:
 
@@ -59,6 +61,22 @@ Example stress request:
 }
 ```
 
+Example hypothetical request:
+
+```json
+{
+  "event_type": "Credit Event",
+  "entity_ids": ["aurora-bank"],
+  "impact_score": 9
+}
+```
+
+The response contains `"hypothetical": true`, echoes the validated assumptions, and
+returns a trigger decision. Entity IDs must be unique and present in the synthetic
+portfolio. Unknown IDs return HTTP 404; invalid events, duplicate entities, and impact
+scores outside 1–10 return HTTP 422. The `signal_id`-shaped value inside this decision
+is a deterministic ephemeral reference and is never stored or retrievable.
+
 ## Endpoint Summary
 
 | Method | Path | Purpose |
@@ -70,6 +88,7 @@ Example stress request:
 | GET | `/api/v1/signals` | Filter and paginate stored signals |
 | GET | `/api/v1/signals/{signal_id}` | Retrieve one signal |
 | POST | `/api/v1/stress-tests` | Evaluate and persist a stress decision |
+| POST | `/api/v1/stress-tests/what-if` | Run a non-persisted hypothetical stress simulation |
 | GET | `/api/v1/stress-tests/{result_id}` | Retrieve a triggered stress result |
 | GET | `/api/v1/portfolio/summary` | Retrieve portfolio totals and breakdowns |
 
@@ -82,6 +101,9 @@ The SQLite schema version is stored in the database and checked at startup. Repo
 tables retain ingestion payloads and per-source outcomes, risk signals and normalized
 entity indexes, and stress decisions/results. Complete payloads are validated back into
 the strict Pydantic contracts when read.
+
+What-if requests bypass these repositories. Their assumptions, ephemeral reference,
+decision, and result exist only in the HTTP response and dashboard session state.
 
 Runtime databases use `RISK_ENGINE_DATABASE_URL` and default to the ignored
 `data/runtime/risksignal.db` path. They are local runtime artifacts and must not be

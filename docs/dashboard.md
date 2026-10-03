@@ -12,7 +12,8 @@ The dashboard answers three distinct questions:
 1. **Risk signals:** What events are present, how severe are they, and why did the
    engine assign each impact score?
 2. **Stress lab:** Does a selected signal pass the configured trigger, and how does its
-   mapped scenario affect the synthetic portfolio?
+   mapped scenario affect the synthetic portfolio? What would happen under separately
+   labeled, user-selected hypothetical assumptions?
 3. **Source health:** Which sources completed, what was accepted or rejected, and when
    did the latest ingestion finish?
 
@@ -48,6 +49,7 @@ modes. Use **Refresh dashboard** to invalidate the 15-second view cache immediat
 | Source outcomes | `GET /api/v1/sources/status` | Operational metadata | Latest persisted ingestion run |
 | Portfolio baseline | `GET /api/v1/portfolio/summary` | Fully synthetic | Versioned project configuration |
 | Stress decision and result | `POST /api/v1/stress-tests` | Synthetic scenario output | On analyst request; persisted by API |
+| Hypothetical what-if | `POST /api/v1/stress-tests/what-if` | User-selected hypothetical assumptions | In-memory response only; never persisted |
 
 Committed fixture and replay records include source-shaped metadata, explicit
 `synthetic=true` provenance, and checksums documented in `data/`. Replay records use
@@ -74,7 +76,12 @@ sentiment and impact.
 
 ## Stress Result Interpretation
 
-The Stress Lab first records the trigger decision. Scores of 7 or below produce an
+The Stress Lab keeps two paths visibly separate. The **Hypothetical what-if** panel has
+event, portfolio-entity, and impact controls beneath a persistent warning. Its response
+is flagged hypothetical and remains only in dashboard session state; it never appears
+in the signal register or persisted stress-result endpoints.
+
+The **Observed or replay signal stress** path records the trigger decision. Scores of 7 or below produce an
 auditable skipped decision. Scores above 7 apply the event's configuration-owned
 scenario. Result cards, asset-class values, issuer losses, instrument rows, and applied
 shocks all come from that single persisted API response.
@@ -89,5 +96,6 @@ limitations are documented in `data/README.md` and `docs/architecture.md`.
 Dashboard tests cover typed HTTP contracts, query filters, sanitized failures, metric
 and grouping transformations, exact stress reconciliation, figure labels, and CLI
 launch construction. The release walkthrough renders the populated Streamlit script
-against a real local API seeded from fixture and replay source types. It verifies the
-organic impact-9 Stress Lab result, filter/reset behavior, KPI cards, and evidence tables.
+against a real local API seeded from fixture and replay source types. It verifies
+hypothetical warnings and controls, skipped and triggered what-if states, the organic
+impact-9 persisted path, filter/reset behavior, KPI cards, and evidence tables.

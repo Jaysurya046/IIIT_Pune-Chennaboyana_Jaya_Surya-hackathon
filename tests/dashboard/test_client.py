@@ -2,7 +2,7 @@
 
 import httpx
 import pytest
-from tests.dashboard.helpers import NOW, sample_signal
+from tests.dashboard.helpers import NOW, sample_signal, sample_stress_result
 
 from risk_engine.api.models import (
     AnalysisResponse,
@@ -14,11 +14,12 @@ from risk_engine.api.models import (
     SourceMode,
     SourceStatusResponse,
     StressTestResponse,
+    WhatIfStressResponse,
 )
 from risk_engine.dashboard.client import DashboardApiClient, DashboardApiError
 from risk_engine.ingestion.models import SourceRunStatus, SourceType
 from risk_engine.nlp.models import EventType
-from risk_engine.stress.models import StressDecision
+from risk_engine.stress.models import HypotheticalStressAssumptions, StressDecision
 
 
 def _response_models() -> dict[str, object]:
@@ -123,6 +124,22 @@ def test_runs_ingestion_analysis_and_stress_workflow() -> None:
             )
         elif request.url.path == "/api/v1/analyze":
             model = AnalysisResponse(run_id="c" * 32, signal_count=1, signals=(signal,))
+        elif request.url.path == "/api/v1/stress-tests/what-if":
+            result = sample_stress_result()
+            model = WhatIfStressResponse(
+                assumptions=HypotheticalStressAssumptions(
+                    event_type=EventType.CREDIT_EVENT,
+                    entity_ids=("aurora-bank",),
+                    impact_score=9,
+                ),
+                decision=StressDecision(
+                    signal_id=result.signal_id,
+                    trigger_threshold=7,
+                    triggered=True,
+                    reason="Hypothetical trigger.",
+                    result=result,
+                ),
+            )
         else:
             model = StressTestResponse(
                 decision_id="d" * 32,
@@ -142,17 +159,30 @@ def test_runs_ingestion_analysis_and_stress_workflow() -> None:
     client.run_ingestion("banking stress", source_mode=SourceMode.REPLAY)
     analysis = client.analyze(ingestion.run_id)
     decision = client.run_stress(analysis.signals[0].signal_id)
+    what_if = client.run_what_if(
+        EventType.CREDIT_EVENT,
+        ("aurora-bank",),
+        9,
+    )
 
     assert [path for path, _ in requests] == [
         "/api/v1/ingestion/run",
         "/api/v1/ingestion/run",
         "/api/v1/analyze",
         "/api/v1/stress-tests",
+        "/api/v1/stress-tests/what-if",
     ]
     assert requests[0][1]["source_mode"] == "fixtures"
     assert requests[1][1]["source_mode"] == "replay"
     assert requests[2][1]["nlp_mode"] == "deterministic"
     assert decision.decision.triggered is False
+    assert requests[4][1] == {
+        "event_type": "Credit Event",
+        "entity_ids": ["aurora-bank"],
+        "impact_score": 9,
+    }
+    assert what_if.hypothetical is True
+    assert what_if.decision.triggered is True
     http_client.close()
 
 

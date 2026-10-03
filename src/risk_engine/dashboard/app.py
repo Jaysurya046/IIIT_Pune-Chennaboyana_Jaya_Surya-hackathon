@@ -15,6 +15,7 @@ from risk_engine.api.models import (
     SourceMode,
     SourceStatusResponse,
     StressTestResponse,
+    WhatIfStressResponse,
 )
 from risk_engine.dashboard.charts import (
     asset_class_figure,
@@ -256,7 +257,11 @@ def _render_signals(
     return selected
 
 
-def _render_stress_result(response: StressTestResponse) -> None:
+def _render_stress_result(
+    response: StressTestResponse | WhatIfStressResponse,
+    *,
+    key_prefix: str,
+) -> None:
     decision = response.decision
     if not decision.triggered or decision.result is None:
         st.warning(decision.reason)
@@ -286,11 +291,13 @@ def _render_stress_result(response: StressTestResponse) -> None:
             width="stretch",
             config={"displaylogo": False},
             theme=None,
+            key=f"{key_prefix}_asset_class_chart",
         )
         st.dataframe(
             pd.DataFrame(stress_by_asset_class(result)),
             hide_index=True,
             width="stretch",
+            key=f"{key_prefix}_asset_class_table",
         )
     with right:
         st.plotly_chart(
@@ -298,11 +305,13 @@ def _render_stress_result(response: StressTestResponse) -> None:
             width="stretch",
             config={"displaylogo": False},
             theme=None,
+            key=f"{key_prefix}_issuer_chart",
         )
         st.dataframe(
             pd.DataFrame(stress_by_issuer(result)),
             hide_index=True,
             width="stretch",
+            key=f"{key_prefix}_issuer_table",
         )
 
     st.subheader("Sector reconciliation")
@@ -310,6 +319,7 @@ def _render_stress_result(response: StressTestResponse) -> None:
         pd.DataFrame(stress_by_sector(result)),
         hide_index=True,
         width="stretch",
+        key=f"{key_prefix}_sector_table",
     )
 
     st.subheader("Instrument reconciliation")
@@ -321,22 +331,90 @@ def _render_stress_result(response: StressTestResponse) -> None:
         pd.DataFrame(instrument_rows(result)),
         hide_index=True,
         width="stretch",
+        key=f"{key_prefix}_instrument_table",
     )
     with st.expander("Applied scenario shocks"):
         shock_rows = applied_shock_rows(result)
         if shock_rows:
-            st.dataframe(pd.DataFrame(shock_rows), hide_index=True, width="stretch")
+            st.dataframe(
+                pd.DataFrame(shock_rows),
+                hide_index=True,
+                width="stretch",
+                key=f"{key_prefix}_shock_table",
+            )
         else:
             st.info("This scenario did not apply any shocks to the selected instruments.")
 
 
-def _render_stress_lab(api_url: str, response: SignalListResponse) -> None:
+def _render_what_if(api_url: str, portfolio: PortfolioSummaryResponse) -> None:
+    st.subheader("Hypothetical what-if")
+    st.warning(
+        "Hypothetical simulation only: these user-selected assumptions are not an observed "
+        "or replay signal, and neither the assumptions nor result are persisted."
+    )
+    event_type = st.selectbox(
+        "Hypothetical event",
+        list(EventType),
+        format_func=lambda item: item.value,
+        key="what_if_event",
+    )
+    issuer_ids = tuple(item.key for item in portfolio.by_issuer)
+    entity_ids = tuple(
+        st.multiselect(
+            "Hypothetical entities",
+            issuer_ids,
+            default=[issuer_ids[0]] if issuer_ids else [],
+            key="what_if_entities",
+        )
+    )
+    impact_score = st.slider(
+        "Hypothetical impact score",
+        min_value=1,
+        max_value=10,
+        value=8,
+        key="what_if_impact",
+    )
+    assumptions_key = (event_type.value, entity_ids, impact_score)
+    if st.button(
+        "Run hypothetical simulation",
+        disabled=not entity_ids,
+        type="primary",
+    ):
+        try:
+            with (
+                st.spinner("Running non-persisted hypothetical stress..."),
+                DashboardApiClient(api_url) as client,
+            ):
+                result = client.run_what_if(event_type, entity_ids, impact_score)
+            st.session_state["latest_what_if"] = (assumptions_key, result)
+        except DashboardApiError as error:
+            st.error(str(error))
+
+    latest = st.session_state.get("latest_what_if")
+    if latest and latest[0] == assumptions_key:
+        st.caption(
+            "Hypothetical assumptions: "
+            f"{event_type.value}; entities {', '.join(entity_ids)}; impact {impact_score}."
+        )
+        _render_stress_result(latest[1], key_prefix="what_if")
+    else:
+        st.caption("Run the controls above to calculate a non-persisted hypothetical result.")
+
+
+def _render_stress_lab(
+    api_url: str,
+    response: SignalListResponse,
+    portfolio: PortfolioSummaryResponse,
+) -> None:
     st.markdown(
         '<div class="source-note"><strong>Synthetic scenario:</strong> shocks and portfolio '
         "positions are project-authored assumptions for demonstration. They are not calibrated "
         "regulatory scenarios.</div>",
         unsafe_allow_html=True,
     )
+    _render_what_if(api_url, portfolio)
+    st.divider()
+    st.subheader("Observed or replay signal stress")
     if not response.items:
         st.info("No filtered signals are available for stress testing.")
         return
@@ -365,7 +443,7 @@ def _render_stress_lab(api_url: str, response: SignalListResponse) -> None:
 
     latest = st.session_state.get("latest_stress")
     if latest and latest[0] == selected.signal_id:
-        _render_stress_result(latest[1])
+        _render_stress_result(latest[1], key_prefix="observed")
     else:
         st.caption(
             "Run the selected signal to view a persisted stress decision and reconciliation."
@@ -478,7 +556,7 @@ def main() -> None:
     with signals_tab:
         _render_signals(filtered, portfolio)
     with stress_tab:
-        _render_stress_lab(api_url, filtered)
+        _render_stress_lab(api_url, filtered, portfolio)
     with sources_tab:
         _render_source_health(api_url, status)
 

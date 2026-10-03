@@ -18,8 +18,14 @@ from risk_engine.api.models import (
     SourceStatusResponse,
     StressTestRequest,
     StressTestResponse,
+    WhatIfStressRequest,
+    WhatIfStressResponse,
 )
-from risk_engine.api.service import LiveModeDisabledError, RiskApplicationService
+from risk_engine.api.service import (
+    LiveModeDisabledError,
+    RiskApplicationService,
+    UnknownPortfolioEntityError,
+)
 from risk_engine.config import Settings
 from risk_engine.nlp.models import EventType, RiskSignal
 from risk_engine.persistence.sqlite import SQLiteStore
@@ -134,6 +140,20 @@ def create_app(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Risk signal not found"
             )
         return response
+
+    @app.post(
+        "/api/v1/stress-tests/what-if",
+        response_model=WhatIfStressResponse,
+        tags=["stress"],
+    )
+    def run_what_if(request: WhatIfStressRequest) -> WhatIfStressResponse:
+        try:
+            return service.what_if(request)
+        except UnknownPortfolioEntityError as error:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(error),
+            ) from error
 
     @app.get(
         "/api/v1/stress-tests/{result_id}",
