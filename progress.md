@@ -15,11 +15,26 @@ Last updated: 2026-10-03
 | 6 Dashboard | complete | Signal monitor and portfolio stress views | Dashboard contract tests and rendered walkthrough | `feat(ui): add risk monitoring and stress dashboard` |
 | 7 Validation | complete | End-to-end tests, benchmark, failure and performance checks | Offline suite and recorded metrics | `test: validate the complete risk intelligence workflow` |
 | 8 Implementation documentation | complete | Final quickstart, architecture image, dataset guide, results and demo script | Clean-clone rehearsal | `docs: finalize reproducible implementation guide` |
+| 9 Deterministic as-of time (P0 T1) | planned | Stable fixture/replay recency and scores | Frozen-time NLP and API tests | `fix(nlp): anchor replay recency to batch time` |
+| 10 Organic replay trigger (P0 T2) | planned | New synthetic replay mode and natural 8+ signal | Exact-score replay and stress tests | `feat(replay): add organic high-impact stress scenario` |
+| 11 Hypothetical what-if (P0 T3) | planned | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
+| 12 Real-data benchmark (P1 T4) | planned | External CSV evaluation and documented metrics | Metric, CLI and failure tests | `feat(benchmark): compare deterministic and model NLP quality` |
+| 13 Model-mode hygiene (P1 T5) | planned | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
+| 14 Dashboard evidence (P1 T6) | planned | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
+| 15 Assumption honesty (P1 T7) | planned | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
+| 16 Release and demo hygiene (P1 T8) | planned | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
+| 17 Deterministic NLP robustness (P2 T9) | optional | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
+| 18 Live path and sector proxy (P2 T10) | optional | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
+| 19 Streaming and polling (P2 T11) | optional | SSE, auto-stress and bounded polling | Streaming, idempotency and lifecycle tests | `feat(api): stream signals and automate stress decisions` |
+| 20 Portfolio generator (P2 T12) | optional-blocked | Seeded 200-position synthetic generator | Determinism, privacy and reconciliation tests | `feat(portfolio): generate reproducible synthetic portfolios` |
 
 ## Current Phase
 
-All implementation phases are complete. Presentation and video production remain
-deferred until requested, as planned.
+The original eight implementation phases are complete. Phase 9 is next: deterministic
+as-of time. Phases 9–16 are the required P0/P1 improvement path; Phases 17–20 are
+optional P2 work. Phase 20 is blocked until a permitted transaction dataset is supplied.
+The detailed sequence and task gates are in
+[docs/improvement-plan.md](docs/improvement-plan.md).
 
 ## Decisions
 
@@ -32,6 +47,10 @@ deferred until requested, as planned.
 - Use a fully synthetic portfolio with fictional issuers and configurable scenarios.
 - Use SQLite, FastAPI, and Streamlit for a locally reproducible prototype.
 - Keep presentation and video work deferred until implementation results are stable.
+- Preserve `data/sample/*.json` byte-for-byte throughout the improvement program.
+- Use one numbered phase and one conventional commit for each improvement task.
+- Treat replay, fixtures, live data, model mode, and hypothetical simulation as explicit
+  non-interchangeable modes with no silent fallback.
 - Keep organizer-provided DOCX files out of the implementation repository; their
   requirements are captured in the README and architecture decision record.
 
@@ -202,6 +221,25 @@ deferred until requested, as planned.
   3.13 virtual environment using the declared requirements. The configuration check, Ruff, all 83
   tests, `pip check`, and the offline validator passed; the clean-clone validator took
   0.179 seconds against its 5-second budget and reconciled stress loss to USD 0.00.
+
+### 2026-10-03 Improvement Baseline and Roadmap
+
+- Confirmed the working tree started clean at commit `632bab7` before planning changes.
+- Ran Ruff successfully with no findings.
+- The first plain Pytest invocation encountered only a managed-shell permission error
+  at `C:\Users\jayas\AppData\Local\Temp\pytest-of-jayas`; 69 tests passed before 14
+  temporary-directory fixtures errored and no assertion failed.
+- Reran the unchanged full suite with `--basetemp data/runtime/improvements-baseline`:
+  all 83 tests passed with one upstream Starlette deprecation warning.
+- Ran the offline validator successfully: all 7 manifested artifacts matched, all 6
+  signals persisted, portfolio value was USD 55.50 million, stress reconciliation
+  difference was USD 0.00, and total runtime was 0.118 seconds.
+- Added the Phase 9–20 roadmap with one task and one conventional commit per phase,
+  mandatory post-task gates, deliberate manifest-count changes, and explicit gates for
+  the real benchmark, presentation PDF, checked regression data, and transaction input.
+- Verified the roadmap change with Ruff, all 83 tests, the offline validator, and
+  `git diff --check`. The validator again matched 7/7 artifacts, persisted 6/6 signals,
+  reconciled to USD 0.00, and completed in 0.121 seconds.
 
 ## Risks and Blockers
 

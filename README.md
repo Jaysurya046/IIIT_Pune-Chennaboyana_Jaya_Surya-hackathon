@@ -181,6 +181,8 @@ The complete evidence and interpretation are in [docs/results.md](docs/results.m
   usefulness, limitations, and next steps.
 - [Demonstration runbook](docs/demo-script.md) — separate five-minute live and
   up-to-ten-minute recorded walkthroughs.
+- [Post-implementation improvement plan](docs/improvement-plan.md) — Phases 9–20,
+  task dependencies, data gates, tests, commands, and conventional commits.
 - [API guide](docs/api.md) and [dashboard guide](docs/dashboard.md) — operational
   contracts, filters, metrics, and error semantics.
 
