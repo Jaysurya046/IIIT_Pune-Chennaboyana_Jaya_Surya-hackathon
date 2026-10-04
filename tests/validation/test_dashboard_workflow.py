@@ -13,6 +13,7 @@ from streamlit.testing.v1 import AppTest
 
 from risk_engine.api.app import create_app
 from risk_engine.config import Settings
+from risk_engine.nlp.models import SentimentLabel, SentimentResult
 from risk_engine.persistence import SQLiteStore
 
 
@@ -77,6 +78,44 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
             timeout=5,
         )
         replay_analysis.raise_for_status()
+
+        replay_signals = [
+            signal
+            for signal in store.list_signals(limit=100, offset=0)[0]
+            if signal.provenance.source.startswith("replay-")
+        ]
+        assert len(replay_signals) == 4
+        positive_signal = replay_signals[0].model_copy(
+            update={
+                "impact_score": 10,
+                "sentiment": SentimentResult(
+                    label=SentimentLabel.POSITIVE,
+                    score=0.9,
+                    confidence=0.9,
+                    probabilities={
+                        SentimentLabel.POSITIVE: 0.9,
+                        SentimentLabel.NEUTRAL: 0.05,
+                        SentimentLabel.NEGATIVE: 0.05,
+                    },
+                ),
+            }
+        )
+        neutral_signal = replay_signals[1].model_copy(
+            update={
+                "impact_score": 8,
+                "sentiment": SentimentResult(
+                    label=SentimentLabel.NEUTRAL,
+                    score=0.0,
+                    confidence=0.9,
+                    probabilities={
+                        SentimentLabel.POSITIVE: 0.05,
+                        SentimentLabel.NEUTRAL: 0.9,
+                        SentimentLabel.NEGATIVE: 0.05,
+                    },
+                ),
+            }
+        )
+        store.save_signals([positive_signal, neutral_signal])
         monkeypatch.setenv("RISK_ENGINE_API_URL", base_url)
 
         dashboard = AppTest.from_file(Path("src/risk_engine/dashboard/app.py").resolve()).run(
@@ -115,6 +154,35 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
             multiselect.label == "Hypothetical entities"
             for multiselect in dashboard.multiselect
         )
+        positive_note = "The trigger is not a claim that positive sentiment is harmful."
+        assert any(positive_note in message.value for message in dashboard.info)
+
+        stress_selector = next(
+            selectbox for selectbox in dashboard.selectbox if selectbox.label == "Trigger signal"
+        )
+        neutral_option = next(
+            option for option in stress_selector.options if option.startswith("Impact 8")
+        )
+        stress_selector.select(neutral_option).run(timeout=30)
+        assert not any(positive_note in message.value for message in dashboard.info)
+
+        stress_selector = next(
+            selectbox for selectbox in dashboard.selectbox if selectbox.label == "Trigger signal"
+        )
+        positive_option = next(
+            option for option in stress_selector.options if option.startswith("Impact 10")
+        )
+        stress_selector.select(positive_option).run(timeout=30)
+        assert any(positive_note in message.value for message in dashboard.info)
+
+        stress_selector = next(
+            selectbox for selectbox in dashboard.selectbox if selectbox.label == "Trigger signal"
+        )
+        negative_option = next(
+            option for option in stress_selector.options if option.startswith("Impact 9")
+        )
+        stress_selector.select(negative_option).run(timeout=30)
+        assert not any(positive_note in message.value for message in dashboard.info)
 
         what_if_event = next(
             selectbox

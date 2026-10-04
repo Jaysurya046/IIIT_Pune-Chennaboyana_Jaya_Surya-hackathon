@@ -37,7 +37,7 @@ from risk_engine.dashboard.model import (
     stress_by_issuer,
     stress_by_sector,
 )
-from risk_engine.nlp.models import EventType, RiskSignal
+from risk_engine.nlp.models import EventType, RiskSignal, SentimentLabel
 
 DEFAULT_API_URL = "http://127.0.0.1:8000"
 
@@ -80,6 +80,17 @@ def _money(value: Decimal) -> str:
 def _signal_label(signal: RiskSignal) -> str:
     entities = ", ".join(entity.name for entity in signal.entities) or "Unresolved entity"
     return f"Impact {signal.impact_score} · {signal.event.event_type.value} · {entities}"
+
+
+def _positive_trigger_note(signal: RiskSignal) -> str | None:
+    if signal.impact_score <= 7 or signal.sentiment.label is not SentimentLabel.POSITIVE:
+        return None
+    return (
+        "Positive-sentiment interpretation: this signal qualifies because the impact "
+        "formula uses direction-agnostic sentiment magnitude together with event severity "
+        "and the other stored factors. The trigger is not a claim that positive sentiment "
+        "is harmful."
+    )
 
 
 def _apply_styles() -> None:
@@ -467,6 +478,9 @@ def _render_stress_lab(
     )
     if selected.impact_score > 7:
         st.success("Eligible: impact is strictly greater than the configured threshold of 7.")
+        positive_note = _positive_trigger_note(selected)
+        if positive_note is not None:
+            st.info(positive_note)
     else:
         st.info("Not eligible: the engine will record a skipped decision because impact is ≤ 7.")
 

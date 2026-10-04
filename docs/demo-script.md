@@ -29,8 +29,8 @@ Complete these steps before recording or joining a jury session:
 | 0:25–0:55 | Terminal | Show the validation command completing successfully. Explain that it verifies checksums, golden cases, persistence, reconciliation, and runtime budget without network access. |
 | 0:55–1:30 | Source health | Run the separate synthetic replay. State that its four fictional, checksummed records are inspired only by a general public banking-stress pattern and contain no copied text. |
 | 1:30–2:35 | Risk signals | Filter to one event category, then reset to All. Open one signal and show sentiment, event, impact factors, entity evidence, model versions, and source provenance. |
-| 2:35–3:45 | Stress lab | Select an impact-9 replay signal and run the stress decision. Explain the strict score-greater-than-7 rule and that the unchanged engine produced the score without manual editing. |
-| 3:45–4:30 | Stress result | Show before/after value, illustrative loss, applied shocks, and issuer or asset-class breakdown. Point out exact instrument reconciliation. |
+| 2:35–3:45 | Stress lab | Select an impact-9 replay signal and run the stress decision. Explain the strict score-greater-than-7 rule and that the unchanged engine produced the score without manual editing. State that absolute sentiment is direction-agnostic; a positive trigger would reflect magnitude and other factors, not harmful positive sentiment. |
+| 3:45–4:30 | Stress result | Show before/after value, illustrative loss, applied shocks, and issuer or asset-class breakdown. Point out exact instrument reconciliation. For derivatives, state that positive DV01 is USD loss per +1 bp rate rise and positive rate shock means rates rise. |
 | 4:30–5:00 | Results and limitations | Summarize two sources, eight event categories, nine API endpoints, USD 55.50M synthetic exposure, and offline quality gates. Close with the synthetic-data and non-advice limitation. |
 
 If a live UI action is slow, continue with the already-populated view rather than
@@ -75,7 +75,15 @@ path with pinned revisions. Mode selection is explicit and never silently falls 
 
 **How is the impact score explained?** The score combines event severity, absolute
 sentiment, classification confidence, entity relevance, corroboration, and recency
-using documented weights. Each factor is stored with the signal.
+using documented weights. Each factor is stored with the signal. Absolute sentiment is
+direction-agnostic, so positive and negative language of equal magnitude contribute
+equally; a positive trigger is not a claim that positive sentiment is harmful.
+
+**What derivative convention is used?** Delta exposure is signed USD, the underlying
+shock is a decimal return, positive DV01 is USD loss per +1 bp rate rise, and positive
+`rate_shock_bps` means rates rise. The linear approximation is `P&L = delta_exposure x
+underlying_shock - DV01 x rate_shock_bps`, followed by `value after = value before +
+P&L`.
 
 **Why is the trigger strictly greater than seven?** That boundary comes from the
 problem statement example and is encoded explicitly. Tests verify that seven is

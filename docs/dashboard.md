@@ -77,6 +77,13 @@ Chart tooltips and the exact-value tables expose the same filtered grain. The da
 impact line at 7 marks the trigger boundary; it does not imply causality between
 sentiment and impact.
 
+The formula uses the absolute value of signed sentiment, so that component is
+direction-agnostic: strongly positive and strongly negative language can both increase
+impact. When an eligible positive-sentiment signal is selected, Stress Lab displays a
+specific interpretation note explaining that the trigger reflects magnitude plus the
+other stored factors, not a claim that positive sentiment is harmful. The note is not
+shown for neutral, negative, or non-triggering selections.
+
 The **Signal publication timeline** uses source `published_at` in UTC on the x-axis,
 integer impact on the y-axis, and a stable color for each event type. Points are ordered
 chronologically and retain entity, source, synthetic classification, and signal ID in
@@ -99,6 +106,11 @@ Asset-class, sector, issuer, and instrument views independently reconcile to the
 portfolio total. Stress values are simplified demonstration results, not forecasts,
 investment advice, or calibrated regulatory capital estimates. Model and valuation
 limitations are documented in `data/README.md` and `docs/architecture.md`.
+
+For derivatives, positive `rate_shock_bps` means rates rise and positive DV01 is the
+USD loss per +1 bp move. The displayed linear result uses `P&L = delta_exposure x
+underlying_shock - DV01 x rate_shock_bps`, then adds P&L to the position's value. The
+underlying shock is a decimal return, while the rate shock remains in basis points.
 
 The **Illustrative loss waterfall by instrument** orders positive loss contributions
 from largest to smallest. Relative bars accumulate to the final **Reconciled total**;

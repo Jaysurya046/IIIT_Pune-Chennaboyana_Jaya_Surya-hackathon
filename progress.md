@@ -21,7 +21,7 @@ Last updated: 2026-10-04
 | 12 Real-data benchmark (P1 T4) | complete | External CSV evaluation and documented metrics | Metric, CLI, failure and real-data evidence | `feat(benchmark): compare deterministic and model NLP quality` |
 | 13 Model-mode hygiene (P1 T5) | complete | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
 | 14 Dashboard evidence (P1 T6) | complete | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
-| 15 Assumption honesty (P1 T7) | planned | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
+| 15 Assumption honesty (P1 T7) | complete | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
 | 16 Release and demo hygiene (P1 T8) | planned | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
 | 17 Deterministic NLP robustness (P2 T9) | optional | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
 | 18 Live path and sector proxy (P2 T10) | optional | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
@@ -31,8 +31,8 @@ Last updated: 2026-10-04
 ## Current Phase
 
 The original eight implementation phases, P0 improvement Phases 9–11, and P1 Phases
-12–14 are complete. Phase 15 is next: assumption honesty. Phases 15–16 are the remaining
-P1 improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
+12–15 are complete. Phase 16 is next: release and demo hygiene. Phase 16 is the remaining
+P1 improvement task; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
 permitted transaction dataset is supplied. The detailed sequence and task gates are
 in [docs/improvement-plan.md](docs/improvement-plan.md).
 
@@ -57,6 +57,11 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   replay mode for the organic stress-trigger demonstration.
 - Keep hypothetical assumptions and results outside signal and stress-decision
   persistence, with explicit API and dashboard labels separating them from evidence.
+- Treat absolute sentiment as direction-agnostic intensity and disclose at the trigger
+  when an eligible positive signal is selected; do not imply that positive sentiment
+  is harmful.
+- Define derivative DV01 as positive USD loss per +1 bp rate rise, keep positive rate
+  shocks as rate increases, and publish the exact linear P&L and value equations.
 - Keep organizer-provided DOCX files out of the implementation repository; their
   requirements are captured in the README and architecture decision record.
 
@@ -391,6 +396,32 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   passed with one upstream Starlette warning, and the offline validator matched 9/9
   artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
   0.132 seconds against its 5-second budget.
+
+### 2026-10-04 Phase 15
+
+- Started from clean synchronized commit `f8579e9`; Ruff passed, all 124 baseline tests
+  passed with one upstream Starlette warning, and validation passed with 9/9 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.119 seconds
+  total runtime.
+- Documented beside the impact formula that absolute sentiment is direction-agnostic:
+  positive and negative language of equal magnitude contribute equally, and a positive
+  trigger is not evidence that positive sentiment is harmful.
+- Added a Stress Lab interpretation note shown only when a positive-sentiment signal
+  strictly exceeds the trigger threshold; API-backed AppTest coverage proves the note
+  is absent for eligible neutral and negative selections.
+- Declared derivative units and signs across architecture, data, dashboard, results,
+  demo, and root guidance: signed USD delta exposure, decimal underlying shock, positive
+  DV01 as USD loss per +1 bp rise, and positive rate shock as a rate increase.
+- Published the exact linear derivative P&L, value-after, and illustrative-loss
+  equations together with the approximation's principal limitations.
+- Rendered the affected Stress Lab state at 1440 x 1000 and 760 x 1000. The note and
+  trigger context remained readable, controls wrapped cleanly, and the narrow viewport
+  had no horizontal page overflow.
+- Left all nine checksummed artifacts and `data/sample/*.json` untouched.
+- Passed the mandatory Phase 15 gate: Ruff reported no findings, all 125 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 9/9
+  artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
+  0.067 seconds against its 5-second budget.
 
 ## Risks and Blockers
 

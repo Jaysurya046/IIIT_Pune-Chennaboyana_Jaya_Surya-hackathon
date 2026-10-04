@@ -98,6 +98,14 @@ covering loans, bonds, equities, and derivatives. Its companies align with the
 fictional issuer watchlist. Values, credit parameters, durations, delta exposures,
 and DV01 measures are project-authored solely to exercise the prototype calculations.
 
+For derivative positions, `delta_exposure` is a signed USD exposure and the configured
+underlying shock is a decimal return. DV01 uses USD per basis point and is entered as a
+positive loss for a +1 bp interest-rate move; positive `rate_shock_bps` means rates
+rise. The exact linear calculation is `P&L (USD) = delta_exposure (USD) x
+underlying_shock (decimal) - DV01 (USD/bp) x rate_shock_bps (bp)`, followed by `value
+after = value before + P&L`. It is an illustrative approximation, not a full derivative
+pricing model.
+
 `data/portfolio/scenarios.json` maps each event category to one explicit set of shocks.
 Macroeconomic and geopolitical scenarios apply portfolio-wide; issuer-specific events
 apply only to resolved entities. These shocks are illustrative assumptions rather

@@ -126,3 +126,22 @@ def test_demo_runbook_covers_both_time_limits_and_data_disclosure() -> None:
     assert "Up-to-Ten-Minute Recorded Walkthrough" in content
     assert "synthetic" in content.lower()
     assert "incognito" in content.lower()
+
+
+def test_directional_and_derivative_assumptions_are_explicit() -> None:
+    architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
+    dashboard = (ROOT / "docs" / "dashboard.md").read_text(encoding="utf-8")
+    data_guide = (ROOT / "data" / "README.md").read_text(encoding="utf-8")
+    readme = README.read_text(encoding="utf-8")
+
+    for content in (architecture, dashboard, readme):
+        normalized = " ".join(content.split())
+        assert "direction-agnostic" in normalized
+        assert "positive sentiment is harmful" in normalized
+
+    for content in (architecture, dashboard, data_guide, readme):
+        normalized = " ".join(content.split())
+        assert "`rate_shock_bps`" in normalized and "means rates rise" in normalized
+        assert "DV01" in normalized and "USD" in normalized and "+1 bp" in normalized
+        assert "delta_exposure" in normalized
+        assert "underlying_shock" in normalized

@@ -20,6 +20,11 @@ wholesale-banking portfolio containing loans, bonds, equities, and derivatives. 
 application shows portfolio value and expected loss before and after the stress,
 with breakdowns by issuer, sector, asset class, and instrument.
 
+The impact formula uses absolute sentiment magnitude and is therefore
+direction-agnostic: strongly positive and strongly negative language can both raise a
+score. An eligible positive-sentiment signal reflects magnitude plus the other stored
+factors; it is not a claim that positive sentiment is harmful.
+
 The implementation prioritizes a reproducible offline demonstration while retaining
 live adapters for GDELT news and Bluesky public posts. Presentation slides and the
 recorded walkthrough are intentionally deferred until the working prototype and its
@@ -164,6 +169,12 @@ asset classes. In the tested issuer credit-event scenario, the two Northstar Ene
 positions move from a portfolio total of USD 55.50 million to USD 53.15 million: a
 USD 2.35 million illustrative loss, including a USD 0.30 million expected-loss
 increase. Instrument losses reconcile exactly to the portfolio result.
+
+Derivative results use an explicit linear convention: delta exposure is signed USD,
+the underlying shock is a decimal return, positive DV01 is USD loss per +1 bp rate
+rise, and positive `rate_shock_bps` means rates rise. The exact P&L equation is
+`delta_exposure x underlying_shock - DV01 x rate_shock_bps`; this is not a full
+derivative revaluation.
 
 These figures demonstrate the implemented calculations against synthetic assumptions;
 they are not forecasts, calibrated regulatory stress results, or investment advice.

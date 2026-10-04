@@ -79,6 +79,17 @@ This trace makes the prototype reviewable in ways a single opaque sentiment scor
 not: an analyst can identify the source, inspect the reasons for the impact score,
 see the scenario assumption, and reconcile the portfolio total back to positions.
 
+One deliberate scoring limitation is that absolute sentiment is direction-agnostic:
+strongly positive and strongly negative language can both raise impact. A positive
+signal crossing the threshold therefore indicates high combined magnitude and other
+risk factors, not that positive sentiment is itself harmful. The dashboard states this
+at the decision point.
+
+Derivative evidence uses a declared linear convention: delta exposure is signed USD,
+the underlying shock is a decimal return, positive DV01 is USD loss per +1 bp rate
+rise, and positive `rate_shock_bps` means rates rise. P&L is `delta_exposure x
+underlying_shock - DV01 x rate_shock_bps`; it is not a full revaluation model.
+
 ## Domain Impact
 
 The prototype demonstrates a practical bridge between unstructured event monitoring

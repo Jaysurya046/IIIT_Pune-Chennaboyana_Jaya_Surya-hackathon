@@ -111,6 +111,11 @@ The result is rounded and clamped to the inclusive range 1 through 10. The indiv
 factors and model revisions are stored with each signal so the score can be explained
 and reproduced.
 
+`absolute sentiment` is the magnitude of the signed sentiment score. Its contribution
+is direction-agnostic: strongly positive and strongly negative language can both raise
+the impact score. The factor measures intensity; it does not claim that positive
+sentiment is harmful or that sentiment alone determines an adverse portfolio outcome.
+
 Recency is evaluated against one timezone-aware analysis timestamp. Callers may pass
 that timestamp explicitly to `RiskSignalEngine.analyze`; otherwise the engine uses its
 UTC clock. Fixture and replay batches are identified by their explicit synthetic
@@ -181,6 +186,24 @@ loan value after = value - (stressed expected loss - base expected loss)
 equity value after = value x (1 + configured price shock)
 derivative P&L = delta exposure x underlying shock - DV01 x rate shock in basis points
 ```
+
+For the derivative approximation, `delta_exposure` is a signed USD exposure and
+`underlying_shock` is a decimal return (for example, `-0.18` means a fall of 18%). DV01
+is stored as a positive USD loss for a +1 bp interest-rate move; a positive
+`rate_shock_bps` therefore means rates rise. The implementation's exact equation is:
+
+```text
+P&L (USD) = delta_exposure (USD) x underlying_shock (decimal)
+            - DV01 (USD/bp) x rate_shock_bps (bp)
+value after (USD) = value before (USD) + P&L (USD)
+illustrative loss (USD) = value before (USD) - value after (USD)
+```
+
+Thus, for the committed long-positive delta and positive-DV01 examples, a negative
+underlying shock and a positive rate shock both reduce value. This is a deliberately
+simplified linear convention: it omits convexity, optionality, basis risk, discounting,
+and non-parallel curve effects. Monetary results are rounded half-up to cents after the
+P&L calculation.
 
 Signals trigger only when their impact score is strictly greater than the configured
 threshold of 7. Macroeconomic and geopolitical scenarios apply to the whole portfolio;
