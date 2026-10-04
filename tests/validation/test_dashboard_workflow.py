@@ -93,7 +93,7 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
         assert dashboard.metric[0].label == "Matching signals"
         assert dashboard.metric[0].value == "10"
         assert len(dashboard.dataframe) >= 3
-        assert len(dashboard.get("plotly_chart")) == 2
+        assert len(dashboard.get("plotly_chart")) == 3
         assert any(
             button.label == "Ingest and analyze synthetic replay"
             for button in dashboard.button
@@ -160,8 +160,13 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
 
         assert not dashboard.exception
         assert any(metric.label == "Illustrative loss" for metric in dashboard.metric)
+        assert len(dashboard.get("plotly_chart")) == 6
         assert any(
             "Hypothetical assumptions: Credit Event" in caption.value
+            for caption in dashboard.caption
+        )
+        assert any(
+            "hypothetical, non-persisted result" in caption.value
             for caption in dashboard.caption
         )
 
@@ -179,7 +184,16 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
 
         assert not dashboard.exception
         assert any(metric.label == "Illustrative loss" for metric in dashboard.metric)
+        assert len(dashboard.get("plotly_chart")) == 9
         assert any("issuer-credit-event" in message.value for message in dashboard.success)
+        assert any(
+            "persisted signal decision" in caption.value
+            for caption in dashboard.caption
+        )
+        assert any(
+            "Triggered observed/replay result on the synthetic portfolio" in caption.value
+            for caption in dashboard.caption
+        )
 
         event_filter = next(
             selectbox for selectbox in dashboard.selectbox if selectbox.label == "Event type"

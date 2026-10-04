@@ -20,7 +20,7 @@ Last updated: 2026-10-04
 | 11 Hypothetical what-if (P0 T3) | complete | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
 | 12 Real-data benchmark (P1 T4) | complete | External CSV evaluation and documented metrics | Metric, CLI, failure and real-data evidence | `feat(benchmark): compare deterministic and model NLP quality` |
 | 13 Model-mode hygiene (P1 T5) | complete | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
-| 14 Dashboard evidence (P1 T6) | planned | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
+| 14 Dashboard evidence (P1 T6) | complete | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
 | 15 Assumption honesty (P1 T7) | planned | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
 | 16 Release and demo hygiene (P1 T8) | planned | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
 | 17 Deterministic NLP robustness (P2 T9) | optional | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
@@ -31,7 +31,7 @@ Last updated: 2026-10-04
 ## Current Phase
 
 The original eight implementation phases, P0 improvement Phases 9–11, and P1 Phases
-12–13 are complete. Phase 14 is next: dashboard evidence. Phases 14–16 are the remaining
+12–14 are complete. Phase 15 is next: assumption honesty. Phases 15–16 are the remaining
 P1 improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
 permitted transaction dataset is supplied. The detailed sequence and task gates are
 in [docs/improvement-plan.md](docs/improvement-plan.md).
@@ -364,6 +364,33 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   passed with one upstream Starlette warning, and the offline validator matched 9/9
   artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
   0.122 seconds against its 5-second budget.
+
+### 2026-10-04 Phase 14
+
+- Started from clean synchronized commit `6cad661`; Ruff passed, all 120 baseline tests
+  passed with one upstream Starlette warning, and validation passed with 9/9 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.125 seconds
+  total runtime.
+- Added a chronological signal timeline using source publication time in UTC, impact on
+  the 1–10 scale, stable event colors, filtered provenance tooltips, and the strict
+  impact-greater-than-7 stress reference.
+- Added a descending horizontal instrument-loss waterfall with all eight instruments,
+  non-negative contributions, an exact reconciled-total bar, readable labels, and an
+  adjacent synthetic or hypothetical classification.
+- Added unit and real Streamlit AppTest coverage for timeline semantics and empty state,
+  waterfall ordering/signs/cent-level reconciliation, chart counts, and observed versus
+  hypothetical disclosure text; 15 focused tests passed.
+- Captured four 1440 x 1000 API-backed screenshots for signal evidence, replay source
+  health, organic triggered stress, and hypothetical controls; each visibly identifies
+  synthetic or hypothetical content and is used in the README.
+- Inspected every affected view at 1440 x 1000 and 760 x 1000. The review confirmed
+  responsive stacking, visible marks and legends, readable dates and currency labels,
+  explicit empty/filter scope, and no horizontal page overflow.
+- Left all nine checksummed artifacts and `data/sample/*.json` untouched.
+- Passed the mandatory Phase 14 gate: Ruff reported no findings, all 124 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 9/9
+  artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
+  0.132 seconds against its 5-second budget.
 
 ## Risks and Blockers
 

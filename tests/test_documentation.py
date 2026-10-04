@@ -54,6 +54,29 @@ def test_architecture_png_is_high_resolution() -> None:
     assert height >= 900
 
 
+def test_dashboard_evidence_screenshots_are_committed_and_reviewable() -> None:
+    screenshots = (
+        "source-health.png",
+        "risk-signal-timeline.png",
+        "organic-stress-result.png",
+        "hypothetical-what-if.png",
+    )
+    readme = README.read_text(encoding="utf-8")
+
+    for filename in screenshots:
+        path = ROOT / "docs" / "img" / filename
+        assert path.is_file(), f"missing dashboard evidence screenshot: {filename}"
+        assert path.stat().st_size >= 50_000, (
+            f"dashboard screenshot is unexpectedly small: {filename}"
+        )
+        with path.open("rb") as image:
+            header = image.read(24)
+        assert header[:8] == b"\x89PNG\r\n\x1a\n"
+        width, height = struct.unpack(">II", header[16:24])
+        assert (width, height) == (1440, 1000)
+        assert f"docs/img/{filename}" in readme
+
+
 def test_local_markdown_links_resolve() -> None:
     markdown_files = [README, *sorted((ROOT / "docs").glob("*.md"))]
     link_pattern = re.compile(r"!?\[[^]]*]\(([^)]+)\)")

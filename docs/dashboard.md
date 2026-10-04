@@ -10,10 +10,11 @@ it does not calculate signals, scenarios, or valuations itself.
 The dashboard answers three distinct questions:
 
 1. **Risk signals:** What events are present, how severe are they, and why did the
-   engine assign each impact score?
+   engine assign each impact score? How do those signals unfold by publication time?
 2. **Stress lab:** Does a selected signal pass the configured trigger, and how does its
-   mapped scenario affect the synthetic portfolio? What would happen under separately
-   labeled, user-selected hypothetical assumptions?
+   mapped scenario affect the synthetic portfolio, and which instruments contribute to
+   the reconciled loss? What would happen under separately labeled, user-selected
+   hypothetical assumptions?
 3. **Source health:** Which sources completed, what was accepted or rejected, and when
    did the latest ingestion finish?
 
@@ -76,6 +77,12 @@ Chart tooltips and the exact-value tables expose the same filtered grain. The da
 impact line at 7 marks the trigger boundary; it does not imply causality between
 sentiment and impact.
 
+The **Signal publication timeline** uses source `published_at` in UTC on the x-axis,
+integer impact on the y-axis, and a stable color for each event type. Points are ordered
+chronologically and retain entity, source, synthetic classification, and signal ID in
+their hover evidence. The chart responds to the same API-backed sidebar filters as the
+signal register and Stress Lab selector.
+
 ## Stress Result Interpretation
 
 The Stress Lab keeps two paths visibly separate. The **Hypothetical what-if** panel has
@@ -93,11 +100,35 @@ portfolio total. Stress values are simplified demonstration results, not forecas
 investment advice, or calibrated regulatory capital estimates. Model and valuation
 limitations are documented in `data/README.md` and `docs/architecture.md`.
 
+The **Illustrative loss waterfall by instrument** orders positive loss contributions
+from largest to smallest. Relative bars accumulate to the final **Reconciled total**;
+zero-loss instruments remain visible so the complete eight-position population is not
+silently narrowed. The adjacent exact-value tables provide the source amounts at cent
+precision.
+
+## Evidence Screenshots
+
+The four committed images were captured from the local API and Streamlit application at
+1440 x 1000 pixels after loading the six fixture and four replay signals. No live or
+proprietary data appears in them.
+
+- [Signal timeline](img/risk-signal-timeline.png) — filtered publication-time evidence
+  with the synthetic-data disclosure and strict trigger reference.
+- [Source health](img/source-health.png) — the explicit two-source synthetic replay run.
+- [Organic stress result](img/organic-stress-result.png) — the unchanged impact-9 replay
+  path and its reconciled instrument waterfall.
+- [Hypothetical what-if](img/hypothetical-what-if.png) — non-persisted controls with the
+  warning and synthetic-scenario disclosure.
+
 ## Verification
 
 Dashboard tests cover typed HTTP contracts, query filters, sanitized failures, metric
-and grouping transformations, exact stress reconciliation, figure labels, and CLI
-launch construction. The release walkthrough renders the populated Streamlit script
+and grouping transformations, timeline semantics, waterfall ordering, exact stress
+reconciliation, figure labels, and CLI launch construction. The release walkthrough
+renders the populated Streamlit script
 against a real local API seeded from fixture and replay source types. It verifies
 hypothetical warnings and controls, skipped and triggered what-if states, the organic
 impact-9 persisted path, filter/reset behavior, KPI cards, and evidence tables.
+Phase 14 additionally inspected all affected views at 1440 x 1000 and 760 x 1000:
+marks, legends, disclosures, amounts, wrapping, and waterfall labels remained visible;
+the narrow layout stacked KPI and chart columns without horizontal page overflow.

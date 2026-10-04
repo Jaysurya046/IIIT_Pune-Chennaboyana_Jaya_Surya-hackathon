@@ -20,8 +20,10 @@ from risk_engine.api.models import (
 from risk_engine.dashboard.charts import (
     asset_class_figure,
     event_distribution_figure,
+    instrument_loss_waterfall_figure,
     issuer_loss_figure,
     sentiment_impact_figure,
+    signal_timeline_figure,
 )
 from risk_engine.dashboard.client import DashboardApiClient, DashboardApiError
 from risk_engine.dashboard.model import (
@@ -94,6 +96,9 @@ def _apply_styles() -> None:
         [data-testid="stMetricLabel"] { color: var(--muted); }
         [data-testid="stMetricValue"] { color: var(--ink); }
         [data-testid="stSidebar"] { border-right: 1px solid var(--line); }
+        [data-testid="stToolbar"], [data-testid="stStatusWidget"] {
+            display: none !important;
+        }
         .source-note {
             border-left: 4px solid #f9a825; background: #fff9e6; padding: .75rem 1rem;
             border-radius: 4px; color: #5d4a00; margin: .5rem 0 1rem;
@@ -218,6 +223,14 @@ def _render_signals(
         st.info("No signals match the current filters. Broaden the sidebar selections.")
         return None
 
+    st.plotly_chart(
+        signal_timeline_figure(response.items),
+        width="stretch",
+        config={"displaylogo": False},
+        theme=None,
+        key="signal_timeline_chart",
+    )
+
     chart_left, chart_right = st.columns(2)
     with chart_left:
         st.plotly_chart(
@@ -268,6 +281,16 @@ def _render_stress_result(
         return
 
     result = decision.result
+    if isinstance(response, WhatIfStressResponse):
+        st.caption(
+            "Classification: hypothetical, non-persisted result applied to the synthetic "
+            "portfolio."
+        )
+    else:
+        st.caption(
+            "Classification: persisted signal decision with an illustrative synthetic "
+            "portfolio scenario."
+        )
     st.success(decision.reason)
     st.caption(
         f"Scenario {result.scenario_id} · portfolio {result.portfolio_version} · "
@@ -313,6 +336,23 @@ def _render_stress_result(
             width="stretch",
             key=f"{key_prefix}_issuer_table",
         )
+
+    waterfall_classification = (
+        "Hypothetical synthetic portfolio evidence"
+        if isinstance(response, WhatIfStressResponse)
+        else "Triggered observed/replay result on the synthetic portfolio"
+    )
+    st.caption(
+        f"{waterfall_classification}: instrument loss contributions are ordered from "
+        "largest to smallest and reconcile to the final total."
+    )
+    st.plotly_chart(
+        instrument_loss_waterfall_figure(result),
+        width="stretch",
+        config={"displaylogo": False},
+        theme=None,
+        key=f"{key_prefix}_instrument_waterfall",
+    )
 
     st.subheader("Sector reconciliation")
     st.dataframe(

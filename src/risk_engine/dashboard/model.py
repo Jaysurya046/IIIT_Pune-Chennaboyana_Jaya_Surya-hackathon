@@ -46,6 +46,24 @@ def signal_rows(signals: tuple[RiskSignal, ...]) -> list[dict[str, object]]:
     ]
 
 
+def signal_timeline_rows(signals: tuple[RiskSignal, ...]) -> list[dict[str, object]]:
+    """Return publication-grain signal evidence in stable chronological order."""
+
+    rows = [
+        {
+            "Published (UTC)": signal.provenance.published_at,
+            "Impact": signal.impact_score,
+            "Event": signal.event.event_type.value,
+            "Entities": ", ".join(entity.name for entity in signal.entities) or "Unresolved",
+            "Source": signal.provenance.source,
+            "Synthetic": signal.provenance.synthetic,
+            "Signal ID": signal.signal_id,
+        }
+        for signal in signals
+    ]
+    return sorted(rows, key=lambda row: (row["Published (UTC)"], row["Signal ID"]))
+
+
 def event_rows(signals: tuple[RiskSignal, ...]) -> list[dict[str, object]]:
     aggregates: dict[str, list[int]] = defaultdict(list)
     for signal in signals:
@@ -106,6 +124,22 @@ def instrument_rows(result: StressResult) -> list[dict[str, object]]:
         }
         for item in result.instrument_results
     ]
+
+
+def instrument_loss_rows(result: StressResult) -> list[dict[str, object]]:
+    """Return descending instrument loss contributions after exact reconciliation."""
+
+    rows = [
+        {
+            "Instrument": item.instrument_id,
+            "Loss (USD)": item.loss,
+            "Affected": item.affected,
+        }
+        for item in result.instrument_results
+    ]
+    if sum((row["Loss (USD)"] for row in rows), Decimal("0")) != result.total_loss:
+        raise ValueError("Instrument loss waterfall does not reconcile to total loss")
+    return sorted(rows, key=lambda row: (-row["Loss (USD)"], row["Instrument"]))
 
 
 def _group_stress(

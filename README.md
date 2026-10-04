@@ -176,6 +176,21 @@ and entity filters; source provenance and score explanations; an explicit stress
 trigger; exact asset-class, sector, issuer, and instrument reconciliation; and clear
 labels for all synthetic fixture, portfolio, and scenario outputs.
 
+### Dashboard evidence
+
+These views were rendered from the committed synthetic fixtures and replay bundle. The
+screenshots retain the dashboard's synthetic or hypothetical disclosures and show the
+same API-backed values exercised by the offline test suite.
+
+<p>
+  <img src="docs/img/risk-signal-timeline.png" width="49%" alt="Synthetic risk-signal publication timeline">
+  <img src="docs/img/source-health.png" width="49%" alt="Synthetic replay source-health evidence">
+</p>
+<p>
+  <img src="docs/img/organic-stress-result.png" width="49%" alt="Triggered synthetic replay stress result and instrument waterfall">
+  <img src="docs/img/hypothetical-what-if.png" width="49%" alt="Hypothetical non-persisted stress controls">
+</p>
+
 Phase 7 adds a repeatable offline validation command covering source-manifest
 integrity, the synthetic NLP golden set, the full persisted workflow, independently
 recomputed portfolio and stress totals, failure paths, dashboard filter/reset behavior,
