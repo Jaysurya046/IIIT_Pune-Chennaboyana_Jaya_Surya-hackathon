@@ -2,7 +2,10 @@
 
 from subprocess import CompletedProcess
 
+import uvicorn
+
 from risk_engine import cli
+from risk_engine.api import app as api_app
 from risk_engine.dashboard import app
 
 
@@ -44,3 +47,26 @@ def test_dashboard_command_passes_bind_and_api_configuration(monkeypatch) -> Non
         "--browser.gatherUsageStats",
         "false",
     ]
+
+
+def test_serve_command_passes_explicit_model_warm_up(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+    sentinel = object()
+
+    def fake_create_app(settings, *, warm_model_mode):
+        captured.update(settings=settings, warm_model_mode=warm_model_mode)
+        return sentinel
+
+    def fake_run(app, *, host, port):
+        captured.update(app=app, host=host, port=port)
+
+    monkeypatch.setattr(api_app, "create_app", fake_create_app)
+    monkeypatch.setattr(uvicorn, "run", fake_run)
+
+    code = cli.main(["serve", "--host", "0.0.0.0", "--port", "8100", "--warm-models"])
+
+    assert code == 0
+    assert captured["warm_model_mode"] is True
+    assert captured["app"] is sentinel
+    assert captured["host"] == "0.0.0.0"
+    assert captured["port"] == 8100

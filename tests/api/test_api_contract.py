@@ -7,6 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from risk_engine.api.app import create_app
+from risk_engine.api.service import RiskApplicationService
 from risk_engine.config import Settings
 from risk_engine.persistence import SQLiteStore
 
@@ -63,6 +64,46 @@ def test_health_empty_status_and_openapi_contract(api_client) -> None:
         "/api/v1/portfolio/summary",
     }
     assert expected_paths.issubset(schema["paths"])
+
+
+def test_opt_in_model_warm_up_runs_before_api_startup(tmp_path: Path, monkeypatch) -> None:
+    calls: list[str] = []
+
+    def warm_up(_service: RiskApplicationService) -> None:
+        calls.append("model")
+
+    monkeypatch.setattr(RiskApplicationService, "warm_up_model_mode", warm_up)
+    settings = Settings(
+        environment="test",
+        data_dir=Path("data"),
+        database_url=f"sqlite:///{(tmp_path / 'warm.db').as_posix()}",
+    )
+    store = SQLiteStore(settings.database_url)
+
+    create_app(settings, store=store, warm_model_mode=True)
+
+    assert calls == ["model"]
+    store.close()
+
+
+def test_model_warm_up_failure_aborts_startup_without_fallback(
+    tmp_path: Path, monkeypatch
+) -> None:
+    def fail(_service: RiskApplicationService) -> None:
+        raise RuntimeError("pinned model unavailable")
+
+    monkeypatch.setattr(RiskApplicationService, "warm_up_model_mode", fail)
+    settings = Settings(
+        environment="test",
+        data_dir=Path("data"),
+        database_url=f"sqlite:///{(tmp_path / 'failed-warm.db').as_posix()}",
+    )
+    store = SQLiteStore(settings.database_url)
+
+    with pytest.raises(RuntimeError, match="pinned model unavailable"):
+        create_app(settings, store=store, warm_model_mode=True)
+
+    store.close()
 
 
 def test_offline_ingestion_analysis_and_signal_queries(api_client) -> None:

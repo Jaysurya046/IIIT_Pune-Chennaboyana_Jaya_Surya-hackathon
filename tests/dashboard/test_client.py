@@ -157,7 +157,7 @@ def test_runs_ingestion_analysis_and_stress_workflow() -> None:
 
     ingestion = client.run_ingestion("risk")
     client.run_ingestion("banking stress", source_mode=SourceMode.REPLAY)
-    analysis = client.analyze(ingestion.run_id)
+    analysis = client.analyze(ingestion.run_id, nlp_mode="model")
     decision = client.run_stress(analysis.signals[0].signal_id)
     what_if = client.run_what_if(
         EventType.CREDIT_EVENT,
@@ -174,7 +174,7 @@ def test_runs_ingestion_analysis_and_stress_workflow() -> None:
     ]
     assert requests[0][1]["source_mode"] == "fixtures"
     assert requests[1][1]["source_mode"] == "replay"
-    assert requests[2][1]["nlp_mode"] == "deterministic"
+    assert requests[2][1]["nlp_mode"] == "model"
     assert decision.decision.triggered is False
     assert requests[4][1] == {
         "event_type": "Credit Event",

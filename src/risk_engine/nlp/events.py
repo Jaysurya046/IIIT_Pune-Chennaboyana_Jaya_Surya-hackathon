@@ -61,6 +61,8 @@ class EventClassifier(Protocol):
 
     def severity_prior(self, event_type: EventType) -> float: ...
 
+    def warm_up(self) -> None: ...
+
 
 class KeywordEventClassifier:
     """Deterministic event baseline with explicit keyword evidence."""
@@ -105,6 +107,9 @@ class KeywordEventClassifier:
             evidence=evidence,
         )
 
+    def warm_up(self) -> None:
+        """The deterministic implementation has no lazy resources."""
+
 
 Encoder = Callable[[Sequence[str]], Sequence[Sequence[float]]]
 
@@ -126,6 +131,7 @@ class EmbeddingEventClassifier(KeywordEventClassifier):
         self._revision = revision
         self._cache_dir = cache_dir
         self._encoder = encoder
+        self._category_vectors: tuple[tuple[float, ...], ...] | None = None
         self.model_version = f"{model_id}@{revision}"
 
     def _get_encoder(self) -> Encoder:
@@ -139,8 +145,23 @@ class EmbeddingEventClassifier(KeywordEventClassifier):
             model = SentenceTransformer(
                 self._model_id, revision=self._revision, cache_folder=self._cache_dir
             )
-            self._encoder = lambda texts: model.encode(list(texts), normalize_embeddings=True)
+            self._encoder = lambda texts: model.encode(
+                list(texts),
+                normalize_embeddings=True,
+                show_progress_bar=False,
+            )
         return self._encoder
+
+    def _get_category_vectors(self) -> tuple[tuple[float, ...], ...]:
+        if self._category_vectors is None:
+            descriptions = [category.description for category in self._taxonomy.categories]
+            vectors = self._get_encoder()(descriptions)
+            if len(vectors) != len(descriptions):
+                raise ValueError(
+                    "Embedding model returned a different number of category vectors"
+                )
+            self._category_vectors = tuple(tuple(vector) for vector in vectors)
+        return self._category_vectors
 
     @staticmethod
     def _cosine(left: Sequence[float], right: Sequence[float]) -> float:
@@ -152,8 +173,11 @@ class EmbeddingEventClassifier(KeywordEventClassifier):
         )
 
     def classify(self, text: str) -> EventClassification:
-        vectors = self._get_encoder()([text, *(c.description for c in self._taxonomy.categories)])
-        text_vector, category_vectors = vectors[0], vectors[1:]
+        category_vectors = self._get_category_vectors()
+        text_vectors = self._get_encoder()([text])
+        if len(text_vectors) != 1:
+            raise ValueError("Embedding model must return exactly one document vector")
+        text_vector = text_vectors[0]
         scored: list[tuple[float, _Category, float, tuple[str, ...]]] = []
         for category, vector in zip(self._taxonomy.categories, category_vectors, strict=True):
             semantic = max(0.0, min(1.0, (self._cosine(text_vector, vector) + 1.0) / 2.0))
@@ -168,3 +192,8 @@ class EmbeddingEventClassifier(KeywordEventClassifier):
             keyword_score=min(1.0, len(evidence) / 2),
             evidence=evidence,
         )
+
+    def warm_up(self) -> None:
+        """Load the pinned encoder and cache all taxonomy description vectors."""
+
+        self._get_category_vectors()

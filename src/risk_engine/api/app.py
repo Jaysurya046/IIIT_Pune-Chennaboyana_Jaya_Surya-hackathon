@@ -36,12 +36,15 @@ def create_app(
     settings: Settings | None = None,
     *,
     store: SQLiteStore | None = None,
+    warm_model_mode: bool = False,
 ) -> FastAPI:
     """Build an application with injectable settings and storage for deterministic tests."""
 
     configured = settings or Settings.from_env()
     repository = store or SQLiteStore(configured.database_url)
     service = RiskApplicationService(configured, repository)
+    if warm_model_mode:
+        service.warm_up_model_mode()
     app = FastAPI(
         title="RiskSignal Engine API",
         version="1.0.0",

@@ -98,6 +98,11 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
             button.label == "Ingest and analyze synthetic replay"
             for button in dashboard.button
         )
+        nlp_mode = next(
+            selectbox for selectbox in dashboard.selectbox if selectbox.label == "NLP mode"
+        )
+        assert nlp_mode.value == "deterministic"
+        assert nlp_mode.options == ["deterministic", "model"]
         assert any(
             "Hypothetical simulation only" in message.value
             for message in dashboard.warning

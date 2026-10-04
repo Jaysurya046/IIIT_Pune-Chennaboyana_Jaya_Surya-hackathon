@@ -2,8 +2,8 @@
 
 ## Scope and Claim Boundary
 
-Phase 12 adds a local benchmark command that evaluates the same ordered CSV with the
-project's explicit `deterministic` and `model` sentiment implementations:
+Phases 12 and 13 add a local benchmark command that evaluates the same ordered CSV with
+the project's explicit `deterministic` and `model` NLP implementations:
 
 ```bash
 python -m risk_engine benchmark \
@@ -20,9 +20,10 @@ dependencies, or unavailable weights. It never replaces model mode with determin
 mode. JSON is written to standard output; the optional output paths retain the same JSON
 and a presentation-ready Markdown table.
 
-This benchmark measures three-class financial sentiment, not entity resolution, event
-classification, impact scoring, trigger rates, or portfolio losses. Trigger-rate
-comparison is intentionally part of Phase 13.
+The classification metrics measure three-class financial sentiment. Phase 13 also runs
+each record through entity resolution, event classification, and impact scoring, then
+reports how often `impact_score > 7`. It does not run portfolio valuation or persist the
+generated benchmark signals.
 
 ## Dataset Source and Permission
 
@@ -69,27 +70,37 @@ and `2`, respectively. No invalid record is silently skipped.
 - Python: 3.13.5.
 - Torch: 2.14.1+cpu.
 - Transformers: 5.18.0.
+- Sentence Transformers: 5.7.0.
 - Deterministic implementation: `deterministic-sentiment-v1`.
 - Model implementation: `ProsusAI/finbert` pinned to revision
   `4556d13015211d73dccd3fdd39d39232506f3e43`.
+- Model event classifier: `sentence-transformers/all-MiniLM-L6-v2` pinned to revision
+  `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`.
 
-The successful cold command took 203.9 seconds including first-run model acquisition;
-that duration is setup evidence, not a throughput claim or production SLA.
+The Phase 13 full-engine cold command took 385.6 seconds including first-run MiniLM
+acquisition. That duration is setup evidence, not a throughput claim or production SLA.
 
 ## Results
 
 Confusion cells are `predicted negative / neutral / positive`; each column represents
 one actual class. Counts sum to the corresponding class support and to 2,264 overall.
 
-| Mode | Model/version | Accuracy | Macro-F1 | Actual negative → N/Neu/P | Actual neutral → N/Neu/P | Actual positive → N/Neu/P |
-| --- | --- | --- | --- | --- | --- | --- |
-| deterministic | deterministic-sentiment-v1 | 0.6767 | 0.4302 | 13/199/91 | 7/1342/42 | 31/362/177 |
-| model | ProsusAI/finbert@4556d13015211d73dccd3fdd39d39232506f3e43 | 0.9717 | 0.9625 | 298/1/4 | 19/1345/27 | 12/1/557 |
+| Mode | Model/version | Accuracy | Macro-F1 | Triggered (>7) | Trigger rate | Actual negative → N/Neu/P | Actual neutral → N/Neu/P | Actual positive → N/Neu/P |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| deterministic | deterministic-sentiment-v1 | 0.6767 | 0.4302 | 0/2264 | 0.0000 | 13/199/91 | 7/1342/42 | 31/362/177 |
+| model | ProsusAI/finbert@4556d13015211d73dccd3fdd39d39232506f3e43 | 0.9717 | 0.9625 | 0/2264 | 0.0000 | 298/1/4 | 19/1345/27 | 12/1/557 |
 
 Accuracy is the fraction of exactly matched labels. Per-class F1 uses
 `2TP / (2TP + FP + FN)` with zero for an undefined class, and macro-F1 is the unweighted
 mean across negative, neutral, and positive. Metrics are implemented locally; no scoring
 package or network service participates.
+
+For trigger comparison, every row is converted in memory to non-synthetic external
+benchmark provenance at the fixed timestamp `2026-01-01T00:00:00Z`. All rows retain one
+common source, no corroboration is invented, and entity relevance comes only from the
+unchanged fictional issuer resolver. Both modes produced 0 scores above 7. This is an
+honest result: the sentiment benchmark alone does not create enough combined event,
+entity, corroboration, and sentiment evidence to cross the strict trigger.
 
 ## Interpretation and Limitations
 
@@ -106,6 +117,9 @@ package or network service participates.
 - The source contains English financial-news sentences about listed companies in a
   particular collection context. It does not establish performance on social posts,
   other languages, long documents, current events, or the project's fictional issuers.
+- Trigger rate is descriptive pipeline behavior under the fixed benchmark provenance,
+  not a labelled trigger-quality metric. Financial PhraseBank provides sentiment labels,
+  not event severity, entity relevance, or ground-truth stress-trigger annotations.
 - Results depend on the exact dataset bytes, model revision, libraries, and runtime
   recorded above. They do not imply investment performance or validate stress losses.
 

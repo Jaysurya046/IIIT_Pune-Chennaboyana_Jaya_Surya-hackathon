@@ -36,10 +36,12 @@ Open `http://127.0.0.1:8501`. The API address can also be supplied through
 `RISK_ENGINE_API_URL`. The dashboard shows a bounded error state with the start command
 when the API is unavailable; it does not expose response bodies or credentials.
 
-On a new database, open **Source health**. Choose **Ingest and analyze fixtures** for the
-six-record baseline, or **Ingest and analyze synthetic replay** for the separate
-four-record banking-stress scenario. Both use deterministic NLP and explicit source
-modes. Use **Refresh dashboard** to invalidate the 15-second view cache immediately.
+On a new database, open **Source health**. Select the explicit `deterministic` or `model`
+NLP mode, then choose **Ingest and analyze fixtures** for the six-record baseline or
+**Ingest and analyze synthetic replay** for the separate four-record banking-stress
+scenario. Model mode requires the optional dependencies and pinned weights; a failure
+is shown and never falls back to rules. Use **Refresh dashboard** to invalidate the
+15-second view cache immediately.
 
 ## Data Sources and Classification
 

@@ -25,10 +25,14 @@ def test_keyword_classifier_has_explicit_other_fallback() -> None:
     assert result.evidence == ()
 
 
-def test_embedding_classifier_accepts_injected_encoder() -> None:
+def test_embedding_classifier_caches_categories_and_encodes_one_text_at_a_time() -> None:
+    calls: list[tuple[str, ...]] = []
+
     def encode(texts: list[str]) -> list[list[float]]:
-        assert len(texts) == 9
-        return [[1.0, 0.0], [1.0, 0.0], *([[0.0, 1.0]] * 7)]
+        calls.append(tuple(texts))
+        if len(texts) == 8:
+            return [[1.0, 0.0], *([[0.0, 1.0]] * 7)]
+        return [[1.0, 0.0]]
 
     classifier = EmbeddingEventClassifier(
         TAXONOMY,
@@ -37,7 +41,30 @@ def test_embedding_classifier_accepts_injected_encoder() -> None:
         encoder=encode,
     )
 
-    result = classifier.classify("Cross-border risk without a taxonomy keyword")
+    first = classifier.classify("Cross-border risk without a taxonomy keyword")
+    second = classifier.classify("Another cross-border concern")
 
-    assert result.event_type is EventType.GEOPOLITICAL
-    assert result.semantic_score == 1.0
+    assert first.event_type is EventType.GEOPOLITICAL
+    assert first.semantic_score == 1.0
+    assert second.event_type is EventType.GEOPOLITICAL
+    assert [len(texts) for texts in calls] == [8, 1, 1]
+
+
+def test_embedding_warm_up_populates_category_cache_without_document_inference() -> None:
+    calls: list[tuple[str, ...]] = []
+
+    def encode(texts: list[str]) -> list[list[float]]:
+        calls.append(tuple(texts))
+        return [[1.0, 0.0] for _ in texts]
+
+    classifier = EmbeddingEventClassifier(
+        TAXONOMY,
+        "example/minilm",
+        "revision",
+        encoder=encode,
+    )
+
+    classifier.warm_up()
+    classifier.warm_up()
+
+    assert [len(texts) for texts in calls] == [8]

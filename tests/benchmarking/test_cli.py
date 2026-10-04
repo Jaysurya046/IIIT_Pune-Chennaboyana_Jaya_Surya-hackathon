@@ -22,6 +22,10 @@ def _metrics(mode: str) -> ModeMetrics:
         support={"negative": 1, "neutral": 1, "positive": 1},
         per_class_f1={"negative": 1.0, "neutral": 1.0, "positive": 1.0},
         confusion_matrix=confusion,
+        trigger_threshold=7,
+        trigger_count=1,
+        non_trigger_count=2,
+        trigger_rate=0.333333,
     )
 
 
@@ -73,9 +77,9 @@ def test_benchmark_command_prints_json_and_writes_requested_outputs(
     assert exit_code == 0
     assert stdout["classification"] == "external-user-supplied-benchmark"
     assert json.loads(json_output.read_text(encoding="utf-8")) == stdout
-    assert "| deterministic | fake-deterministic | 1.0000 |" in markdown_output.read_text(
-        encoding="utf-8"
-    )
+    markdown = markdown_output.read_text(encoding="utf-8")
+    assert "| deterministic | fake-deterministic | 1.0000 |" in markdown
+    assert "| 1/3 | 0.3333 |" in markdown
 
 
 def test_benchmark_command_reports_model_failure_without_result(

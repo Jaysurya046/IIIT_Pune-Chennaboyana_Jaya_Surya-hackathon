@@ -147,12 +147,14 @@ modes on the same 2,264 expert-labelled financial sentences. The model's publish
 training data includes Financial PhraseBank, so these are implementation-comparison
 metrics rather than an out-of-sample generalization claim.
 
-| Mode | Accuracy | Macro-F1 | Negative actual → N/Neu/P | Neutral actual → N/Neu/P | Positive actual → N/Neu/P |
-|---|---:|---:|---:|---:|---:|
-| Deterministic v1 | 0.6767 | 0.4302 | 13/199/91 | 7/1342/42 | 31/362/177 |
-| Pinned FinBERT | 0.9717 | 0.9625 | 298/1/4 | 19/1345/27 | 12/1/557 |
+| Mode | Accuracy | Macro-F1 | Triggered (>7) | Trigger rate | Negative actual → N/Neu/P | Neutral actual → N/Neu/P | Positive actual → N/Neu/P |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Deterministic v1 | 0.6767 | 0.4302 | 0/2264 | 0.0000 | 13/199/91 | 7/1342/42 | 31/362/177 |
+| Pinned FinBERT | 0.9717 | 0.9625 | 0/2264 | 0.0000 | 298/1/4 | 19/1345/27 | 12/1/557 |
 
-Cells show predicted negative/neutral/positive counts for each actual class. Dataset
+Cells show predicted negative/neutral/positive counts for each actual class. Trigger
+rates use full-engine impact scores under fixed, non-persisted benchmark provenance; the
+dataset has sentiment labels but no ground-truth trigger labels. Dataset
 provenance, licence restrictions, exact model revision, checksum, environment, metric
 definitions, and interpretation limits are in [docs/benchmark.md](docs/benchmark.md).
 

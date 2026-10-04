@@ -66,6 +66,5 @@ def build_risk_engine(settings: Settings, *, mode: str | None = None) -> RiskSig
             cache_dir=str(settings.model_cache_dir),
         )
     else:
-        sentiment = RuleBasedSentimentAnalyzer()
         events = KeywordEventClassifier(taxonomy)
     return RiskSignalEngine(resolver, sentiment, events)

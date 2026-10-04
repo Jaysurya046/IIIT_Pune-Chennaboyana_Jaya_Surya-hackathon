@@ -75,14 +75,24 @@ class RiskSignalEngine:
     ) -> tuple[RiskSignal, ...]:
         """Analyze documents at one explicit, timezone-aware point in time."""
 
+        document_batch = tuple(documents)
+        texts = tuple(
+            " ".join(part for part in (document.title, document.text) if part)
+            for document in document_batch
+        )
+        sentiments = self._sentiment.analyze_batch(texts)
+        if len(sentiments) != len(document_batch):
+            raise ValueError("sentiment analyzer returned an incomplete batch")
+
         analyzed: list[_AnalyzedDocument] = []
-        for document in documents:
-            text = " ".join(part for part in (document.title, document.text) if part)
+        for document, text, sentiment in zip(
+            document_batch, texts, sentiments, strict=True
+        ):
             analyzed.append(
                 _AnalyzedDocument(
                     document=document,
                     entities=self._resolver.resolve(text),
-                    sentiment=self._sentiment.analyze(text),
+                    sentiment=sentiment,
                     event=self._events.classify(text),
                 )
             )
@@ -135,3 +145,9 @@ class RiskSignalEngine:
                 )
             )
         return tuple(signals)
+
+    def warm_up(self) -> None:
+        """Load every lazy NLP component; exceptions remain visible to the caller."""
+
+        self._sentiment.warm_up()
+        self._events.warm_up()

@@ -87,6 +87,16 @@ Start the API in terminal one:
 python -m risk_engine serve --host 127.0.0.1 --port 8000
 ```
 
+For a prepared model-mode demonstration, load both pinned model components before the
+API accepts requests:
+
+```bash
+python -m risk_engine serve --host 127.0.0.1 --port 8000 --warm-models
+```
+
+This option is deliberately strict: missing dependencies, unavailable weights, or model
+load failures abort startup visibly. It never starts with deterministic replacements.
+
 Verify `http://127.0.0.1:8000/health`, then start the dashboard in terminal two:
 
 ```bash
@@ -104,7 +114,8 @@ The dashboard has three workspaces:
    entity matches, model versions, and source provenance.
 2. **Stress lab** evaluates a selected signal against the strict impact-greater-than-7
    trigger and shows the persisted decision and reconciled portfolio result.
-3. **Source health** reports per-source outcomes and owns separate fixture/replay actions.
+3. **Source health** reports per-source outcomes and owns separate fixture/replay actions
+   with an explicit deterministic/model NLP selector.
 
 Interactive API documentation is available at `http://127.0.0.1:8000/docs`.
 
@@ -127,11 +138,14 @@ downloads:
 ```bash
 python -m pip install -r requirements-nlp.txt
 python -m risk_engine analyze-fixtures --query "portfolio risk" --nlp-mode model
+python -m risk_engine serve --warm-models
 ```
 
 Model identifiers, revisions, license metadata, and limitations are recorded in
 `data/models.yaml`. A failed model request raises an explicit error; it does not fall
-back to deterministic rules.
+back to deterministic rules. FinBERT processes each analysis batch in one ordered
+pipeline call, while MiniLM caches the eight taxonomy-description embeddings once per
+engine and encodes only incoming document text thereafter.
 
 ## Quality Gates
 

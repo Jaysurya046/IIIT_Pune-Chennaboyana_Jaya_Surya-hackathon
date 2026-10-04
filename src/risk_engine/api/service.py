@@ -120,15 +120,24 @@ class RiskApplicationService:
             sources=result.sources,
         )
 
+    def _nlp_engine(self, mode: str) -> RiskSignalEngine:
+        engine = self._nlp_engines.get(mode)
+        if engine is None:
+            engine = build_risk_engine(self.settings, mode=mode)
+            self._nlp_engines[mode] = engine
+        return engine
+
+    def warm_up_model_mode(self) -> None:
+        """Load both pinned model components and surface any failure to startup."""
+
+        self._nlp_engine("model").warm_up()
+
     def analyze(self, run_id: str, nlp_mode: str | None) -> AnalysisResponse | None:
         record = self.store.get_ingestion(run_id)
         if record is None:
             return None
         mode = nlp_mode or self.settings.nlp_mode
-        engine = self._nlp_engines.get(mode)
-        if engine is None:
-            engine = build_risk_engine(self.settings, mode=mode)
-            self._nlp_engines[mode] = engine
+        engine = self._nlp_engine(mode)
         documents = record.result.documents
         contains_synthetic_provenance = any(
             document.provenance.synthetic for document in documents

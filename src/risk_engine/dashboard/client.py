@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Any, Self, TypeVar
+from typing import Any, Literal, Self, TypeVar
 from urllib.parse import urlsplit
 
 import httpx
@@ -24,6 +24,7 @@ from risk_engine.nlp.models import EventType, RiskSignal
 from risk_engine.stress.models import StressResult
 
 ResponseModel = TypeVar("ResponseModel", bound=BaseModel)
+NlpMode = Literal["deterministic", "model"]
 
 
 class DashboardApiError(RuntimeError):
@@ -142,7 +143,12 @@ class DashboardApiClient:
             json={"query": query, "source_mode": source_mode.value, "limit": limit},
         )
 
-    def analyze(self, run_id: str, *, nlp_mode: str = "deterministic") -> AnalysisResponse:
+    def analyze(
+        self,
+        run_id: str,
+        *,
+        nlp_mode: NlpMode = "deterministic",
+    ) -> AnalysisResponse:
         return self._request(
             "POST",
             "/api/v1/analyze",

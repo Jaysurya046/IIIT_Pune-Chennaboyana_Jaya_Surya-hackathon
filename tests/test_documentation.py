@@ -91,6 +91,9 @@ def test_external_benchmark_documents_source_license_and_claim_boundary() -> Non
     assert "CC BY-NC-SA 3.0" in benchmark
     assert "a7a3128b1380b32d27f28b29c5f57c662492fd6ae6293a778d02593ef5bedae1" in benchmark
     assert "not an out-of-sample generalization estimate" in benchmark
+    assert "0/2264" in benchmark
+    assert "no ground-truth trigger-quality metric" not in benchmark
+    assert "not a labelled trigger-quality metric" in benchmark
 
 
 def test_demo_runbook_covers_both_time_limits_and_data_disclosure() -> None:

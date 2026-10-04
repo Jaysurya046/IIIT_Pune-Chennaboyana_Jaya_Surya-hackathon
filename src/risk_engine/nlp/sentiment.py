@@ -18,6 +18,10 @@ class SentimentAnalyzer(Protocol):
 
     def analyze(self, text: str) -> SentimentResult: ...
 
+    def analyze_batch(self, texts: Sequence[str]) -> tuple[SentimentResult, ...]: ...
+
+    def warm_up(self) -> None: ...
+
 
 class RuleBasedSentimentAnalyzer:
     """Small transparent baseline used by offline tests and demonstrations."""
@@ -88,6 +92,14 @@ class RuleBasedSentimentAnalyzer:
             probabilities=probabilities,
         )
 
+    def analyze_batch(self, texts: Sequence[str]) -> tuple[SentimentResult, ...]:
+        """Preserve input order while applying the transparent rules."""
+
+        return tuple(self.analyze(text) for text in texts)
+
+    def warm_up(self) -> None:
+        """The deterministic implementation has no lazy resources."""
+
 
 ClassifierOutput = Sequence[Mapping[str, object]] | Sequence[Sequence[Mapping[str, object]]]
 
@@ -140,13 +152,8 @@ class FinBertSentimentAnalyzer:
             )
         return self._classifier
 
-    def analyze(self, text: str) -> SentimentResult:
-        raw = self._get_classifier()(text)
-        rows = (
-            raw[0]
-            if raw and isinstance(raw[0], Sequence) and not isinstance(raw[0], Mapping)
-            else raw
-        )
+    @staticmethod
+    def _normalize(rows: Sequence[Mapping[str, object]]) -> SentimentResult:
         probabilities = {label: 0.0 for label in SentimentLabel}
         for row in rows:
             label = SentimentLabel(str(row["label"]).lower())
@@ -161,3 +168,27 @@ class FinBertSentimentAnalyzer:
             confidence=probabilities[predicted],
             probabilities=probabilities,
         )
+
+    def analyze_batch(self, texts: Sequence[str]) -> tuple[SentimentResult, ...]:
+        """Classify an ordered text batch with one transformer pipeline call."""
+
+        if not texts:
+            return ()
+        raw = self._get_classifier()(list(texts))
+        if raw and isinstance(raw[0], Mapping):
+            batches: Sequence[Sequence[Mapping[str, object]]] = (raw,)
+        else:
+            batches = raw  # type: ignore[assignment]
+        if len(batches) != len(texts):
+            raise ValueError(
+                "FinBERT returned a different number of predictions than input texts"
+            )
+        return tuple(self._normalize(rows) for rows in batches)
+
+    def analyze(self, text: str) -> SentimentResult:
+        return self.analyze_batch((text,))[0]
+
+    def warm_up(self) -> None:
+        """Load the pinned tokenizer and model without running inference."""
+
+        self._get_classifier()

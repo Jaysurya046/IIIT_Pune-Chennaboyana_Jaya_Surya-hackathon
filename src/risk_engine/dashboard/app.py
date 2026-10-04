@@ -464,10 +464,25 @@ def _render_source_health(api_url: str, status: SourceStatusResponse) -> None:
         )
         st.dataframe(pd.DataFrame(source_rows(status)), hide_index=True, width="stretch")
 
+    st.subheader("Analysis mode")
+    nlp_mode = st.selectbox(
+        "NLP mode",
+        ("deterministic", "model"),
+        help=(
+            "Deterministic mode is offline and transparent. Model mode requires the pinned "
+            "FinBERT and MiniLM dependencies and weights; failures never fall back to rules."
+        ),
+    )
+    if nlp_mode == "model":
+        st.warning(
+            "Model mode selected. The API must have the optional NLP dependencies and pinned "
+            "weights available; an unavailable model is reported as an error."
+        )
+
     st.subheader("Reproducible fixture refresh")
     st.caption(
-        "This action explicitly uses committed fixtures and deterministic NLP. It never falls "
-        "back from a failed live request."
+        f"This action explicitly uses committed fixtures with `{nlp_mode}` NLP. It never "
+        "falls back between source or NLP modes."
     )
     query = st.text_input("Ingestion query", value="portfolio risk", max_chars=500)
     if st.button("Ingest and analyze fixtures", disabled=not query.strip()):
@@ -479,9 +494,11 @@ def _render_source_health(api_url: str, status: SourceStatusResponse) -> None:
                         query.strip(), source_mode=SourceMode.FIXTURES
                     )
                     st.write(f"Accepted {ingestion.document_count} normalized documents")
-                    analysis = client.analyze(ingestion.run_id, nlp_mode="deterministic")
+                    analysis = client.analyze(ingestion.run_id, nlp_mode=nlp_mode)
                     st.write(f"Generated {analysis.signal_count} explainable signals")
-                pipeline_status.update(label="Fixture workflow completed", state="complete")
+                pipeline_status.update(
+                    label=f"Fixture workflow completed ({nlp_mode})", state="complete"
+                )
             st.cache_data.clear()
             st.success("Data stored. Refresh the dashboard to load the new run.")
         except DashboardApiError as error:
@@ -501,9 +518,11 @@ def _render_source_health(api_url: str, status: SourceStatusResponse) -> None:
                         "banking stress", source_mode=SourceMode.REPLAY
                     )
                     st.write(f"Accepted {ingestion.document_count} normalized documents")
-                    analysis = client.analyze(ingestion.run_id, nlp_mode="deterministic")
+                    analysis = client.analyze(ingestion.run_id, nlp_mode=nlp_mode)
                     st.write(f"Generated {analysis.signal_count} explainable signals")
-                replay_status.update(label="Synthetic replay completed", state="complete")
+                replay_status.update(
+                    label=f"Synthetic replay completed ({nlp_mode})", state="complete"
+                )
             st.cache_data.clear()
             st.success("Replay stored. Refresh the dashboard to use it in Stress Lab.")
         except DashboardApiError as error:

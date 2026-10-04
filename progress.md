@@ -19,7 +19,7 @@ Last updated: 2026-10-04
 | 10 Organic replay trigger (P0 T2) | complete | New synthetic replay mode and natural 8+ signal | Exact-score replay, API, CLI and AppTest coverage | `feat(replay): add organic high-impact stress scenario` |
 | 11 Hypothetical what-if (P0 T3) | complete | Non-persisted what-if API and dashboard panel | API, persistence, stress and AppTest coverage | `feat(stress): add hypothetical what-if simulation` |
 | 12 Real-data benchmark (P1 T4) | complete | External CSV evaluation and documented metrics | Metric, CLI, failure and real-data evidence | `feat(benchmark): compare deterministic and model NLP quality` |
-| 13 Model-mode hygiene (P1 T5) | planned | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
+| 13 Model-mode hygiene (P1 T5) | complete | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
 | 14 Dashboard evidence (P1 T6) | planned | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
 | 15 Assumption honesty (P1 T7) | planned | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
 | 16 Release and demo hygiene (P1 T8) | planned | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
@@ -30,9 +30,9 @@ Last updated: 2026-10-04
 
 ## Current Phase
 
-The original eight implementation phases, P0 improvement Phases 9–11, and Phase 12 are
-complete. Phase 13 is next: model-mode hygiene and mode visibility. Phases 13–16 are
-the remaining P1 improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
+The original eight implementation phases, P0 improvement Phases 9–11, and P1 Phases
+12–13 are complete. Phase 14 is next: dashboard evidence. Phases 14–16 are the remaining
+P1 improvement path; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
 permitted transaction dataset is supplied. The detailed sequence and task gates are
 in [docs/improvement-plan.md](docs/improvement-plan.md).
 
@@ -335,6 +335,35 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   passed with one upstream Starlette warning, and the offline validator matched 9/9
   artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
   0.198 seconds against its 5-second budget.
+
+### 2026-10-04 Phase 13
+
+- Started from clean synchronized commit `7c2c998`; Ruff passed, all 114 baseline tests
+  passed with one upstream Starlette warning, and validation passed with 9/9 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.216 seconds
+  total runtime.
+- Added ordered sentiment batching to both implementations; FinBERT now receives one
+  list per engine analysis instead of one pipeline call per document.
+- Cached all eight MiniLM taxonomy-description embeddings once per classifier and then
+  encoded only one incoming document at a time. Repeated classification and warm-up
+  reuse the cached category vectors.
+- Added `serve --warm-models`, which loads FinBERT and MiniLM before API startup and
+  propagates dependency, weight, and model errors without deterministic fallback.
+- Added one dashboard NLP-mode selector shared by the fixture and replay actions, with
+  explicit model prerequisites, selected-mode status text, and no hidden fallback.
+- Extended the real-data benchmark through the full risk-signal engine. Both modes
+  triggered 0/2,264 rows above the configured threshold of 7 under fixed, non-persisted
+  external benchmark provenance; sentiment accuracy and macro-F1 remained unchanged.
+- Documented that the zero trigger rate is descriptive pipeline behavior rather than a
+  labelled quality result because Financial PhraseBank contains sentiment labels only.
+- Left all nine checksummed artifacts and `data/sample/*.json` untouched.
+- Replayed the 2,264-row benchmark with both model providers forced offline; local caches
+  reproduced the documented accuracy, macro-F1, confusion, and 0/2,264 trigger results in
+  251.6 seconds without network access.
+- Passed the mandatory Phase 13 gate: Ruff reported no findings, all 120 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 9/9
+  artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
+  0.122 seconds against its 5-second budget.
 
 ## Risks and Blockers
 

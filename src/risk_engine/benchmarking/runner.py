@@ -6,8 +6,10 @@ import csv
 import hashlib
 import io
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Protocol
 
 from risk_engine.benchmarking.models import (
     LABEL_ORDER,
@@ -16,11 +18,23 @@ from risk_engine.benchmarking.models import (
     calculate_metrics,
 )
 from risk_engine.config import Settings
-from risk_engine.nlp.factory import build_sentiment_analyzer
-from risk_engine.nlp.models import SentimentLabel
-from risk_engine.nlp.sentiment import SentimentAnalyzer
+from risk_engine.ingestion.models import Provenance, RawDocument, SourceType
+from risk_engine.nlp.factory import build_risk_engine
+from risk_engine.nlp.models import RiskSignal, SentimentLabel
 
-AnalyzerFactory = Callable[[Settings, str], SentimentAnalyzer]
+_BENCHMARK_AS_OF = datetime(2026, 1, 1, tzinfo=UTC)
+
+
+class BenchmarkEngine(Protocol):
+    def analyze(
+        self,
+        documents: Sequence[RawDocument],
+        *,
+        as_of: datetime | None = None,
+    ) -> tuple[RiskSignal, ...]: ...
+
+
+EngineFactory = Callable[[Settings, str], BenchmarkEngine]
 
 _LABEL_ALIASES = {
     "0": SentimentLabel.NEGATIVE,
@@ -115,8 +129,41 @@ def load_csv(path: Path, *, text_column: str, label_column: str) -> tuple[Benchm
     return examples
 
 
-def _default_analyzer_factory(settings: Settings, mode: str) -> SentimentAnalyzer:
-    return build_sentiment_analyzer(settings, mode=mode)
+def _default_engine_factory(settings: Settings, mode: str) -> BenchmarkEngine:
+    return build_risk_engine(settings, mode=mode)
+
+
+def _benchmark_documents(examples: Sequence[BenchmarkExample]) -> tuple[RawDocument, ...]:
+    documents = []
+    for index, example in enumerate(examples, start=1):
+        content_hash = hashlib.sha256(example.text.encode()).hexdigest()
+        document_id = hashlib.sha256(f"{index}\0{example.text}".encode()).hexdigest()[:32]
+        url = f"https://financial-phrasebank-benchmark.example/records/{document_id}"
+        documents.append(
+            RawDocument(
+                document_id=document_id,
+                text=example.text,
+                canonical_url=url,
+                content_hash=content_hash,
+                normalized_at=_BENCHMARK_AS_OF,
+                provenance=Provenance(
+                    source="financial-phrasebank-benchmark",
+                    source_type=SourceType.NEWS,
+                    source_id=f"row-{index}",
+                    original_url=url,
+                    query="external sentiment benchmark",
+                    published_at=_BENCHMARK_AS_OF,
+                    retrieved_at=_BENCHMARK_AS_OF,
+                    language="en",
+                    synthetic=False,
+                    metadata={
+                        "classification": "external-user-supplied-benchmark",
+                        "row_number": index,
+                    },
+                ),
+            )
+        )
+    return tuple(documents)
 
 
 def run_benchmark(
@@ -125,7 +172,7 @@ def run_benchmark(
     text_column: str,
     label_column: str,
     settings: Settings | None = None,
-    analyzer_factory: AnalyzerFactory = _default_analyzer_factory,
+    engine_factory: EngineFactory = _default_engine_factory,
 ) -> BenchmarkReport:
     """Run both explicit modes on the same ordered examples with no fallback."""
 
@@ -136,16 +183,22 @@ def run_benchmark(
     )
     selected_settings = settings or Settings.from_env()
     actual = [example.label for example in examples]
+    documents = _benchmark_documents(examples)
     mode_metrics = []
     for mode in ("deterministic", "model"):
-        analyzer = analyzer_factory(selected_settings, mode)
-        predicted = [analyzer.analyze(example.text).label for example in examples]
+        engine = engine_factory(selected_settings, mode)
+        signals = engine.analyze(documents, as_of=_BENCHMARK_AS_OF)
+        if len(signals) != len(examples):
+            raise ValueError("NLP engine returned a different number of signals than rows")
+        predicted = [signal.sentiment.label for signal in signals]
         mode_metrics.append(
             calculate_metrics(
                 mode=mode,
-                model_version=analyzer.model_version,
+                model_version=signals[0].model_versions["sentiment"],
                 actual=actual,
                 predicted=predicted,
+                impact_scores=[signal.impact_score for signal in signals],
+                trigger_threshold=selected_settings.stress_trigger_threshold,
             )
         )
 

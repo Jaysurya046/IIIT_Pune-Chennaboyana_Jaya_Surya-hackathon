@@ -34,6 +34,10 @@ class ModeMetrics(StrictModel):
     support: dict[str, int]
     per_class_f1: dict[str, float]
     confusion_matrix: dict[str, dict[str, int]]
+    trigger_threshold: int = Field(ge=1, le=9)
+    trigger_count: int = Field(ge=0)
+    non_trigger_count: int = Field(ge=0)
+    trigger_rate: float = Field(ge=0.0, le=1.0)
 
 
 class BenchmarkReport(StrictModel):
@@ -57,6 +61,8 @@ class BenchmarkReport(StrictModel):
             "Model/version",
             "Accuracy",
             "Macro-F1",
+            "Triggered",
+            "Trigger rate",
             "Actual negative → N/Neu/P",
             "Actual neutral → N/Neu/P",
             "Actual positive → N/Neu/P",
@@ -75,6 +81,8 @@ class BenchmarkReport(StrictModel):
                     metrics.model_version.replace("|", "\\|"),
                     f"{metrics.accuracy:.4f}",
                     f"{metrics.macro_f1:.4f}",
+                    f"{metrics.trigger_count}/{metrics.trigger_count + metrics.non_trigger_count}",
+                    f"{metrics.trigger_rate:.4f}",
                     *confusion_cells,
                 ]
             )
@@ -92,6 +100,8 @@ def calculate_metrics(
     model_version: str,
     actual: Sequence[SentimentLabel],
     predicted: Sequence[SentimentLabel],
+    impact_scores: Sequence[int],
+    trigger_threshold: int,
 ) -> ModeMetrics:
     """Calculate accuracy, macro-F1, and an actual-by-predicted confusion matrix."""
 
@@ -99,6 +109,8 @@ def calculate_metrics(
         raise ValueError("at least one benchmark label is required")
     if len(actual) != len(predicted):
         raise ValueError("actual and predicted labels must have equal lengths")
+    if len(actual) != len(impact_scores):
+        raise ValueError("impact scores and labels must have equal lengths")
 
     confusion = {
         label.value: {candidate.value: 0 for candidate in LABEL_ORDER}
@@ -122,6 +134,7 @@ def calculate_metrics(
 
     correct = sum(confusion[label.value][label.value] for label in LABEL_ORDER)
     support_counts = Counter(label.value for label in actual)
+    trigger_count = sum(score > trigger_threshold for score in impact_scores)
     return ModeMetrics(
         mode=mode,
         model_version=model_version,
@@ -130,4 +143,8 @@ def calculate_metrics(
         support={label.value: support_counts[label.value] for label in LABEL_ORDER},
         per_class_f1={name: round(value, 6) for name, value in raw_class_f1.items()},
         confusion_matrix=confusion,
+        trigger_threshold=trigger_threshold,
+        trigger_count=trigger_count,
+        non_trigger_count=len(actual) - trigger_count,
+        trigger_rate=round(trigger_count / len(actual), 6),
     )

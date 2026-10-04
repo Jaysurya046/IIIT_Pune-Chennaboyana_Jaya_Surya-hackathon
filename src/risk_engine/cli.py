@@ -57,6 +57,11 @@ def build_parser() -> argparse.ArgumentParser:
     serve_parser = subparsers.add_parser("serve", help="run the versioned FastAPI service")
     serve_parser.add_argument("--host", default="127.0.0.1")
     serve_parser.add_argument("--port", type=int, default=8000)
+    serve_parser.add_argument(
+        "--warm-models",
+        action="store_true",
+        help="load pinned model-mode components before accepting API requests",
+    )
     dashboard_parser = subparsers.add_parser(
         "dashboard", help="run the Streamlit monitoring dashboard"
     )
@@ -119,7 +124,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         from risk_engine.api.app import create_app
 
-        uvicorn.run(create_app(settings), host=args.host, port=args.port)
+        uvicorn.run(
+            create_app(settings, warm_model_mode=args.warm_models),
+            host=args.host,
+            port=args.port,
+        )
         return 0
 
     if args.command == "dashboard":
