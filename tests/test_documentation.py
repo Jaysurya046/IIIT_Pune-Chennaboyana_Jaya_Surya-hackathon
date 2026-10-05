@@ -104,7 +104,7 @@ def test_dataset_guide_preserves_source_classification_and_caveats() -> None:
     assert "Bluesky Public AppView" in guide
     assert "synthetic" in guide.lower()
     assert "not an estimate" in guide
-    assert len(re.findall(r"sha256: [0-9a-f]{64}", manifest)) == 9
+    assert len(re.findall(r"sha256: [0-9a-f]{64}", manifest)) == 11
 
 
 def test_external_benchmark_documents_source_license_and_claim_boundary() -> None:

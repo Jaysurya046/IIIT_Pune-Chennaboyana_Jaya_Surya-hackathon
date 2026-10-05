@@ -24,7 +24,7 @@ Last updated: 2026-10-06
 | 15 Assumption honesty (P1 T7) | complete | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
 | 16 Release and demo hygiene (P1 T8) | complete | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
 | 17 Deterministic NLP robustness (P2 T9) | complete | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
-| 18 Live path and sector proxy (P2 T10) | optional | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
+| 18 Live path and sector proxy (P2 T10) | complete | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
 | 19 Streaming and polling (P2 T11) | optional | SSE, auto-stress and bounded polling | Streaming, idempotency and lifecycle tests | `feat(api): stream signals and automate stress decisions` |
 | 20 Portfolio generator (P2 T12) | optional-blocked | Seeded 200-position synthetic generator | Determinism, privacy and reconciliation tests | `feat(portfolio): generate reproducible synthetic portfolios` |
 
@@ -475,6 +475,21 @@ is supplied. The detailed sequence and task gates are in
 - The final 140-test gate passed with validation in 0.095 seconds; the verified
   boundary-probe illustrative loss is USD 2.35M after the event-priority change.
 - Left all nine checksummed artifacts and `data/sample/*.json` untouched.
+
+### 2026-10-06 Phase 18
+
+- Started from the clean Phase 17 commit; Ruff passed, all 140 tests passed with one
+  upstream Starlette warning, and validation passed with 9/9 artifacts before changes.
+- Built live queries from every configured issuer name, ticker, and alias; added a
+  configurable GDELT request-spacing interval and explicit Bluesky authentication mode.
+- Added mocked coverage for query construction, spacing, bearer/public authentication,
+  provider authorization errors, source isolation, and known/unknown/multi-sector proxy
+  resolution. No tests make network requests.
+- Added the metadata-only public snapshot recording one GDELT response and the Bluesky
+  403 authentication outcome. No article or post content is retained.
+- Added the versioned synthetic sector-proxy mapping and labelled non-synthetic stress
+  results `illustrative sector proxy`, never issuer exposure.
+- Added two checksummed artifacts, raising the manifest expectation from 9 to 11.
 
 ## Risks and Blockers
 

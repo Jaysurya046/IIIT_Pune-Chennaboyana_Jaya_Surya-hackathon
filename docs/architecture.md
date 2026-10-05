@@ -131,6 +131,13 @@ mode uses versioned rules for offline CI and demonstrations. The selected mode i
 visible in each signal's model versions; model failures do not silently fall back to
 rules.
 
+Live ingestion builds a bounded OR query from the configured watchlist's names, tickers,
+and aliases. GDELT applies an explicit request-spacing setting, while Bluesky exposes
+whether bearer authentication is configured and surfaces provider authorization failures
+without switching to fixtures. A committed metadata-only snapshot records one public
+GDELT response and one unauthenticated Bluesky authorization outcome; no source content
+is redistributed.
+
 The deterministic event matcher recognizes configured keywords plus bounded English
 inflections (`s`, `es`, `ed`, and `ing`) at whole-word boundaries. It is intentionally
 not a general stemmer, so every match remains traceable to a taxonomy entry. The
@@ -282,7 +289,9 @@ versions, and creation timestamp.
 
 `StressResult` contains the trigger signal, scenario, portfolio version, aggregate
 before and after measures, total loss, loss percentage, expected-loss change, and
-instrument-level details.
+instrument-level details. Results from non-synthetic live signals also carry
+`exposure_label="illustrative sector proxy"`; this is a projection into the fictional
+portfolio and never issuer exposure.
 
 These contracts are implemented as strict Pydantic models. Unknown event types,
 out-of-range scores, naive timestamps, and missing provenance fields will be rejected.

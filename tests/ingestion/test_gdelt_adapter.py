@@ -64,6 +64,21 @@ def test_gdelt_adapter_uses_start_datetime_when_supplied() -> None:
         assert adapter.fetch(IngestionRequest(query="rates", since=since)) == []
 
 
+def test_gdelt_adapter_applies_configured_request_spacing() -> None:
+    delays: list[float] = []
+    transport = httpx.MockTransport(lambda _request: httpx.Response(200, json={"articles": []}))
+    with httpx.Client(transport=transport) as client:
+        adapter = GdeltAdapter(
+            "https://api.example/gdelt",
+            client=client,
+            request_spacing_seconds=1.25,
+            sleeper=delays.append,
+        )
+        adapter.fetch(IngestionRequest(query="rates"))
+
+    assert delays == [1.25]
+
+
 def test_gdelt_adapter_rejects_unexpected_response() -> None:
     transport = httpx.MockTransport(lambda _request: httpx.Response(200, json={"items": []}))
     with httpx.Client(transport=transport) as client:

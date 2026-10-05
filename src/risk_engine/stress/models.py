@@ -187,6 +187,9 @@ class StressResult(StrictModel):
     expected_loss_after: NonNegativeMoney
     expected_loss_change: Money
     reconciliation_difference: NonNegativeMoney
+    exposure_label: Literal["synthetic portfolio", "illustrative sector proxy"] = (
+        "synthetic portfolio"
+    )
     instrument_results: tuple[InstrumentStressResult, ...]
     created_at: AwareDatetime
 

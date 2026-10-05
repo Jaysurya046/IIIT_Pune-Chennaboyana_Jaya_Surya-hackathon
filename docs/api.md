@@ -44,6 +44,12 @@ Example fixture ingestion request:
 Use the same endpoint with `"source_mode": "replay"` and query `"banking stress"`
 to load the four-record synthetic organic-trigger scenario without network access.
 
+Live ingestion ignores ad-hoc issuer text and builds its query from the configured
+watchlist names, tickers, and aliases. GDELT uses the configured request-spacing
+interval. Bluesky responses identify bearer versus public-unauthenticated mode, and a
+provider authorization failure remains a source failure; no fixture or replay fallback
+occurs. A live stress result is labelled `illustrative sector proxy`.
+
 Example analysis request:
 
 ```json

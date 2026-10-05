@@ -47,6 +47,13 @@ replay_artifacts:
     sha256: d1474a86e5e14eaeb95fa7d546d44206661affbd6c0229f18ad9bc705b80f5e5
     assumptions: hand-authored fictional social-shaped replay inspired only by the general March 2023 banking-stress pattern; no copied posts
 
+live_snapshot_artifacts:
+  - path: data/live-snapshots/2026-10-05-public-metadata.json
+    classification: project-authored
+    redistribution: metadata-only record under repository license; endpoint terms govern future retrieval
+    sha256: b7970c4e76ffb8bb59997a9190ca20880a28577a6e05aaec8bdae151684738f4
+    assumptions: public endpoint status and counts only; no article or post content retained
+
 configuration_artifacts:
   - path: data/nlp/issuer_watchlist.json
     classification: synthetic
@@ -71,3 +78,9 @@ configuration_artifacts:
     redistribution: project-authored under repository license
     sha256: b90de73bf1bb68644dfcaeac5512bd3f60be97d6541c3ef7da751b011f2de479
     assumptions: illustrative shocks are not forecasts, calibrated risk measures, or advice
+
+  - path: data/portfolio/sector_proxy.json
+    classification: synthetic
+    redistribution: project-authored under repository license
+    sha256: d98f842ac30f89fe55e7e5b31504d48b41a57baf453fe68d5db528d6a9258ae7
+    assumptions: broad real-world sector labels map only to matching synthetic sectors; never issuer exposure

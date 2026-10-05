@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "2026-10-05-public-metadata",
+  "classification": "public-metadata-only",
+  "synthetic": false,
+  "content_retained": false,
+  "description": "Permitted metadata-only connectivity snapshot; no article or post text is retained.",
+  "retrieved_at": "2026-10-05T22:20:01Z",
+  "sources": [
+    {
+      "source": "gdelt",
+      "endpoint": "https://api.gdeltproject.org/api/v2/doc/doc",
+      "query": "\"Northstar Energy\"",
+      "lookback_hours": 24,
+      "http_status": 200,
+      "record_count": 1,
+      "terms": "Public GDELT DOC API documentation; only response metadata retained"
+    },
+    {
+      "source": "bluesky",
+      "endpoint": "https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts",
+      "query": "\"Northstar Energy\"",
+      "http_status": 403,
+      "record_count": 0,
+      "authentication_required": true,
+      "terms": "Public AppView endpoint; no bearer token supplied and no post content retained"
+    }
+  ],
+  "license_note": "Metadata only; endpoint terms and public documentation govern any future retrieval."
+}

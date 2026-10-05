@@ -62,6 +62,7 @@ def test_bluesky_adapter_maps_public_post_response() -> None:
     assert record.metadata["like_count"] == 4
     assert record.synthetic is False
     assert client.headers["Authorization"] == "Bearer test-token"
+    assert adapter.auth_mode == "bearer"
 
 
 def test_bluesky_adapter_reports_http_failure_without_response_body() -> None:
@@ -74,3 +75,4 @@ def test_bluesky_adapter_reports_http_failure_without_response_body() -> None:
             adapter.fetch(IngestionRequest(query="risk"))
 
     assert "internal" not in str(error.value)
+    assert "public-unauthenticated" in str(error.value)

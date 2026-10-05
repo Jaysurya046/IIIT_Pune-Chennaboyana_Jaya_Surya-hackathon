@@ -69,6 +69,7 @@ class Settings:
     data_dir: Path = Path("data")
     database_url: str = "sqlite:///data/runtime/risksignal.db"
     request_timeout_seconds: float = 10.0
+    gdelt_request_spacing_seconds: float = 1.0
     max_text_length: int = 10_000
     gdelt_base_url: str = "https://api.gdeltproject.org/api/v2/doc/doc"
     bluesky_base_url: str = "https://public.api.bsky.app"
@@ -95,6 +96,9 @@ class Settings:
             ).strip(),
             request_timeout_seconds=_read_positive_float(
                 "RISK_ENGINE_REQUEST_TIMEOUT_SECONDS", 10.0
+            ),
+            gdelt_request_spacing_seconds=_read_positive_float(
+                "RISK_ENGINE_GDELT_REQUEST_SPACING_SECONDS", 1.0
             ),
             max_text_length=_read_positive_integer("RISK_ENGINE_MAX_TEXT_LENGTH", 10_000),
             gdelt_base_url=os.getenv(
@@ -158,4 +162,5 @@ class Settings:
         summary["model_cache_dir"] = str(self.model_cache_dir)
         token = summary.pop("bluesky_bearer_token")
         summary["bluesky_auth_configured"] = bool(token)
+        summary["bluesky_auth_mode"] = "bearer" if token else "public-unauthenticated"
         return summary

@@ -46,6 +46,11 @@ Live adapters apply bounded retries to transport failures, rate limits, and tran
 server errors. Terminal errors contain only the source and exception class rather than
 response bodies that could expose upstream details.
 
+The committed `data/live-snapshots/2026-10-05-public-metadata.json` is a metadata-only
+connectivity record. It retains endpoint, query, status, count, authentication, and
+terms notes, but no article or post body. The Bluesky entry records a 403 without a
+bearer token; this is an explicit authentication outcome, not a fixture fallback.
+
 ## Committed Fixtures
 
 The two files under `data/sample/` are hand-authored synthetic examples. Names,
@@ -112,3 +117,7 @@ apply only to resolved entities. These shocks are illustrative assumptions rathe
 than forecasts, calibrated regulatory stress tests, investment advice, or evidence
 about real institutions. Both files are versioned and checksummed in
 `data/sources.yaml`.
+
+`data/portfolio/sector_proxy.json` maps broad real-world sector labels to matching
+synthetic sectors. Any stress result based on a non-synthetic live signal is labelled
+`illustrative sector proxy`; it must never be read as issuer exposure.

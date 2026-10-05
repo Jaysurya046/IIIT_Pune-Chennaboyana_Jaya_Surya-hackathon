@@ -42,6 +42,7 @@ class BlueskyAdapter:
         if client is not None and bearer_token:
             self._client.headers["Authorization"] = f"Bearer {bearer_token}"
         self._max_attempts = max_attempts
+        self.auth_mode = "bearer" if bearer_token else "public-unauthenticated"
 
     def close(self) -> None:
         if self._owns_client:
@@ -59,13 +60,16 @@ class BlueskyAdapter:
             "since": since.astimezone(UTC).isoformat().replace("+00:00", "Z"),
         }
 
-        payload = get_json(
-            self._client,
-            f"{self._base_url}{self._SEARCH_PATH}",
-            params=params,
-            source_name="Bluesky",
-            max_attempts=self._max_attempts,
-        )
+        try:
+            payload = get_json(
+                self._client,
+                f"{self._base_url}{self._SEARCH_PATH}",
+                params=params,
+                source_name="Bluesky",
+                max_attempts=self._max_attempts,
+            )
+        except SourceAdapterError as error:
+            raise SourceAdapterError(f"{error} (authentication mode: {self.auth_mode})") from error
 
         if not isinstance(payload, dict) or not isinstance(payload.get("posts"), list):
             raise SourceAdapterError("Bluesky returned an unexpected response shape")

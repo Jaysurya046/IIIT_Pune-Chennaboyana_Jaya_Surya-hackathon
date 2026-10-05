@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "version": "2026-10-06",
+  "synthetic": true,
+  "description": "Illustrative mapping from broad real-world issuer sectors to matching synthetic portfolio sectors; never issuer exposure.",
+  "mappings": [
+    {
+      "proxy_id": "banking-to-banking",
+      "source_sector": "Commercial Banking",
+      "source_aliases": ["bank", "banking", "commercial banking", "financial services"],
+      "synthetic_sector": "Banking",
+      "label": "illustrative sector proxy"
+    },
+    {
+      "proxy_id": "energy-to-energy",
+      "source_sector": "Energy",
+      "source_aliases": ["energy", "oil and gas", "utilities"],
+      "synthetic_sector": "Energy",
+      "label": "illustrative sector proxy"
+    },
+    {
+      "proxy_id": "shipping-to-transportation",
+      "source_sector": "Shipping and Logistics",
+      "source_aliases": ["shipping", "logistics", "transportation"],
+      "synthetic_sector": "Transportation",
+      "label": "illustrative sector proxy"
+    },
+    {
+      "proxy_id": "manufacturing-to-industrials",
+      "source_sector": "Industrial Manufacturing",
+      "source_aliases": ["manufacturing", "industrial manufacturing", "industrials"],
+      "synthetic_sector": "Industrials",
+      "label": "illustrative sector proxy"
+    }
+  ]
+}

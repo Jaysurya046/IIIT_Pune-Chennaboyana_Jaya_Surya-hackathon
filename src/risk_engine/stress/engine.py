@@ -64,6 +64,7 @@ class StressEngine:
         event_type: EventType,
         entity_ids: tuple[str, ...],
         impact_score: int,
+        exposure_label: str = "synthetic portfolio",
     ) -> StressDecision:
         if impact_score <= self._trigger_threshold:
             return StressDecision(
@@ -128,6 +129,7 @@ class StressEngine:
             expected_loss_after=expected_after,
             expected_loss_change=money(expected_after - expected_before),
             reconciliation_difference=reconciliation,
+            exposure_label=exposure_label,
             instrument_results=instrument_results,
             created_at=self._clock(),
         )
@@ -150,6 +152,11 @@ class StressEngine:
             event_type=signal.event.event_type,
             entity_ids=tuple(entity.entity_id for entity in signal.entities),
             impact_score=signal.impact_score,
+            exposure_label=(
+                "synthetic portfolio"
+                if signal.provenance.synthetic
+                else "illustrative sector proxy"
+            ),
         )
 
     def run_hypothetical(

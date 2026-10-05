@@ -27,10 +27,13 @@ an artifact no longer matches its manifest entry.
 | `data/nlp/event_taxonomy.json` | Project-authored configuration | Event labels and severity priors | Yes | Priors are prototype assumptions, not calibrated risk estimates |
 | `data/portfolio/portfolio.json` | Synthetic portfolio | Stress valuation | Yes | Eight fictional USD positions across four asset classes |
 | `data/portfolio/scenarios.json` | Synthetic scenario matrix | Event-to-shock mapping | Yes | Shocks are illustrative, not forecasts or regulatory scenarios |
+| `data/portfolio/sector_proxy.json` | Synthetic mapping | Illustrative real-sector to synthetic-sector projection | Yes | Never issuer exposure; outputs carry an illustrative-sector-proxy label |
+| `data/live-snapshots/2026-10-05-public-metadata.json` | Public metadata-only snapshot | Connectivity and authentication evidence | Yes | No article/post content retained; endpoint terms govern future retrieval |
 | Financial PhraseBank v1.0 `sentences_allagree` | Public, expert-labelled financial news sentences | Optional sentiment benchmark | No | CC BY-NC-SA 3.0; non-commercial use; model-training overlap |
 
-The manifest groups nine checksummed artifacts because the two public interfaces are
-described as live sources rather than committed datasets.
+The manifest groups eleven checksummed artifacts. The two public interfaces remain
+runtime sources; the committed snapshot contains metadata only, and the sector map is
+synthetic configuration.
 
 The external benchmark dataset is also not part of the committed-artifact count. Its
 immutable distribution reference, archive and derived-file checksums, selection rule,
@@ -63,6 +66,11 @@ licence, measured results, and training-overlap limitation are documented separa
 Live responses are runtime data and are not committed automatically. The adapters use
 bounded retries and record source failures separately. A failed live request never
 causes synthetic fixture data to appear in the same run.
+
+Live queries are generated from every configured issuer name, ticker, and alias in the
+synthetic watchlist. GDELT requests use a configurable spacing interval. Bluesky
+reports whether it is using bearer authentication or the public-unauthenticated mode;
+a provider 403 is surfaced as a source failure and never changes source mode.
 
 ## Synthetic Fixtures
 
@@ -115,6 +123,10 @@ zero-position result rather than stressing unrelated holdings.
 Outputs are illustrative scenario calculations. They are not forecasts, investment
 recommendations, credit opinions, regulatory capital results, or evidence about any
 real institution.
+
+For non-synthetic live signals, stress results expose the label `illustrative sector
+proxy`. This describes a broad sector mapping into the fictional portfolio only; it is
+not a claim that the live issuer owns or is exposed to those synthetic positions.
 
 ## Provenance Retained at Runtime
 

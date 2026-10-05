@@ -22,6 +22,7 @@ from risk_engine.config import Settings
 from risk_engine.ingestion.adapters import BlueskyAdapter, FixtureAdapter, GdeltAdapter
 from risk_engine.ingestion.models import IngestionRequest
 from risk_engine.ingestion.service import IngestionService
+from risk_engine.ingestion.watchlist import build_watchlist_query
 from risk_engine.nlp.engine import RiskSignalEngine
 from risk_engine.nlp.factory import build_risk_engine, synthetic_batch_as_of
 from risk_engine.persistence.sqlite import SQLiteStore
@@ -76,6 +77,7 @@ class RiskApplicationService:
             GdeltAdapter(
                 self.settings.gdelt_base_url,
                 timeout_seconds=self.settings.request_timeout_seconds,
+                request_spacing_seconds=self.settings.gdelt_request_spacing_seconds,
             ),
             BlueskyAdapter(
                 self.settings.bluesky_base_url,
@@ -93,13 +95,16 @@ class RiskApplicationService:
             adapters = self._live_adapters()
         else:  # pragma: no cover - SourceMode validation is exhaustive
             raise AssertionError(f"Unhandled source mode: {request.source_mode}")
+        query = request.query
+        if request.source_mode is SourceMode.LIVE:
+            query = build_watchlist_query(self.settings.data_dir / "nlp" / "issuer_watchlist.json")
         try:
             result = IngestionService(
                 adapters,
                 max_text_length=self.settings.max_text_length,
             ).run(
                 IngestionRequest(
-                    query=request.query,
+                    query=query,
                     limit=request.limit,
                     lookback_hours=request.lookback_hours,
                     since=request.since,

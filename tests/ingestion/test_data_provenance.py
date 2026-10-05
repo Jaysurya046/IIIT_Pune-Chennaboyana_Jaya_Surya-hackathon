@@ -26,6 +26,9 @@ def test_fixture_checksums_match_source_manifest() -> None:
         "data/replay/banking_stress_social.json": (
             "d1474a86e5e14eaeb95fa7d546d44206661affbd6c0229f18ad9bc705b80f5e5"
         ),
+        "data/live-snapshots/2026-10-05-public-metadata.json": (
+            "b7970c4e76ffb8bb59997a9190ca20880a28577a6e05aaec8bdae151684738f4"
+        ),
         "data/nlp/issuer_watchlist.json": (
             "3317a8118c630e4710080d9d5cdc730055dab134d00626a37ce29cca952a83e6"
         ),
@@ -38,6 +41,9 @@ def test_fixture_checksums_match_source_manifest() -> None:
         "data/portfolio/scenarios.json": (
             "b90de73bf1bb68644dfcaeac5512bd3f60be97d6541c3ef7da751b011f2de479"
         ),
+        "data/portfolio/sector_proxy.json": (
+            "d98f842ac30f89fe55e7e5b31504d48b41a57baf453fe68d5db528d6a9258ae7"
+        ),
     }
 
     for filename, checksum in expected.items():
@@ -46,7 +52,7 @@ def test_fixture_checksums_match_source_manifest() -> None:
         assert f"path: {filename}" in manifest
         assert f"sha256: {checksum}" in manifest
 
-    assert len(expected) == 9
+    assert len(expected) == 11
 
 
 def test_replay_bundles_are_synthetic_reserved_domain_records() -> None:
@@ -66,3 +72,18 @@ def test_replay_bundles_are_synthetic_reserved_domain_records() -> None:
         or record["metadata"].get("copied_post_text") is False
         for record in records
     )
+
+
+def test_live_snapshot_is_metadata_only_and_records_authentication_outcome() -> None:
+    snapshot = json.loads(
+        Path("data/live-snapshots/2026-10-05-public-metadata.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert snapshot["classification"] == "public-metadata-only"
+    assert snapshot["content_retained"] is False
+    assert {source["source"] for source in snapshot["sources"]} == {"gdelt", "bluesky"}
+    bluesky = next(source for source in snapshot["sources"] if source["source"] == "bluesky")
+    assert bluesky["http_status"] == 403
+    assert bluesky["authentication_required"] is True

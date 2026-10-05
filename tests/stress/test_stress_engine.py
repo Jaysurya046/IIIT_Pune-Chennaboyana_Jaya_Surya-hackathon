@@ -26,6 +26,7 @@ def _signal(
     event_type: EventType = EventType.CREDIT_EVENT,
     *,
     with_entity: bool = True,
+    synthetic: bool = True,
 ) -> RiskSignal:
     entities = (
         (
@@ -86,7 +87,7 @@ def _signal(
             published_at=NOW,
             retrieved_at=NOW,
             language="en",
-            synthetic=True,
+            synthetic=synthetic,
         ),
     )
 
@@ -122,6 +123,13 @@ def test_entity_scenario_only_stresses_matching_issuer_and_reconciles() -> None:
     assert result.expected_loss_change == Decimal("300000.00")
     assert result.reconciliation_difference == Decimal("0.00")
     assert sum(item.loss for item in result.instrument_results) == result.total_loss
+
+
+def test_non_synthetic_signal_result_is_labeled_as_illustrative_proxy() -> None:
+    decision = _engine().run(_signal(9, synthetic=False))
+
+    assert decision.result is not None
+    assert decision.result.exposure_label == "illustrative sector proxy"
 
 
 def test_portfolio_scenario_stresses_every_position() -> None:

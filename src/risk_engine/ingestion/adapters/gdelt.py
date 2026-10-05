@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
+from time import sleep
 
 import httpx
 
@@ -26,6 +28,8 @@ class GdeltAdapter:
         timeout_seconds: float = 10.0,
         client: httpx.Client | None = None,
         max_attempts: int = 3,
+        request_spacing_seconds: float = 0.0,
+        sleeper: Callable[[float], None] = sleep,
     ) -> None:
         self._base_url = base_url
         self._owns_client = client is None
@@ -35,6 +39,10 @@ class GdeltAdapter:
             headers={"User-Agent": f"RiskSignalEngine/{__version__}"},
         )
         self._max_attempts = max_attempts
+        if request_spacing_seconds < 0:
+            raise ValueError("request_spacing_seconds must not be negative")
+        self._request_spacing_seconds = request_spacing_seconds
+        self._sleeper = sleeper
 
     def close(self) -> None:
         if self._owns_client:
@@ -42,6 +50,8 @@ class GdeltAdapter:
 
     def fetch(self, request: IngestionRequest) -> list[SourceRecord]:
         retrieved_at = utc_now()
+        if self._request_spacing_seconds:
+            self._sleeper(self._request_spacing_seconds)
         params: dict[str, str | int] = {
             "query": request.query,
             "mode": "artlist",
