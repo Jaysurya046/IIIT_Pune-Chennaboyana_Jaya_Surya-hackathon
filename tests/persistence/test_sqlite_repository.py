@@ -35,6 +35,10 @@ def test_ingestion_and_signal_round_trip_with_filters(tmp_path: Path) -> None:
     )
 
     assert store.save_signals(signals) == 6
+    events = store.list_signal_events_after()
+    assert [event.event_id for event in events] == list(range(1, 7))
+    assert [event.signal.signal_id for event in events] == [signal.signal_id for signal in signals]
+    assert [event.event_id for event in store.list_signal_events_after(3)] == [4, 5, 6]
     restored_run = store.get_ingestion(ingestion.run_id)
     assert restored_run == ingestion
     assert store.latest_ingestion() == ingestion

@@ -50,6 +50,20 @@ interval. Bluesky responses identify bearer versus public-unauthenticated mode, 
 provider authorization failure remains a source failure; no fixture or replay fallback
 occurs. A live stress result is labelled `illustrative sector proxy`.
 
+### Signal streaming and polling
+
+`GET /api/v1/signals/stream` returns Server-Sent Events with `id`, `event: signal`, and
+compact JSON signal data. Send `Last-Event-ID` or `last_event_id` to resume after a
+cursor; the SQLite event log preserves ordering across API restarts. Comment heartbeats
+keep idle connections alive, and disconnects remove the subscriber.
+
+Auto-stress is disabled by default. Start the API with `python -m risk_engine serve
+--auto-stress` to persist decisions for newly analyzed signals above the configured
+threshold. Optional polling is also disabled by default; enable it with
+`--poll-minutes <positive-number> --source-mode <fixtures|replay|live>`. Polling must
+name its source mode explicitly, rejects live mode while offline mode is enabled, and
+never changes mode after a source failure.
+
 Example analysis request:
 
 ```json

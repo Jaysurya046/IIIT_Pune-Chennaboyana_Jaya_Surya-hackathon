@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import FastAPI, HTTPException, Query, status
+from fastapi import FastAPI, Header, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 
 from risk_engine import __version__
+from risk_engine.api.events import SignalEventBroker, format_heartbeat, format_sse
 from risk_engine.api.models import (
     AnalysisRequest,
     AnalysisResponse,
@@ -15,6 +17,7 @@ from risk_engine.api.models import (
     IngestionRunResponse,
     PortfolioSummaryResponse,
     SignalListResponse,
+    SourceMode,
     SourceStatusResponse,
     StressTestRequest,
     StressTestResponse,
@@ -23,6 +26,7 @@ from risk_engine.api.models import (
 )
 from risk_engine.api.service import (
     LiveModeDisabledError,
+    PollingWorker,
     RiskApplicationService,
     UnknownPortfolioEntityError,
 )
@@ -37,12 +41,28 @@ def create_app(
     *,
     store: SQLiteStore | None = None,
     warm_model_mode: bool = False,
+    auto_stress: bool = False,
+    poll_minutes: float | None = None,
+    poll_source_mode: str | None = None,
+    poll_query: str = "financial risk",
+    poll_nlp_mode: str | None = None,
 ) -> FastAPI:
     """Build an application with injectable settings and storage for deterministic tests."""
 
     configured = settings or Settings.from_env()
     repository = store or SQLiteStore(configured.database_url)
-    service = RiskApplicationService(configured, repository)
+    event_broker = SignalEventBroker(
+        history_loader=lambda cursor: tuple(
+            (event.event_id, event.signal)
+            for event in repository.list_signal_events_after(cursor)
+        )
+    )
+    service = RiskApplicationService(
+        configured,
+        repository,
+        event_broker=event_broker,
+        auto_stress=auto_stress,
+    )
     if warm_model_mode:
         service.warm_up_model_mode()
     app = FastAPI(
@@ -53,6 +73,32 @@ def create_app(
     app.state.settings = configured
     app.state.store = repository
     app.state.service = service
+    app.state.events = event_broker
+
+    poller: PollingWorker | None = None
+    if poll_minutes is not None:
+        if poll_minutes <= 0:
+            raise ValueError("poll_minutes must be positive")
+        if poll_source_mode is None:
+            raise ValueError("poll_source_mode is required when polling is enabled")
+        selected_source_mode = SourceMode(poll_source_mode)
+        poller = PollingWorker(
+            lambda: service.poll_once(
+                source_mode=selected_source_mode,
+                query=poll_query,
+                nlp_mode=poll_nlp_mode,
+            ),
+            interval_seconds=poll_minutes * 60,
+        )
+        app.state.poller = poller
+
+        @app.on_event("startup")
+        def start_poller() -> None:
+            poller.start()
+
+        @app.on_event("shutdown")
+        def stop_poller() -> None:
+            poller.stop()
 
     @app.get("/health", response_model=HealthResponse, tags=["system"])
     def health() -> HealthResponse:
@@ -117,6 +163,33 @@ def create_app(
             entity_id=entity_id,
         )
         return SignalListResponse(total=total, limit=limit, offset=offset, items=items)
+
+    @app.get("/api/v1/signals/stream", tags=["signals"])
+    def stream_signals(
+        last_event_id: Annotated[int | None, Query(ge=0)] = None,
+        last_event_header: Annotated[str | None, Header(alias="Last-Event-ID")] = None,
+        heartbeat_seconds: Annotated[float, Query(gt=0, le=60)] = 15.0,
+    ) -> StreamingResponse:
+        cursor = last_event_id or 0
+        if last_event_header is not None:
+            try:
+                cursor = int(last_event_header)
+            except ValueError as error:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Last-Event-ID must be an integer",
+                ) from error
+            if cursor < 0:
+                raise HTTPException(status_code=422, detail="Last-Event-ID must be non-negative")
+
+        def body():
+            for event in event_broker.subscribe(
+                last_event_id=cursor,
+                heartbeat_seconds=heartbeat_seconds,
+            ):
+                yield format_heartbeat() if event is None else format_sse(event)
+
+        return StreamingResponse(body(), media_type="text/event-stream")
 
     @app.get(
         "/api/v1/signals/{signal_id}",

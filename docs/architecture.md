@@ -138,6 +138,13 @@ without switching to fixtures. A committed metadata-only snapshot records one pu
 GDELT response and one unauthenticated Bluesky authorization outcome; no source content
 is redistributed.
 
+Signal analysis writes an ordered event row to SQLite and publishes the same event to
+an in-process broker. `/api/v1/signals/stream` formats those events as SSE with stable
+reconnect IDs and heartbeat comments. An optional auto-stress subscriber persists only
+above-threshold decisions and relies on the existing deterministic decision identity for
+idempotency. An optional bounded polling worker is lifecycle-managed by FastAPI; its
+source and NLP modes are explicit, and adapter failures are isolated without fallback.
+
 The deterministic event matcher recognizes configured keywords plus bounded English
 inflections (`s`, `es`, `ed`, and `ing`) at whole-word boundaries. It is intentionally
 not a general stemmer, so every match remains traceable to a taxonomy entry. The

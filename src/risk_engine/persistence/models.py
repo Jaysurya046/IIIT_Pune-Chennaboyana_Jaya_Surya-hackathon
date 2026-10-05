@@ -7,6 +7,7 @@ from typing import Annotated
 from pydantic import Field
 
 from risk_engine.ingestion.models import IngestionResult, StrictModel
+from risk_engine.nlp.models import RiskSignal
 from risk_engine.stress.models import StressDecision
 
 Identifier = Annotated[str, Field(pattern=r"^[0-9a-f]{32}$")]
@@ -24,3 +25,10 @@ class StressDecisionRecord(StrictModel):
 
     decision_id: Identifier
     decision: StressDecision
+
+
+class SignalEventRecord(StrictModel):
+    """Persisted ordered signal event used by SSE reconnect cursors."""
+
+    event_id: int = Field(ge=1)
+    signal: RiskSignal

@@ -25,7 +25,7 @@ Last updated: 2026-10-06
 | 16 Release and demo hygiene (P1 T8) | complete | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
 | 17 Deterministic NLP robustness (P2 T9) | complete | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
 | 18 Live path and sector proxy (P2 T10) | complete | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
-| 19 Streaming and polling (P2 T11) | optional | SSE, auto-stress and bounded polling | Streaming, idempotency and lifecycle tests | `feat(api): stream signals and automate stress decisions` |
+| 19 Streaming and polling (P2 T11) | complete | SSE, auto-stress and bounded polling | Streaming, idempotency and lifecycle tests | `feat(api): stream signals and automate stress decisions` |
 | 20 Portfolio generator (P2 T12) | optional-blocked | Seeded 200-position synthetic generator | Determinism, privacy and reconciliation tests | `feat(portfolio): generate reproducible synthetic portfolios` |
 
 ## Current Phase
@@ -490,6 +490,19 @@ is supplied. The detailed sequence and task gates are in
 - Added the versioned synthetic sector-proxy mapping and labelled non-synthetic stress
   results `illustrative sector proxy`, never issuer exposure.
 - Added two checksummed artifacts, raising the manifest expectation from 9 to 11.
+
+### 2026-10-06 Phase 19
+
+- Added a SQLite-backed ordered signal-event log and an in-process SSE broker with
+  event IDs, reconnect cursors, heartbeat comments, ordering, and disconnect cleanup.
+- Added `GET /api/v1/signals/stream`; events are emitted only after signal persistence,
+  so reconnects can replay durable events without a broker or Kafka dependency.
+- Added opt-in `serve --auto-stress`; only above-threshold signals create stress decisions,
+  and the existing deterministic decision IDs make repeated delivery idempotent.
+- Added opt-in `serve --poll-minutes` with mandatory explicit source mode, explicit NLP
+  mode support, offline live-mode rejection, isolated failures, and clean shutdown.
+- Added offline tests for SSE framing/cursors/heartbeats, persistence ordering,
+  auto-stress behavior, polling timing, source validation, and process lifecycle.
 
 ## Risks and Blockers
 

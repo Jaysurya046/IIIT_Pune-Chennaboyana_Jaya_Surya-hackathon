@@ -33,6 +33,13 @@ class DemoCommandError(RuntimeError):
     """Raised when the local demo cannot start exactly as requested."""
 
 
+def _positive_float(value: str) -> float:
+    parsed = float(value)
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("value must be greater than zero")
+    return parsed
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Create the command-line parser."""
 
@@ -73,6 +80,23 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="load pinned model-mode components before accepting API requests",
     )
+    serve_parser.add_argument(
+        "--auto-stress",
+        action="store_true",
+        help="persist stress decisions for newly analyzed signals above the trigger",
+    )
+    serve_parser.add_argument(
+        "--poll-minutes",
+        type=_positive_float,
+        help="enable bounded polling at this interval; requires --source-mode",
+    )
+    serve_parser.add_argument(
+        "--source-mode",
+        choices=tuple(mode.value for mode in SourceMode),
+        help="explicit source mode for polling",
+    )
+    serve_parser.add_argument("--query", default="financial risk")
+    serve_parser.add_argument("--nlp-mode", choices=sorted(Settings.ALLOWED_NLP_MODES))
     dashboard_parser = subparsers.add_parser(
         "dashboard", help="run the Streamlit monitoring dashboard"
     )
@@ -286,8 +310,45 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         from risk_engine.api.app import create_app
 
+        if args.poll_minutes is not None and args.source_mode is None:
+            print(
+                json.dumps(
+                    {
+                        "classification": "polling-error",
+                        "message": "--source-mode is required with --poll-minutes",
+                    }
+                ),
+                file=sys.stderr,
+            )
+            return 1
+        if (
+            args.poll_minutes is not None
+            and args.source_mode == SourceMode.LIVE.value
+            and settings.offline_mode
+        ):
+            print(
+                json.dumps(
+                    {
+                        "classification": "polling-error",
+                        "message": "live polling requires RISK_ENGINE_OFFLINE_MODE=false",
+                    }
+                ),
+                file=sys.stderr,
+            )
+            return 1
+
+        app_options: dict[str, object] = {"warm_model_mode": args.warm_models}
+        if args.auto_stress:
+            app_options["auto_stress"] = True
+        if args.poll_minutes is not None:
+            app_options.update(
+                poll_minutes=args.poll_minutes,
+                poll_source_mode=args.source_mode,
+                poll_query=args.query,
+                poll_nlp_mode=args.nlp_mode,
+            )
         uvicorn.run(
-            create_app(settings, warm_model_mode=args.warm_models),
+            create_app(settings, **app_options),
             host=args.host,
             port=args.port,
         )

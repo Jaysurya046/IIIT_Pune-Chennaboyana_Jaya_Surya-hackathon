@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+import threading
 from collections import defaultdict
 from collections.abc import Callable
 from decimal import Decimal
 
+from risk_engine.api.events import SignalEventBroker
 from risk_engine.api.models import (
     AnalysisResponse,
     IngestionRunRequest,
@@ -31,6 +34,8 @@ from risk_engine.stress.factory import build_stress_engine
 from risk_engine.stress.models import AssetClass, LoanPosition, Portfolio, Position
 from risk_engine.stress.valuation import money
 
+LOGGER = logging.getLogger(__name__)
+
 
 class LiveModeDisabledError(RuntimeError):
     """Raised when a request tries to use the network in configured offline mode."""
@@ -47,12 +52,21 @@ class UnknownPortfolioEntityError(ValueError):
 class RiskApplicationService:
     """Use-case layer kept separate from HTTP and storage implementations."""
 
-    def __init__(self, settings: Settings, store: SQLiteStore) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        store: SQLiteStore,
+        *,
+        event_broker: SignalEventBroker | None = None,
+        auto_stress: bool = False,
+    ) -> None:
         self.settings = settings
         self.store = store
         self._stress_engine = build_stress_engine(settings)
         self._portfolio = load_portfolio(settings.data_dir / "portfolio" / "portfolio.json")
         self._nlp_engines: dict[str, RiskSignalEngine] = {}
+        self._event_broker = event_broker
+        self._auto_stress = auto_stress
 
     def _fixture_adapters(self) -> list[FixtureAdapter]:
         sample_dir = self.settings.data_dir / "sample"
@@ -154,7 +168,32 @@ class RiskApplicationService:
         )
         signals = engine.analyze(documents, as_of=as_of)
         self.store.save_signals(signals)
+        if self._event_broker is not None:
+            for signal in signals:
+                event = self.store.signal_event(signal.signal_id)
+                if event is not None:
+                    self._event_broker.publish(event.signal, event.event_id)
+        if self._auto_stress:
+            for signal in signals:
+                if signal.impact_score > self.settings.stress_trigger_threshold:
+                    self.stress(signal.signal_id)
         return AnalysisResponse(run_id=run_id, signal_count=len(signals), signals=signals)
+
+    def poll_once(
+        self,
+        *,
+        source_mode: SourceMode,
+        query: str,
+        nlp_mode: str | None = None,
+    ) -> AnalysisResponse | None:
+        """Run one explicit polling cycle without changing source or NLP modes."""
+
+        ingestion = self.ingest(
+            IngestionRunRequest(query=query, source_mode=source_mode)
+        )
+        if ingestion.failed_source_count:
+            LOGGER.warning("Polling source failure; retaining explicit mode %s", source_mode)
+        return self.analyze(ingestion.run_id, nlp_mode)
 
     def source_status(self) -> SourceStatusResponse:
         record = self.store.latest_ingestion()
@@ -234,3 +273,52 @@ class RiskApplicationService:
             by_sector=self._breakdown(portfolio, lambda item: item.sector),
             by_issuer=self._breakdown(portfolio, lambda item: item.issuer_id),
         )
+
+
+class PollingWorker:
+    """Bounded daemon worker for optional in-process ingestion polling."""
+
+    def __init__(
+        self,
+        poll: Callable[[], object],
+        *,
+        interval_seconds: float,
+        sleeper: Callable[[float], bool] | None = None,
+    ) -> None:
+        if interval_seconds <= 0:
+            raise ValueError("interval_seconds must be positive")
+        self._poll = poll
+        self._interval_seconds = interval_seconds
+        self._stop = threading.Event()
+        self._sleeper = sleeper
+        self._thread: threading.Thread | None = None
+
+    @property
+    def running(self) -> bool:
+        return self._thread is not None and self._thread.is_alive()
+
+    def _wait(self) -> bool:
+        if self._sleeper is not None:
+            return self._sleeper(self._interval_seconds)
+        return self._stop.wait(self._interval_seconds)
+
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            try:
+                self._poll()
+            except Exception:  # noqa: BLE001 - polling must not kill the API process
+                LOGGER.exception("Polling cycle failed; source mode remains explicit")
+            if self._wait():
+                break
+
+    def start(self) -> None:
+        if self.running:
+            return
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._run, name="risk-signal-poller", daemon=True)
+        self._thread.start()
+
+    def stop(self, timeout_seconds: float = 5.0) -> None:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout_seconds)

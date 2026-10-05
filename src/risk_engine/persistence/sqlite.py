@@ -10,7 +10,11 @@ from pathlib import Path
 
 from risk_engine.ingestion.models import IngestionResult
 from risk_engine.nlp.models import EventType, RiskSignal
-from risk_engine.persistence.models import IngestionRunRecord, StressDecisionRecord
+from risk_engine.persistence.models import (
+    IngestionRunRecord,
+    SignalEventRecord,
+    StressDecisionRecord,
+)
 from risk_engine.stress.models import StressDecision, StressResult
 
 SCHEMA_VERSION = "1"
@@ -87,6 +91,12 @@ class SQLiteStore:
             ON risk_signals(created_at DESC, signal_id);
         CREATE INDEX IF NOT EXISTS idx_risk_signals_filters
             ON risk_signals(event_type, impact_score, source);
+        CREATE TABLE IF NOT EXISTS signal_events (
+            event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            signal_id TEXT NOT NULL UNIQUE REFERENCES risk_signals(signal_id) ON DELETE CASCADE,
+            created_at TEXT NOT NULL,
+            payload_json TEXT NOT NULL
+        );
         CREATE TABLE IF NOT EXISTS signal_entities (
             signal_id TEXT NOT NULL REFERENCES risk_signals(signal_id) ON DELETE CASCADE,
             entity_id TEXT NOT NULL,
@@ -240,7 +250,54 @@ class SQLiteStore:
                     "INSERT INTO signal_entities(signal_id, entity_id) VALUES (?, ?)",
                     [(signal.signal_id, entity.entity_id) for entity in signal.entities],
                 )
+                self._connection.execute(
+                    """
+                    INSERT OR IGNORE INTO signal_events(signal_id, created_at, payload_json)
+                    VALUES (?, ?, ?)
+                    """,
+                    (signal.signal_id, signal.created_at.isoformat(), signal.model_dump_json()),
+                )
         return len(signal_batch)
+
+    def list_signal_events_after(
+        self, event_id: int = 0, *, limit: int = 100
+    ) -> tuple[SignalEventRecord, ...]:
+        if event_id < 0 or limit < 1:
+            raise ValueError("event_id must be non-negative and limit must be positive")
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT event_id, payload_json FROM signal_events
+                WHERE event_id > ? ORDER BY event_id ASC LIMIT ?
+                """,
+                (event_id, limit),
+            ).fetchall()
+        return tuple(
+            SignalEventRecord(
+                event_id=row["event_id"],
+                signal=RiskSignal.model_validate_json(row["payload_json"]),
+            )
+            for row in rows
+        )
+
+    def signal_event(self, signal_id: str) -> SignalEventRecord | None:
+        with self._lock:
+            row = self._connection.execute(
+                "SELECT event_id, payload_json FROM signal_events WHERE signal_id = ?",
+                (signal_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return SignalEventRecord(
+            event_id=row["event_id"],
+            signal=RiskSignal.model_validate_json(row["payload_json"]),
+        )
+
+    def count_stress_decisions(self) -> int:
+        with self._lock:
+            return int(
+                self._connection.execute("SELECT COUNT(*) FROM stress_decisions").fetchone()[0]
+            )
 
     def get_signal(self, signal_id: str) -> RiskSignal | None:
         with self._lock:
