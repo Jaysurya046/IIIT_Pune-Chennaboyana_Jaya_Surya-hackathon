@@ -47,7 +47,7 @@ def create_app(
         service.warm_up_model_mode()
     app = FastAPI(
         title="RiskSignal Engine API",
-        version="1.0.0",
+        version=__version__,
         description="Versioned API for explainable risk signals and portfolio stress tests.",
     )
     app.state.settings = configured

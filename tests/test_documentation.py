@@ -27,7 +27,7 @@ def test_submission_readme_contains_required_sections_and_links() -> None:
     assert "python -m risk_engine dashboard" in content
 
 
-def test_required_phase_eight_artifacts_exist() -> None:
+def test_required_submission_artifacts_exist() -> None:
     required = (
         "docs/architecture.png",
         "docs/assets/architecture.svg",
@@ -35,12 +35,13 @@ def test_required_phase_eight_artifacts_exist() -> None:
         "docs/dataset-guide.md",
         "docs/results.md",
         "docs/demo-script.md",
+        "docs/presentation.pdf",
     )
 
     for relative_path in required:
         path = ROOT / relative_path
-        assert path.is_file(), f"missing Phase 8 artifact: {relative_path}"
-        assert path.stat().st_size > 0, f"empty Phase 8 artifact: {relative_path}"
+        assert path.is_file(), f"missing required artifact: {relative_path}"
+        assert path.stat().st_size > 0, f"empty required artifact: {relative_path}"
 
 
 def test_architecture_png_is_high_resolution() -> None:
@@ -145,3 +146,44 @@ def test_directional_and_derivative_assumptions_are_explicit() -> None:
         assert "DV01" in normalized and "USD" in normalized and "+1 bp" in normalized
         assert "delta_exposure" in normalized
         assert "underlying_shock" in normalized
+
+
+def test_presentation_pdf_is_real_and_has_submission_page_count() -> None:
+    presentation = ROOT / "docs" / "presentation.pdf"
+    payload = presentation.read_bytes()
+
+    assert payload.startswith(b"%PDF-")
+    assert len(payload) >= 100_000
+    page_count = len(re.findall(rb"/Type\s*/Page\b", payload))
+    assert 5 <= page_count <= 7
+
+
+def test_readme_results_are_one_evidence_table_plus_screenshots() -> None:
+    readme = README.read_text(encoding="utf-8")
+    results = readme.split("## 5. Key Results & Domain Impact", maxsplit=1)[1].split(
+        "## Reviewer Guide", maxsplit=1
+    )[0]
+
+    assert len(re.findall(r"^\|---", results, flags=re.MULTILINE)) == 1
+    assert "docs/benchmark.md" in results
+    assert "docs/results.md" in results
+    for filename in (
+        "risk-signal-timeline.png",
+        "source-health.png",
+        "organic-stress-result.png",
+        "hypothetical-what-if.png",
+    ):
+        assert f"docs/img/{filename}" in results
+
+
+def test_release_docs_use_current_progress_path_and_ci_matrix() -> None:
+    readme = README.read_text(encoding="utf-8")
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    assert (ROOT / "docs" / "progress.md").is_file()
+    assert not (ROOT / "progress.md").exists()
+    assert "docs/progress.md" in readme
+    assert "python-version: [\"3.11\", \"3.13\"]" in workflow
+    assert "HF_HUB_OFFLINE" in workflow
+    assert "TRANSFORMERS_OFFLINE" in workflow
+    assert "deferred" not in readme.lower()

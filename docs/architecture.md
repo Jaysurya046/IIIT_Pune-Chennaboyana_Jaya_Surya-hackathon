@@ -330,7 +330,7 @@ suite. Detailed scope, baseline values, and limitations are recorded in
 The initial implementation excludes live trading, investment recommendations,
 portfolio optimization, full revaluation models, fine-tuning foundation models,
 multi-user authentication, production-scale streaming infrastructure, Module A,
-cloud deployment, presentation creation, and video recording.
+cloud deployment, and video recording.
 
 The recorded walkthrough may run for up to ten minutes under the submission guidance,
 while the deterministic live demonstration runbook fits within five minutes as
@@ -341,7 +341,7 @@ required by the problem statement. Both paths are defined in `docs/demo-script.m
 ```text
 README.md
 LICENSE
-progress.md
+docs/progress.md
 pyproject.toml
 requirements.txt
 .env.example

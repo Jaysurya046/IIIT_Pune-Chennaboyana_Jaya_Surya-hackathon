@@ -5,12 +5,18 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import socket
 import subprocess
 import sys
+import time
 from collections.abc import Sequence
 from pathlib import Path
 
+import httpx
+
 from risk_engine import __version__
+from risk_engine.api.models import IngestionRunRequest, SourceMode
+from risk_engine.api.service import RiskApplicationService
 from risk_engine.benchmarking import BenchmarkDataError, run_benchmark
 from risk_engine.config import Settings
 from risk_engine.ingestion.adapters import FixtureAdapter
@@ -19,7 +25,12 @@ from risk_engine.ingestion.service import IngestionService
 from risk_engine.logging_config import configure_logging
 from risk_engine.nlp.factory import build_risk_engine, synthetic_batch_as_of
 from risk_engine.nlp.sentiment import ModelDependencyError
+from risk_engine.persistence import SQLiteStore
 from risk_engine.stress.factory import build_stress_engine
+
+
+class DemoCommandError(RuntimeError):
+    """Raised when the local demo cannot start exactly as requested."""
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -68,6 +79,28 @@ def build_parser() -> argparse.ArgumentParser:
     dashboard_parser.add_argument("--host", default="127.0.0.1")
     dashboard_parser.add_argument("--port", type=int, default=8501)
     dashboard_parser.add_argument("--api-url", default="http://127.0.0.1:8000")
+    demo_parser = subparsers.add_parser(
+        "demo", help="seed data and run the local API plus dashboard"
+    )
+    demo_parser.add_argument(
+        "--source-mode",
+        choices=(SourceMode.FIXTURES.value, SourceMode.REPLAY.value),
+        default=SourceMode.REPLAY.value,
+    )
+    demo_parser.add_argument(
+        "--nlp-mode",
+        choices=sorted(Settings.ALLOWED_NLP_MODES),
+        default="deterministic",
+    )
+    demo_parser.add_argument("--host", default="127.0.0.1")
+    demo_parser.add_argument("--api-port", type=int, default=8000)
+    demo_parser.add_argument("--dashboard-port", type=int, default=8501)
+    demo_parser.add_argument(
+        "--open-browser",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="open the Streamlit UI in a browser (use --no-open-browser for headless use)",
+    )
     validation_parser = subparsers.add_parser(
         "validate", help="run the reproducible offline validation benchmark"
     )
@@ -106,6 +139,135 @@ def _run_replay(settings: Settings, query: str, limit: int):
         max_text_length=settings.max_text_length,
     )
     return service.run(IngestionRequest(query=query, limit=limit))
+
+
+def _assert_demo_port_available(host: str, port: int, label: str) -> None:
+    if not 1 <= port <= 65_535:
+        raise DemoCommandError(f"{label} port must be between 1 and 65535")
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as candidate:
+            candidate.bind((host, port))
+    except OSError as error:
+        raise DemoCommandError(f"{label} port {host}:{port} is unavailable") from error
+
+
+def _seed_demo(settings: Settings, source_mode: SourceMode, nlp_mode: str) -> tuple[int, int]:
+    store = SQLiteStore(settings.database_url)
+    try:
+        service = RiskApplicationService(settings, store)
+        query = "banking stress" if source_mode is SourceMode.REPLAY else "portfolio risk"
+        ingestion = service.ingest(
+            IngestionRunRequest(query=query, source_mode=source_mode)
+        )
+        if ingestion.failed_source_count:
+            raise DemoCommandError(
+                f"{source_mode.value} ingestion failed for "
+                f"{ingestion.failed_source_count} source(s)"
+            )
+        analysis = service.analyze(ingestion.run_id, nlp_mode)
+        if analysis is None:  # pragma: no cover - the saved run must be retrievable
+            raise DemoCommandError("seeded ingestion run could not be analyzed")
+        return ingestion.document_count, analysis.signal_count
+    finally:
+        store.close()
+
+
+def _demo_client_host(host: str) -> str:
+    if host == "0.0.0.0":
+        return "127.0.0.1"
+    if host == "::":
+        return "::1"
+    return host
+
+
+def _wait_for_demo_api(
+    process: subprocess.Popen,
+    health_url: str,
+    *,
+    timeout_seconds: float = 20.0,
+) -> None:
+    deadline = time.monotonic() + timeout_seconds
+    with httpx.Client(timeout=0.5) as client:
+        while time.monotonic() < deadline:
+            return_code = process.poll()
+            if return_code is not None:
+                raise DemoCommandError(
+                    f"API process exited before readiness with code {return_code}"
+                )
+            try:
+                response = client.get(health_url)
+                if response.status_code == 200:
+                    return
+            except httpx.HTTPError:
+                pass
+            time.sleep(0.1)
+    raise DemoCommandError(f"API did not become healthy within {timeout_seconds:.0f} seconds")
+
+
+def _stop_demo_api(process: subprocess.Popen) -> None:
+    if process.poll() is not None:
+        return
+    process.terminate()
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
+
+
+def _run_demo(settings: Settings, args: argparse.Namespace) -> int:
+    if args.api_port == args.dashboard_port:
+        raise DemoCommandError("API and dashboard ports must be different")
+    _assert_demo_port_available(args.host, args.api_port, "API")
+    _assert_demo_port_available(args.host, args.dashboard_port, "dashboard")
+
+    source_mode = SourceMode(args.source_mode)
+    document_count, signal_count = _seed_demo(settings, source_mode, args.nlp_mode)
+    print(
+        f"Seeded {document_count} {source_mode.value} documents and "
+        f"persisted {signal_count} {args.nlp_mode} signals."
+    )
+
+    api_command = [
+        sys.executable,
+        "-m",
+        "risk_engine",
+        "serve",
+        "--host",
+        args.host,
+        "--port",
+        str(args.api_port),
+    ]
+    client_host = _demo_client_host(args.host)
+    api_url = f"http://{client_host}:{args.api_port}"
+    api_process = subprocess.Popen(api_command, env=os.environ.copy())
+    try:
+        _wait_for_demo_api(api_process, f"{api_url}/health")
+        dashboard_app = Path(__file__).parent / "dashboard" / "app.py"
+        environment = os.environ.copy()
+        environment["RISK_ENGINE_API_URL"] = api_url
+        dashboard_command = [
+            sys.executable,
+            "-m",
+            "streamlit",
+            "run",
+            str(dashboard_app),
+            "--server.address",
+            args.host,
+            "--server.port",
+            str(args.dashboard_port),
+            "--server.headless",
+            str(not args.open_browser).lower(),
+            "--browser.gatherUsageStats",
+            "false",
+        ]
+        return subprocess.run(
+            dashboard_command,
+            env=environment,
+            check=False,
+        ).returncode
+    finally:
+        _stop_demo_api(api_process)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -149,6 +311,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             "false",
         ]
         return subprocess.run(command, env=environment, check=False).returncode
+
+    if args.command == "demo":
+        try:
+            return _run_demo(settings, args)
+        except (DemoCommandError, ModelDependencyError, OSError) as error:
+            print(
+                json.dumps(
+                    {
+                        "classification": "demo-error",
+                        "error_type": type(error).__name__,
+                        "message": str(error),
+                    }
+                ),
+                file=sys.stderr,
+            )
+            return 1
 
     if args.command == "validate":
         from risk_engine.validation import run_validation

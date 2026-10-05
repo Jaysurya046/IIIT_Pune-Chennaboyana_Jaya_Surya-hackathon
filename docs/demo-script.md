@@ -14,9 +14,9 @@ Complete these steps before recording or joining a jury session:
 - Confirm the repository is public in an incognito browser.
 - Start from a clean or deliberately seeded `data/runtime/risksignal.db`.
 - Run `python -m risk_engine validate` and retain the successful console result.
-- Start the API on `127.0.0.1:8000` and confirm `/health` reports version 0.8.0.
-- Start the dashboard on `127.0.0.1:8501` and keep the tab open.
-- If the database is empty, use **Source health** to ingest and analyze the synthetic replay.
+- Run `python -m risk_engine demo`; it seeds replay mode, waits for API health, and
+  opens the dashboard on `127.0.0.1:8501`.
+- Confirm `/health` reports the package version 0.8.0.
 - Use browser zoom and window size that keep KPI cards and charts readable.
 - Close unrelated applications, notifications, terminals, and browser tabs.
 - Do not display `.env`, tokens, local usernames, or private browser content.
@@ -31,7 +31,7 @@ Complete these steps before recording or joining a jury session:
 | 1:30–2:35 | Risk signals | Filter to one event category, then reset to All. Open one signal and show sentiment, event, impact factors, entity evidence, model versions, and source provenance. |
 | 2:35–3:45 | Stress lab | Select an impact-9 replay signal and run the stress decision. Explain the strict score-greater-than-7 rule and that the unchanged engine produced the score without manual editing. State that absolute sentiment is direction-agnostic; a positive trigger would reflect magnitude and other factors, not harmful positive sentiment. |
 | 3:45–4:30 | Stress result | Show before/after value, illustrative loss, applied shocks, and issuer or asset-class breakdown. Point out exact instrument reconciliation. For derivatives, state that positive DV01 is USD loss per +1 bp rate rise and positive rate shock means rates rise. |
-| 4:30–5:00 | Results and limitations | Summarize two sources, eight event categories, nine API endpoints, USD 55.50M synthetic exposure, and offline quality gates. Close with the synthetic-data and non-advice limitation. |
+| 4:30–5:00 | Results and limitations | Summarize two sources, eight event categories, ten API endpoints, USD 55.50M synthetic exposure, and offline quality gates. Close with the synthetic-data and non-advice limitation. |
 
 If a live UI action is slow, continue with the already-populated view rather than
 switching to live external sources. The reliable demonstration is the committed
@@ -98,8 +98,7 @@ sources continue. Live failure never causes fixtures to be substituted within th
 
 ## Recording Handoff
 
-The future video should be uploaded to YouTube as **Unlisted**, linked from the root
-README, and tested in an incognito window. The future deck should contain five to seven
-slides, be committed as `docs/presentation.pdf` or linked from an unrestricted host,
-and also be tested without an authenticated session. Those artifacts remain deferred
-until the user requests the presentation and recording phase.
+The six-slide deck is committed as `docs/presentation.pdf` and linked from the root
+README. Use it to structure the screen-recorded walkthrough. Upload the completed video
+to YouTube as **Unlisted**, link it from the README, and test both links in an incognito
+window before submission.

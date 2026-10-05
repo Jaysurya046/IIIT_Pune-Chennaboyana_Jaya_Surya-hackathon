@@ -1,6 +1,6 @@
 # Implementation Progress
 
-Last updated: 2026-10-04
+Last updated: 2026-10-05
 
 ## Phase Status
 
@@ -22,7 +22,7 @@ Last updated: 2026-10-04
 | 13 Model-mode hygiene (P1 T5) | complete | Cached embeddings, batched sentiment, warm-up and mode UI | NLP, API, benchmark and dashboard tests | `perf(nlp): batch model inference and expose mode controls` |
 | 14 Dashboard evidence (P1 T6) | complete | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
 | 15 Assumption honesty (P1 T7) | complete | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
-| 16 Release and demo hygiene (P1 T8) | planned | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
+| 16 Release and demo hygiene (P1 T8) | complete | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
 | 17 Deterministic NLP robustness (P2 T9) | optional | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
 | 18 Live path and sector proxy (P2 T10) | optional | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
 | 19 Streaming and polling (P2 T11) | optional | SSE, auto-stress and bounded polling | Streaming, idempotency and lifecycle tests | `feat(api): stream signals and automate stress decisions` |
@@ -30,11 +30,11 @@ Last updated: 2026-10-04
 
 ## Current Phase
 
-The original eight implementation phases, P0 improvement Phases 9–11, and P1 Phases
-12–15 are complete. Phase 16 is next: release and demo hygiene. Phase 16 is the remaining
-P1 improvement task; Phases 17–20 are optional P2 work. Phase 20 is blocked until a
-permitted transaction dataset is supplied. The detailed sequence and task gates are
-in [docs/improvement-plan.md](docs/improvement-plan.md).
+The original eight implementation phases, P0 improvement Phases 9–11, and all P1
+improvement Phases 12–16 are complete. Phases 17–20 are optional P2 work. Phase 17 is
+the next optional task; Phase 20 remains blocked until a permitted transaction dataset
+is supplied. The detailed sequence and task gates are in
+[improvement-plan.md](improvement-plan.md).
 
 ## Decisions
 
@@ -46,7 +46,8 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
 - Trigger stress testing only when the impact score is greater than 7.
 - Use a fully synthetic portfolio with fictional issuers and configurable scenarios.
 - Use SQLite, FastAPI, and Streamlit for a locally reproducible prototype.
-- Keep presentation and video work deferred until implementation results are stable.
+- Build the presentation from verified implementation evidence; produce the recorded
+  video only after the application and deck are stable.
 - Preserve `data/sample/*.json` byte-for-byte throughout the improvement program.
 - Use one numbered phase and one conventional commit for each improvement task.
 - Treat replay, fixtures, live data, model mode, and hypothetical simulation as explicit
@@ -62,6 +63,12 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   is harmful.
 - Define derivative DV01 as positive USD loss per +1 bp rate rise, keep positive rate
   shocks as rate increases, and publish the exact linear P&L and value equations.
+- Keep FastAPI metadata synchronized with the package `__version__`.
+- Make `python -m risk_engine demo` the reviewer entry point: explicit source and NLP
+  modes, replay by default, bounded readiness polling, and API child cleanup.
+- Run identical offline CI gates on Python 3.11 and 3.13.
+- Keep the six-slide presentation in the repository and derive every claim from the
+  documented implementation, benchmark, or synthetic dashboard evidence.
 - Keep organizer-provided DOCX files out of the implementation repository; their
   requirements are captured in the README and architecture decision record.
 
@@ -423,6 +430,34 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
   artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
   0.067 seconds against its 5-second budget.
 
+### 2026-10-05 Phase 16
+
+- Started from clean synchronized commit `00b8120`; Ruff passed, all 125 baseline tests
+  passed with one upstream Starlette warning, and validation passed with 9/9 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.069 seconds
+  total runtime.
+- Synchronized FastAPI metadata with the package version and added a contract assertion
+  covering both `/health` and OpenAPI metadata.
+- Added `python -m risk_engine demo` with replay as the explicit default, optional fixture
+  and model selections, port checks, API health polling, browser control, and guaranteed
+  API child cleanup when the dashboard exits or startup fails.
+- Added lifecycle tests for seed order, process arguments, readiness failure, cleanup,
+  occupied ports, invalid live selection, and model failure without fallback. A real
+  isolated deterministic replay seed persisted four documents and four signals.
+- Moved the tracker to `docs/progress.md`, repaired all references, reduced README
+  Section 5 to one evidence table plus the four Phase 14 screenshots, and removed stale
+  presentation placeholders and wording.
+- Added matching offline CI jobs for Python 3.11 and 3.13 and disabled model-provider
+  network access during every quality job.
+- Authored and visually inspected a six-page 16:9 presentation PDF using only repository
+  architecture and dashboard evidence. The final 488,748-byte PDF has a valid signature,
+  six page objects, readable source footers, and no clipping or overlap.
+- Left all nine checksummed artifacts and `data/sample/*.json` untouched.
+- Passed the mandatory Phase 16 gate: Ruff reported no findings, all 133 Pytest tests
+  passed with one upstream Starlette warning, and the offline validator matched 9/9
+  artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
+  0.066 seconds against its 5-second budget.
+
 ## Risks and Blockers
 
 - Live public APIs can be unavailable or rate-limited; offline fixtures are mandatory.
@@ -435,9 +470,8 @@ in [docs/improvement-plan.md](docs/improvement-plan.md).
 - The repository's public visibility cannot be inferred from the local Git remote and
   must be verified through an incognito browser before final submission.
 
-## Deferred Work
+## Remaining Work and Scope Exclusions
 
 - Module A tactical index rebalancing.
-- Presentation deck and PDF export.
 - Recorded YouTube walkthrough and link validation.
 - Cloud deployment and production-scale streaming infrastructure.

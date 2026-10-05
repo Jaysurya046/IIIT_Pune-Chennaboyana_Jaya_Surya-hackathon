@@ -19,8 +19,8 @@ adapters and pinned-model mode are optional extensions, not hidden prerequisites
 - Network access only for the initial package installation.
 
 The implementation has been exercised on Windows with Python 3.13. GitHub Actions
-checks Python 3.11 on Ubuntu. No database server, API key, container runtime, or GPU is
-required for the default workflow.
+checks Python 3.11 and 3.13 on Ubuntu with the same offline gates. No database server,
+API key, container runtime, or GPU is required for the default workflow.
 
 ## Clean Installation
 
@@ -78,6 +78,35 @@ python -m risk_engine replay
 
 These commands are useful for inspecting contracts, but each is a self-contained
 demonstration. Use the API workflow below when persistence across steps matters.
+
+## One-Command Reviewer Demo
+
+The default reviewer path seeds the separate synthetic replay, analyzes it with the
+deterministic engine, starts the API, waits for `/health`, and launches Streamlit:
+
+```bash
+python -m risk_engine demo
+```
+
+The command opens a browser by default and keeps the API child process tied to the
+dashboard lifecycle. Closing the dashboard process also stops the API child. Use
+`--no-open-browser` for headless use. Every mode and bind choice is explicit:
+
+```bash
+python -m risk_engine demo \
+  --source-mode fixtures \
+  --nlp-mode deterministic \
+  --host 127.0.0.1 \
+  --api-port 8000 \
+  --dashboard-port 8501 \
+  --no-open-browser
+```
+
+`--source-mode` accepts only `fixtures` or `replay`; replay is the default so the
+dashboard starts with four organic impact-9 triggers. Model mode requires the pinned
+optional dependencies and weights. Occupied ports, invalid modes, unavailable models,
+failed ingestion, and API readiness failure stop the command with an explicit error.
+The command never substitutes another source or NLP mode.
 
 ## Start the Application
 
@@ -158,8 +187,9 @@ python -m pip check
 python -m risk_engine validate --max-seconds 5
 ```
 
-CI installs `requirements-dev.txt`, runs Ruff and Pytest, and then executes the offline
-validator with a ten-second allowance for shared runners.
+Each Python 3.11 and 3.13 CI job installs `requirements-dev.txt`, runs the configuration
+check, Ruff, Pytest, and the offline validator with a ten-second allowance for shared
+runners. Transformer and Hugging Face network access stay disabled during these gates.
 
 ## Runtime Files and Reset
 
@@ -174,6 +204,7 @@ fixtures and configuration under `data/` must remain unchanged.
 |---|---|
 | Dashboard reports that the API is unavailable | Start the API on port 8000 or pass the matching `--api-url` |
 | Port already in use | Stop the existing local process or choose another port for both commands |
+| `demo` exits before opening the dashboard | Read the structured `demo-error`; free the named port or install the explicitly selected model mode |
 | No signals are visible | Run a fixture or replay action in **Source health**, then refresh the dashboard |
 | Live request returns HTTP 409 | Set `RISK_ENGINE_OFFLINE_MODE=false` intentionally before using live mode |
 | Bluesky returns an authorization error | Supply a permitted bearer token or use the reproducible fixture path |

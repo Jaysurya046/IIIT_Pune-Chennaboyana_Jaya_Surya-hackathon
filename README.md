@@ -3,9 +3,9 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 8 complete - implementation and reproducibility baseline ready
-**Demo Video Link:** To be added after implementation
-**Slide Deck Link:** To be added after implementation
+**Implementation Status:** Phase 16 complete - release and demo workflow ready
+**Demo Video Link:** To be added after the recorded walkthrough
+**Slide Deck:** [Download the six-slide presentation PDF](docs/presentation.pdf)
 
 ## 1. Project Overview / Problem Statement & Approach
 
@@ -25,10 +25,13 @@ direction-agnostic: strongly positive and strongly negative language can both ra
 score. An eligible positive-sentiment signal reflects magnitude plus the other stored
 factors; it is not a claim that positive sentiment is harmful.
 
+Derivative stress uses signed USD `delta_exposure`, a decimal `underlying_shock`, and
+positive DV01 as USD loss per +1 bp move; positive `rate_shock_bps` means rates rise.
+The linear approximation is documented alongside its limitations in the architecture.
+
 The implementation prioritizes a reproducible offline demonstration while retaining
-live adapters for GDELT news and Bluesky public posts. Presentation slides and the
-recorded walkthrough are intentionally deferred until the working prototype and its
-results are stable.
+live adapters for GDELT news and Bluesky public posts. The committed presentation and
+demo runbook use the same tested synthetic evidence as the application.
 
 ## 2. Architecture & Tech Stack
 
@@ -119,6 +122,18 @@ The first model-mode run downloads weights into the ignored cache directory. Exa
 model revisions, license metadata, and limitations are recorded in
 [data/models.yaml](data/models.yaml); downloaded weights are not committed.
 
+For the reviewer path, one command seeds the four-record replay, analyzes it with the
+deterministic engine, starts the API, waits for health, and launches the dashboard:
+
+```bash
+python -m risk_engine demo
+```
+
+Use `--source-mode fixtures` for the six-record baseline, `--nlp-mode model` only when
+the pinned weights are installed, `--api-port` and `--dashboard-port` for alternate
+ports, and `--no-open-browser` for headless use. Invalid or unavailable selections fail
+explicitly and never switch modes.
+
 Start the local API with:
 
 ```bash
@@ -147,51 +162,25 @@ ignored `RISK_ENGINE_BLUESKY_BEARER_TOKEN` environment setting.
 
 ## 5. Key Results & Domain Impact
 
-The external Financial PhraseBank v1.0 all-agree evaluation compares both sentiment
-modes on the same 2,264 expert-labelled financial sentences. The model's published
-training data includes Financial PhraseBank, so these are implementation-comparison
-metrics rather than an out-of-sample generalization claim.
+The table consolidates the evidence that can be reproduced from committed code or the
+documented local benchmark. Synthetic results demonstrate implementation correctness;
+they are not forecasts, calibrated regulatory results, or investment advice.
 
-| Mode | Accuracy | Macro-F1 | Triggered (>7) | Trigger rate | Negative actual → N/Neu/P | Neutral actual → N/Neu/P | Positive actual → N/Neu/P |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Deterministic v1 | 0.6767 | 0.4302 | 0/2264 | 0.0000 | 13/199/91 | 7/1342/42 | 31/362/177 |
-| Pinned FinBERT | 0.9717 | 0.9625 | 0/2264 | 0.0000 | 298/1/4 | 19/1345/27 | 12/1/557 |
+| Evidence | Recorded result | Interpretation boundary |
+|---|---|---|
+| Financial PhraseBank v1.0, deterministic mode | Accuracy 0.6767; macro-F1 0.4302; 0/2,264 signals above 7 | Sentiment comparison on expert-labelled text; the dataset has no trigger-quality labels |
+| Financial PhraseBank v1.0, pinned FinBERT | Accuracy 0.9717; macro-F1 0.9625; 0/2,264 signals above 7 | The model's published training data includes this dataset, so this is not an out-of-sample estimate |
+| Synthetic NLP regression | 8/8 event, sentiment, and entity exact matches across all eight event categories | Authored regression coverage, not real-world predictive accuracy |
+| Synthetic replay | Four checksummed records produce four impact-9 signals and organic persisted triggers | Fictional Aurora Bank; unchanged deterministic engine; no copied article text |
+| Synthetic portfolio stress | USD 55.50M across eight positions; Aurora replay loss USD 3.747M; reconciliation USD 0.00 | Project-authored positions and shocks; simplified valuation paths |
+| Offline validator | 9/9 manifested artifacts; 6/6 persisted baseline signals; boundary-probe loss USD 717k | Reproducibility and contract evidence under the local five-second budget |
 
-Cells show predicted negative/neutral/positive counts for each actual class. Trigger
-rates use full-engine impact scores under fixed, non-persisted benchmark provenance; the
-dataset has sentiment labels but no ground-truth trigger labels. Dataset
-provenance, licence restrictions, exact model revision, checksum, environment, metric
-definitions, and interpretation limits are in [docs/benchmark.md](docs/benchmark.md).
+The benchmark provenance and confusion matrices are in
+[docs/benchmark.md](docs/benchmark.md). Calculation details, assumptions, and
+limitations are in [docs/results.md](docs/results.md).
 
-The deterministic NLP regression set contains eight synthetic cases covering every
-event category. The Phase 4 portfolio contains eight fictional positions across four
-asset classes. In the tested issuer credit-event scenario, the two Northstar Energy
-positions move from a portfolio total of USD 55.50 million to USD 53.15 million: a
-USD 2.35 million illustrative loss, including a USD 0.30 million expected-loss
-increase. Instrument losses reconcile exactly to the portfolio result.
-
-Derivative results use an explicit linear convention: delta exposure is signed USD,
-the underlying shock is a decimal return, positive DV01 is USD loss per +1 bp rate
-rise, and positive `rate_shock_bps` means rates rise. The exact P&L equation is
-`delta_exposure x underlying_shock - DV01 x rate_shock_bps`; this is not a full
-derivative revaluation.
-
-These figures demonstrate the implemented calculations against synthetic assumptions;
-they are not forecasts, calibrated regulatory stress results, or investment advice.
-Phase 5 and the improvement path expose the workflow through ten documented HTTP endpoints
-and preserves ingestion runs, source status, signals, entity indexes, and stress
-decisions across process restarts.
-
-Phase 6 adds a typed API-backed monitoring interface with global event, impact, source,
-and entity filters; source provenance and score explanations; an explicit stress
-trigger; exact asset-class, sector, issuer, and instrument reconciliation; and clear
-labels for all synthetic fixture, portfolio, and scenario outputs.
-
-### Dashboard evidence
-
-These views were rendered from the committed synthetic fixtures and replay bundle. The
-screenshots retain the dashboard's synthetic or hypothetical disclosures and show the
-same API-backed values exercised by the offline test suite.
+These screenshots use the committed synthetic fixtures and replay bundle and retain
+their synthetic or hypothetical disclosures.
 
 <p>
   <img src="docs/img/risk-signal-timeline.png" width="49%" alt="Synthetic risk-signal publication timeline">
@@ -201,24 +190,6 @@ same API-backed values exercised by the offline test suite.
   <img src="docs/img/organic-stress-result.png" width="49%" alt="Triggered synthetic replay stress result and instrument waterfall">
   <img src="docs/img/hypothetical-what-if.png" width="49%" alt="Hypothetical non-persisted stress controls">
 </p>
-
-Phase 7 adds a repeatable offline validation command covering source-manifest
-integrity, the synthetic NLP golden set, the full persisted workflow, independently
-recomputed portfolio and stress totals, failure paths, dashboard filter/reset behavior,
-and a bounded performance check. The baseline and its interpretation limits are in
-[docs/validation.md](docs/validation.md).
-
-The implementation delivers two optional live adapters, six baseline fixture records,
-four separate replay records, eight event categories, a USD 55.50 million synthetic
-portfolio, ten API endpoints, and three dashboard workspaces. The current validator
-matches all nine artifact checksums and all eight authored NLP cases. The replay
-produces four exact impact-9 signals and organic persisted stress results for fictional
-Aurora Bank without score mutation. A separate what-if endpoint and warned dashboard
-panel run user-selected assumptions without creating a signal or persistent result.
-These are synthetic regression and implementation results, not real-world accuracy,
-market forecasts, or investment advice.
-
-The complete evidence and interpretation are in [docs/results.md](docs/results.md).
 
 ## Reviewer Guide
 
@@ -236,17 +207,19 @@ The complete evidence and interpretation are in [docs/results.md](docs/results.m
   usefulness, limitations, and next steps.
 - [Demonstration runbook](docs/demo-script.md) — separate five-minute live and
   up-to-ten-minute recorded walkthroughs.
+- [Presentation PDF](docs/presentation.pdf) — six-slide problem, architecture, data,
+  evidence, stress result, and limitation summary.
 - [Post-implementation improvement plan](docs/improvement-plan.md) — Phases 9–20,
   task dependencies, data gates, tests, commands, and conventional commits.
 - [API guide](docs/api.md) and [dashboard guide](docs/dashboard.md) — operational
   contracts, filters, metrics, and error semantics.
 
-Presentation and YouTube recording remain intentionally deferred. When created, the
-deck will be limited to five–seven slides and the unlisted YouTube link and deck link
-will replace the placeholders at the top of this README. Both links and the public
-repository must be tested from an incognito window before submission.
+The presentation PDF is committed and linked above. The remaining submission handoff
+is the unlisted YouTube walkthrough; its link and the public repository should be tested
+from an incognito window before submission.
 
 ## Development Progress
 
 Implementation status, verification evidence, decisions, and blockers are maintained
-in [progress.md](progress.md). Each completed phase is delivered as a focused commit.
+in [docs/progress.md](docs/progress.md). Each completed phase is delivered as a focused
+commit.

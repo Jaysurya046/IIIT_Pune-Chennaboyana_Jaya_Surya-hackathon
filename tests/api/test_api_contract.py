@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from risk_engine import __version__
 from risk_engine.api.app import create_app
 from risk_engine.api.service import RiskApplicationService
 from risk_engine.config import Settings
@@ -48,8 +49,9 @@ def test_health_empty_status_and_openapi_contract(api_client) -> None:
     schema = client.get("/openapi.json").json()
 
     assert health.status_code == 200
-    assert health.json()["version"] == "0.8.0"
+    assert health.json()["version"] == __version__
     assert health.json()["database"] == "ok"
+    assert schema["info"]["version"] == __version__
     assert sources.json()["latest_run_id"] is None
     expected_paths = {
         "/health",
