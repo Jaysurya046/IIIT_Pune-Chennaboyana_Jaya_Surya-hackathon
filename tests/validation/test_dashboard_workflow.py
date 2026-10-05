@@ -269,7 +269,9 @@ def test_dashboard_replay_trigger_filter_and_reset_states(tmp_path: Path, monkey
         event_filter.select("Operational").run(timeout=30)
 
         assert not dashboard.exception
-        assert dashboard.metric[0].value == "1"
+        # Suffix-tolerant matching resolves the shipping-spread fixture as the
+        # higher-priority Credit Event, leaving no Operational matches.
+        assert dashboard.metric[0].value == "0"
 
         event_filter = next(
             selectbox for selectbox in dashboard.selectbox if selectbox.label == "Event type"

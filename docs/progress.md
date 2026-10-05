@@ -1,6 +1,6 @@
 # Implementation Progress
 
-Last updated: 2026-10-05
+Last updated: 2026-10-06
 
 ## Phase Status
 
@@ -23,16 +23,16 @@ Last updated: 2026-10-05
 | 14 Dashboard evidence (P1 T6) | complete | Timeline, loss waterfall and screenshots | Chart contracts, AppTest and rendered checks | `feat(ui): add timeline waterfall and evidence screenshots` |
 | 15 Assumption honesty (P1 T7) | complete | Sentiment-direction and DV01 disclosures | UI-state and documentation tests | `docs(risk): clarify directional and valuation assumptions` |
 | 16 Release and demo hygiene (P1 T8) | complete | Version sync, docs move, CI matrix, presentation and demo command | CLI lifecycle, PDF, clean-clone and CI checks | `chore(release): finalize demo workflow and repository hygiene` |
-| 17 Deterministic NLP robustness (P2 T9) | optional | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
+| 17 Deterministic NLP robustness (P2 T9) | complete | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
 | 18 Live path and sector proxy (P2 T10) | optional | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
 | 19 Streaming and polling (P2 T11) | optional | SSE, auto-stress and bounded polling | Streaming, idempotency and lifecycle tests | `feat(api): stream signals and automate stress decisions` |
 | 20 Portfolio generator (P2 T12) | optional-blocked | Seeded 200-position synthetic generator | Determinism, privacy and reconciliation tests | `feat(portfolio): generate reproducible synthetic portfolios` |
 
 ## Current Phase
 
-The original eight implementation phases, P0 improvement Phases 9–11, and all P1
-improvement Phases 12–16 are complete. Phases 17–20 are optional P2 work. Phase 17 is
-the next optional task; Phase 20 remains blocked until a permitted transaction dataset
+The original eight implementation phases, P0 improvement Phases 9–11, P1 improvement
+Phases 12–16, and optional Phase 17 are complete. Phases 18–20 remain optional P2 work;
+Phase 20 remains blocked until a permitted transaction dataset
 is supplied. The detailed sequence and task gates are in
 [improvement-plan.md](improvement-plan.md).
 
@@ -457,6 +457,24 @@ is supplied. The detailed sequence and task gates are in
   passed with one upstream Starlette warning, and the offline validator matched 9/9
   artifacts, persisted 6/6 fixture signals, reconciled to USD 0.00, and completed in
   0.066 seconds against its 5-second budget.
+
+### 2026-10-06 Phase 17
+
+- Started from the clean Phase 16 commit; Ruff passed, the 133-test baseline passed
+  with one upstream Starlette warning, and validation passed with 9/9 artifacts,
+  6/6 persisted fixture signals, USD 0.00 reconciliation difference, and 0.145 seconds.
+- Added bounded whole-word event matching for common `s`, `es`, `ed`, and `ing`
+  inflections. The matcher remains taxonomy-driven and does not silently stem text.
+- Added a documented three-token negation window with odd-negation flipping and
+  even-negation preservation; removed ambiguous `fine` and `record` sentiment tokens.
+- Updated the Operational dashboard regression deliberately: the fixture's shipping
+  spread now resolves to the higher-priority Credit Event, so the Operational filter
+  returns zero matches.
+- Recomputed deterministic Financial PhraseBank evidence locally: accuracy/macro-F1
+  moved from 0.6767/0.4302 to 0.6793/0.4305; the model row remains unchanged.
+- The final 140-test gate passed with validation in 0.095 seconds; the verified
+  boundary-probe illustrative loss is USD 2.35M after the event-priority change.
+- Left all nine checksummed artifacts and `data/sample/*.json` untouched.
 
 ## Risks and Blockers
 

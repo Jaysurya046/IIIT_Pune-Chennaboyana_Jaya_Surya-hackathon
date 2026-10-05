@@ -131,6 +131,14 @@ mode uses versioned rules for offline CI and demonstrations. The selected mode i
 visible in each signal's model versions; model failures do not silently fall back to
 rules.
 
+The deterministic event matcher recognizes configured keywords plus bounded English
+inflections (`s`, `es`, `ed`, and `ing`) at whole-word boundaries. It is intentionally
+not a general stemmer, so every match remains traceable to a taxonomy entry. The
+deterministic sentiment rules use a three-token look-back for `not`, `no`, `never`,
+`without`, or `hardly`; an odd number of negators flips a token and an even number
+leaves it unchanged. Ambiguous tokens such as `fine` and `record` are excluded from
+the sentiment lexicon.
+
 ### Persistence and API
 
 SQLite is the initial persistence layer because it keeps local setup deterministic and

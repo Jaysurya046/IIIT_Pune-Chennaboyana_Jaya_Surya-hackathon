@@ -36,7 +36,6 @@ class RuleBasedSentimentAnalyzer:
             "launch",
             "launches",
             "profit",
-            "record",
             "strong",
             "upgrade",
         }
@@ -48,7 +47,6 @@ class RuleBasedSentimentAnalyzer:
             "closure",
             "default",
             "downgrade",
-            "fine",
             "loss",
             "missed",
             "outage",
@@ -57,11 +55,27 @@ class RuleBasedSentimentAnalyzer:
             "sanctions",
         }
     )
+    _negations = frozenset({"hardly", "never", "no", "not", "without"})
+    _negation_window = 3
 
     def analyze(self, text: str) -> SentimentResult:
         tokens = re.findall(r"[a-z]+", text.lower())
-        positive = sum(token in self._positive for token in tokens)
-        negative = sum(token in self._negative for token in tokens)
+        positive = 0
+        negative = 0
+        for index, token in enumerate(tokens):
+            if token not in self._positive and token not in self._negative:
+                continue
+            negated = sum(
+                candidate in self._negations
+                for candidate in tokens[max(0, index - self._negation_window) : index]
+            ) % 2 == 1
+            is_positive = token in self._positive
+            if negated:
+                is_positive = not is_positive
+            if is_positive:
+                positive += 1
+            else:
+                negative += 1
         total = positive + negative
         if total == 0 or positive == negative:
             probabilities = {

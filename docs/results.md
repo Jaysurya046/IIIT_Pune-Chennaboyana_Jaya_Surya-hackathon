@@ -40,7 +40,7 @@ The Phase 7 baseline was recorded on 2026-10-03 using Python 3.13 on Windows:
 | Exact entity-set matches on synthetic golden cases | 8 / 8 |
 | Persisted signals recovered after database reopen | 6 / 6 |
 | Independently summed synthetic portfolio value | USD 55.50M |
-| Boundary-probe illustrative stress loss | USD 717k |
+| Boundary-probe illustrative stress loss | USD 2.35M |
 | Stress reconciliation difference | USD 0.00 |
 | Local deterministic validation time | 0.119 seconds |
 | Phase 7 automated suite | 77 tests passed |

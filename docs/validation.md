@@ -60,7 +60,7 @@ Recorded on 2026-10-03 using Python 3.13 on Windows in deterministic offline mod
 | Signals produced / unique / persisted after reopen | 6 / 6 / 6 |
 | Synthetic signals | 6 / 6 |
 | Independently summed portfolio value | USD 55,500,000.00 |
-| Boundary stress illustrative loss | USD 717,000.00 |
+| Boundary stress illustrative loss | USD 2,350,000.00 |
 | Stress reconciliation difference | USD 0.00 |
 | Complete validation runtime | 0.119 seconds |
 | Local runtime budget | 5.000 seconds |

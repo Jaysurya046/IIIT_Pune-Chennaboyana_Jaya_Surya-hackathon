@@ -168,12 +168,12 @@ they are not forecasts, calibrated regulatory results, or investment advice.
 
 | Evidence | Recorded result | Interpretation boundary |
 |---|---|---|
-| Financial PhraseBank v1.0, deterministic mode | Accuracy 0.6767; macro-F1 0.4302; 0/2,264 signals above 7 | Sentiment comparison on expert-labelled text; the dataset has no trigger-quality labels |
+| Financial PhraseBank v1.0, deterministic mode | Accuracy 0.6793; macro-F1 0.4305; 0/2,264 signals above 7 | Sentiment comparison on expert-labelled text; Phase 17 bounded matching and negation rules; no trigger-quality labels |
 | Financial PhraseBank v1.0, pinned FinBERT | Accuracy 0.9717; macro-F1 0.9625; 0/2,264 signals above 7 | The model's published training data includes this dataset, so this is not an out-of-sample estimate |
 | Synthetic NLP regression | 8/8 event, sentiment, and entity exact matches across all eight event categories | Authored regression coverage, not real-world predictive accuracy |
 | Synthetic replay | Four checksummed records produce four impact-9 signals and organic persisted triggers | Fictional Aurora Bank; unchanged deterministic engine; no copied article text |
 | Synthetic portfolio stress | USD 55.50M across eight positions; Aurora replay loss USD 3.747M; reconciliation USD 0.00 | Project-authored positions and shocks; simplified valuation paths |
-| Offline validator | 9/9 manifested artifacts; 6/6 persisted baseline signals; boundary-probe loss USD 717k | Reproducibility and contract evidence under the local five-second budget |
+| Offline validator | 9/9 manifested artifacts; 6/6 persisted baseline signals; boundary-probe loss USD 2.35M | Reproducibility and contract evidence under the local five-second budget; Phase 17 inflection matching changes the selected event severity |
 
 The benchmark provenance and confusion matrices are in
 [docs/benchmark.md](docs/benchmark.md). Calculation details, assumptions, and

@@ -67,6 +67,8 @@ class EventClassifier(Protocol):
 class KeywordEventClassifier:
     """Deterministic event baseline with explicit keyword evidence."""
 
+    _INFLECTION_SUFFIXES = ("s", "es", "ed", "ing")
+
     def __init__(self, taxonomy_path: Path) -> None:
         self._taxonomy = load_taxonomy(taxonomy_path)
         self.model_version = f"deterministic-event-{self._taxonomy.version}"
@@ -77,11 +79,43 @@ class KeywordEventClassifier:
         )
 
     @staticmethod
-    def _evidence(text: str, category: _Category) -> tuple[str, ...]:
+    def _keyword_forms(keyword: str) -> tuple[str, ...]:
+        """Return a keyword and bounded singular/plural forms.
+
+        This deliberately handles only common English inflections. It is not a
+        stemmer: every match remains explainable as the configured taxonomy
+        keyword, and word boundaries prevent substring false positives.
+        """
+
+        words = keyword.split()
+        final = words[-1]
+        forms = [keyword]
+        if final.endswith("ies"):
+            forms.append(" ".join((*words[:-1], final[:-3] + "y")))
+        elif final.endswith("es"):
+            forms.append(" ".join((*words[:-1], final[:-2])))
+        elif final.endswith("s") and not final.endswith("ss"):
+            forms.append(" ".join((*words[:-1], final[:-1])))
+        return tuple(dict.fromkeys(forms))
+
+    @classmethod
+    def _keyword_pattern(cls, keyword: str) -> str:
+        patterns: list[str] = []
+        for form in cls._keyword_forms(keyword):
+            words = form.split()
+            final = re.escape(words[-1])
+            suffix = rf"(?:{'|'.join(cls._INFLECTION_SUFFIXES)})?"
+            escaped = [re.escape(word) for word in words[:-1]]
+            phrase = r"\s+".join((*escaped, final + suffix))
+            patterns.append(phrase)
+        return rf"(?<!\w)(?:{'|'.join(patterns)})(?!\w)"
+
+    @classmethod
+    def _evidence(cls, text: str, category: _Category) -> tuple[str, ...]:
         return tuple(
             keyword
             for keyword in category.keywords
-            if re.search(rf"(?<!\w){re.escape(keyword)}(?!\w)", text, re.IGNORECASE)
+            if re.search(cls._keyword_pattern(keyword), text, re.IGNORECASE)
         )
 
     def classify(self, text: str) -> EventClassification:

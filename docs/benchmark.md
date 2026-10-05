@@ -87,7 +87,7 @@ one actual class. Counts sum to the corresponding class support and to 2,264 ove
 
 | Mode | Model/version | Accuracy | Macro-F1 | Triggered (>7) | Trigger rate | Actual negative → N/Neu/P | Actual neutral → N/Neu/P | Actual positive → N/Neu/P |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| deterministic | deterministic-sentiment-v1 | 0.6767 | 0.4302 | 0/2264 | 0.0000 | 13/199/91 | 7/1342/42 | 31/362/177 |
+| deterministic | deterministic-sentiment-v1 | 0.6793 | 0.4305 | 0/2264 | 0.0000 | 13/199/91 | 1/1350/40 | 31/364/175 |
 | model | ProsusAI/finbert@4556d13015211d73dccd3fdd39d39232506f3e43 | 0.9717 | 0.9625 | 0/2264 | 0.0000 | 298/1/4 | 19/1345/27 | 12/1/557 |
 
 Accuracy is the fraction of exactly matched labels. Per-class F1 uses
@@ -123,5 +123,7 @@ entity, corroboration, and sentiment evidence to cross the strict trigger.
 - Results depend on the exact dataset bytes, model revision, libraries, and runtime
   recorded above. They do not imply investment performance or validate stress losses.
 
+Phase 17's bounded inflection and negation rules changed the deterministic benchmark
+from 0.6767 accuracy / 0.4302 macro-F1 to 0.6793 / 0.4305. The model row is unchanged.
 This table is reproducible implementation evidence and a transparent mode comparison;
 it is not a claim of independent state-of-the-art model quality.

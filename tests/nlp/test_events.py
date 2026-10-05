@@ -25,6 +25,24 @@ def test_keyword_classifier_has_explicit_other_fallback() -> None:
     assert result.evidence == ()
 
 
+def test_keyword_classifier_accepts_bounded_inflections_and_returns_base_evidence() -> None:
+    result = KeywordEventClassifier(TAXONOMY).classify(
+        "Regulators opened investigations into repeated defaults."
+    )
+
+    assert result.event_type is EventType.REGULATORY
+    assert set(result.evidence) == {"regulator", "investigation"}
+
+
+def test_keyword_classifier_does_not_match_unbounded_substrings() -> None:
+    result = KeywordEventClassifier(TAXONOMY).classify(
+        "A warning was issued before the routine operation."
+    )
+
+    assert result.event_type is EventType.OTHER
+    assert result.evidence == ()
+
+
 def test_embedding_classifier_caches_categories_and_encodes_one_text_at_a_time() -> None:
     calls: list[tuple[str, ...]] = []
 

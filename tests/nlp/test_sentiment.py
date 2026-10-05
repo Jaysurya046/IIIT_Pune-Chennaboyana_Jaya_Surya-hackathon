@@ -21,6 +21,28 @@ def test_rule_based_sentiment_is_deterministic(text: str, expected: SentimentLab
     assert sum(result.probabilities.values()) == pytest.approx(1.0)
 
 
+def test_rule_based_sentiment_removes_ambiguous_tokens() -> None:
+    result = RuleBasedSentimentAnalyzer().analyze("The fine record was published")
+
+    assert result.label is SentimentLabel.NEUTRAL
+    assert result.score == 0.0
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Not strong", SentimentLabel.NEGATIVE),
+        ("Not not strong", SentimentLabel.POSITIVE),
+        ("Not a very good strong", SentimentLabel.POSITIVE),
+        ("Not a very strong", SentimentLabel.NEGATIVE),
+    ],
+)
+def test_rule_based_sentiment_uses_an_odd_three_token_negation_window(
+    text: str, expected: SentimentLabel
+) -> None:
+    assert RuleBasedSentimentAnalyzer().analyze(text).label is expected
+
+
 def test_finbert_adapter_normalizes_injected_model_output() -> None:
     calls: list[list[str]] = []
 
