@@ -27,7 +27,7 @@ command with a 10-second budget to accommodate shared runners.
 
 | Area | Evidence | Validation method |
 |---|---|---|
-| Dataset integrity | Nine artifacts declared in `data/sources.yaml` | Recalculate every SHA-256 checksum; require bounded `data/` paths and explicit synthetic or project-authored classification |
+| Dataset integrity | Eleven artifacts declared in `data/sources.yaml` | Recalculate every SHA-256 checksum; require bounded `data/` paths and explicit synthetic or project-authored classification |
 | Fixture quality | Three GDELT-shaped and three Bluesky-shaped records | Require non-empty text and source IDs, unique IDs, publication no later than retrieval, and two explicitly synthetic bundles |
 | NLP regression | Eight cases in `data/evaluation/nlp_golden.json` | Independently run deterministic entity, sentiment, and event components and compare exact expected outputs |
 | Offline workflow | Both committed fixture adapters | Ingest, normalize, analyze at the batch's latest retrieval time, persist, reopen SQLite, and compare unique document/signal counts and provenance |
@@ -43,9 +43,9 @@ The separate replay adds four project-authored synthetic records. The unchanged
 deterministic engine assigns each an exact impact score of 9 and the dashboard/API tests
 persist a triggered issuer-credit result directly from those observed replay signals.
 
-## Recorded Baseline
+## Historical baseline (recorded at Phase 7)
 
-Recorded on 2026-10-03 using Python 3.13 on Windows in deterministic offline mode:
+Recorded at Phase 7 on 2026-10-03 using Python 3.13 on Windows in deterministic offline mode:
 
 | Check | Result |
 |---|---:|
@@ -64,6 +64,13 @@ Recorded on 2026-10-03 using Python 3.13 on Windows in deterministic offline mod
 | Stress reconciliation difference | USD 0.00 |
 | Complete validation runtime | 0.119 seconds |
 | Local runtime budget | 5.000 seconds |
+
+## Current Gate (recorded 2026-10-06)
+
+The current gate recorded 154 Pytest tests passed with one upstream Starlette warning,
+Ruff clean, `git diff --check` clean, and `python -m risk_engine validate` returning
+`passed: true` with 11/11 manifested artifacts, 6/6 persisted signals, USD 0.00
+reconciliation difference, and a runtime within the five-second budget.
 
 The accuracy rows are exact-match results on a small synthetic regression set designed
 to cover code paths. They must not be presented as estimates of performance on public

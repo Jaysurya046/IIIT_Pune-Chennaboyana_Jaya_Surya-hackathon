@@ -31,7 +31,7 @@ Complete these steps before recording or joining a jury session:
 | 1:30–2:35 | Risk signals | Filter to one event category, then reset to All. Open one signal and show sentiment, event, impact factors, entity evidence, model versions, and source provenance. |
 | 2:35–3:45 | Stress lab | Select an impact-9 replay signal and run the stress decision. Explain the strict score-greater-than-7 rule and that the unchanged engine produced the score without manual editing. State that absolute sentiment is direction-agnostic; a positive trigger would reflect magnitude and other factors, not harmful positive sentiment. |
 | 3:45–4:30 | Stress result | Show before/after value, illustrative loss, applied shocks, and issuer or asset-class breakdown. Point out exact instrument reconciliation. For derivatives, state that positive DV01 is USD loss per +1 bp rate rise and positive rate shock means rates rise. |
-| 4:30–5:00 | Results and limitations | Summarize two sources, eight event categories, ten API endpoints, USD 55.50M synthetic exposure, and offline quality gates. Close with the synthetic-data and non-advice limitation. |
+| 4:30–5:00 | Results and limitations | Summarize two sources, eight event categories, eleven API routes including the SSE stream, USD 55.50M synthetic exposure, and offline quality gates. Close with the synthetic-data and non-advice limitation. |
 
 If a live UI action is slow, continue with the already-populated view rather than
 switching to live external sources. The reliable demonstration is the committed

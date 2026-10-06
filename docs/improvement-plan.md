@@ -1,5 +1,7 @@
 # Post-Implementation Improvement Plan
 
+> Historical development plan (retained for traceability; no new Phase 20 work is planned).
+
 ## Objective and Delivery Rules
 
 This roadmap continues the completed implementation as Phases 9 through 20. Each

@@ -26,15 +26,14 @@ Last updated: 2026-10-06
 | 17 Deterministic NLP robustness (P2 T9) | complete | Suffix and negation rules, ambiguous-token removal | NLP, dashboard and benchmark comparison | `fix(nlp): improve deterministic matching and negation` |
 | 18 Live path and sector proxy (P2 T10) | complete | Watchlist queries, public snapshot and illustrative mapping | Mocked live, provenance and stress tests | `feat(data): strengthen live ingestion and sector proxy stress` |
 | 19 Streaming and polling (P2 T11) | complete | SSE, auto-stress and bounded polling | Streaming, idempotency and lifecycle tests | `feat(api): stream signals and automate stress decisions` |
-| 20 Portfolio generator (P2 T12) | optional-blocked | Seeded 200-position synthetic generator | Determinism, privacy and reconciliation tests | `feat(portfolio): generate reproducible synthetic portfolios` |
+| 20 Portfolio generator (P2 T12) | not pursued (no permitted dataset) | Seeded 200-position synthetic generator was intentionally abandoned | No aggregate profile was created without an approved transaction dataset | — |
 
 ## Current Phase
 
-The original eight implementation phases, P0 improvement Phases 9–11, P1 improvement
-Phases 12–16, and optional Phase 17 are complete. Phases 18–20 remain optional P2 work;
-Phase 20 remains blocked until a permitted transaction dataset
-is supplied. The detailed sequence and task gates are in
-[improvement-plan.md](improvement-plan.md).
+The original eight implementation phases and improvement Phases 9–19 are complete.
+Phase 20 was intentionally not pursued because no permitted transaction dataset or
+approved aggregate profile was supplied; no source statistics were invented. The
+detailed historical sequence and task gates are in [improvement-plan.md](improvement-plan.md).
 
 ## Decisions
 
@@ -69,6 +68,8 @@ is supplied. The detailed sequence and task gates are in
 - Run identical offline CI gates on Python 3.11 and 3.13.
 - Keep the six-slide presentation in the repository and derive every claim from the
   documented implementation, benchmark, or synthetic dashboard evidence.
+- Do not pursue Phase 20 without a permitted transaction dataset or approved aggregate
+  profile; inventing source statistics would violate provenance requirements.
 - Keep organizer-provided DOCX files out of the implementation repository; their
   requirements are captured in the README and architecture decision record.
 
@@ -503,6 +504,17 @@ is supplied. The detailed sequence and task gates are in
   mode support, offline live-mode rejection, isolated failures, and clean shutdown.
 - Added offline tests for SSE framing/cursors/heartbeats, persistence ordering,
   auto-stress behavior, polling timing, source validation, and process lifecycle.
+
+### 2026-10-06 Final consistency pass
+
+- Audited endpoint, artifact, benchmark, CI, and implementation-status claims against
+  the current routes, manifest, commands, and tests; updated the architecture diagram
+  and re-exported its 1800×1050 PNG.
+- Marked Phase 20 not pursued because no permitted transaction dataset or approved
+  aggregate profile was supplied; no source statistics or generator artifacts were
+  invented.
+- The final gate records 154 Pytest tests, Ruff clean, a passing 11-artifact validator,
+  and a clean `git diff --check`; the only test warning is upstream Starlette/httpx.
 
 ## Risks and Blockers
 

@@ -5,7 +5,8 @@
 RiskSignal Engine implements the required AI/NLP risk pipeline and the strategic
 portfolio stress-testing module. The reproducible path processes two source types,
 produces explainable sentiment, event, entity, and impact outputs, serves them behind
-ten HTTP endpoints, and presents their downstream portfolio effect in a dashboard.
+eleven HTTP routes (including the Server-Sent Events signal stream), and presents their
+downstream portfolio effect in a dashboard.
 
 The strongest evidence is implementation evidence: all manifested artifacts match
 their checksums, all eight synthetic taxonomy cases match their expected deterministic
@@ -20,14 +21,15 @@ contracts; they do not establish predictive accuracy on real financial text.
 | At least two text sources | GDELT news and Bluesky social adapters, plus matching offline fixtures | Adapter tests, six-record validation workflow |
 | Structured NLP output | Signed sentiment, eight event types, entity matches, 1–10 impact score, explanation factors | Strict Pydantic contracts and golden cases |
 | Downstream application | Module B event-driven stress testing | Scenario mapping, strict trigger, four valuation paths |
-| Machine-readable access | Versioned FastAPI service with ten endpoints | API contract tests and OpenAPI documentation |
+| Machine-readable access | Versioned FastAPI service with eleven routes, including the signal SSE stream | API contract tests and OpenAPI documentation |
 | Visualization | Streamlit risk monitor, stress lab, and source-health workspace | Dashboard workflow and rendered checks |
 | Data-source clarity | Public interfaces separated from synthetic committed artifacts | Source manifest, checksums, synthetic flags, dataset guide |
 | Reproducibility | Default offline mode and one-command validator | CI and clean-install instructions |
 
 ## Recorded Offline Evidence
 
-The Phase 7 baseline was recorded on 2026-10-03 using Python 3.13 on Windows:
+The historical Phase 7 baseline was recorded at Phase 7 on 2026-10-03 using Python 3.13
+on Windows:
 
 | Measure | Observed result |
 |---|---:|
@@ -66,6 +68,13 @@ The final Phase 8 snapshot was also installed into an independent Python 3.13 vi
 environment from a clean clone. The configuration diagnostic, Ruff, all 83 tests,
 `pip check`, and the validator passed there; the clean-clone validation run completed
 in 0.179 seconds against its five-second local budget.
+
+## Current Gate (recorded 2026-10-06)
+
+The current repository gate passes with Ruff clean, 154 Pytest tests passed, one
+upstream Starlette warning, `git diff --check` clean, and the offline validator reporting
+`passed: true`, 11/11 manifested artifacts, 6/6 persisted signals, USD 0.00
+reconciliation difference, and a runtime within the five-second budget.
 
 ## Explainability and Auditability
 
@@ -111,8 +120,8 @@ monitoring, and human approval.
 - Live GDELT and Bluesky behavior depends on external services and is mocked in tests.
 - Optional transformer mode is pinned but not downloaded or benchmarked in CI.
 - Stress shocks and valuation methods are simplified and are not regulatory models.
-- The local prototype has no multi-user identity, authorization, streaming, or cloud
-  deployment layer.
+- The local prototype has no multi-user identity, authorization, or cloud deployment
+  layer; its bounded in-process SSE stream is not production-scale infrastructure.
 
 The next engineering step after the hackathon would be a governed pilot dataset with
 human-labeled events, out-of-sample evaluation, calibrated scenario design, and a

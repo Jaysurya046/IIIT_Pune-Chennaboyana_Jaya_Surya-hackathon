@@ -124,6 +124,7 @@ entity, corroboration, and sentiment evidence to cross the strict trigger.
   recorded above. They do not imply investment performance or validate stress losses.
 
 Phase 17's bounded inflection and negation rules changed the deterministic benchmark
-from 0.6767 accuracy / 0.4302 macro-F1 to 0.6793 / 0.4305. The model row is unchanged.
-This table is reproducible implementation evidence and a transparent mode comparison;
-it is not a claim of independent state-of-the-art model quality.
+from 0.6767 accuracy / 0.4302 macro-F1 to 0.6793 / 0.4305. The model row is the Phase
+13 run and was not re-run after Phase 17. This table is reproducible implementation
+evidence and a transparent mode comparison; it is not a claim of independent
+state-of-the-art model quality.

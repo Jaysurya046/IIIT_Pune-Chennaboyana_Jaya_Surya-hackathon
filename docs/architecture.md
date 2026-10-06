@@ -178,6 +178,7 @@ The versioned API provides:
 - `POST /api/v1/ingestion/run`
 - `POST /api/v1/analyze`
 - `GET /api/v1/signals`
+- `GET /api/v1/signals/stream`
 - `GET /api/v1/signals/{signal_id}`
 - `POST /api/v1/stress-tests`
 - `POST /api/v1/stress-tests/what-if`

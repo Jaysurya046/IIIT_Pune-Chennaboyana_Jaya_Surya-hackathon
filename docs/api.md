@@ -106,6 +106,7 @@ is a deterministic ephemeral reference and is never stored or retrievable.
 | POST | `/api/v1/ingestion/run` | Run fixture, replay, or explicitly enabled live ingestion |
 | POST | `/api/v1/analyze` | Analyze a persisted ingestion run |
 | GET | `/api/v1/signals` | Filter and paginate stored signals |
+| GET | `/api/v1/signals/stream` | Stream persisted signals as Server-Sent Events |
 | GET | `/api/v1/signals/{signal_id}` | Retrieve one signal |
 | POST | `/api/v1/stress-tests` | Evaluate and persist a stress decision |
 | POST | `/api/v1/stress-tests/what-if` | Run a non-persisted hypothetical stress simulation |

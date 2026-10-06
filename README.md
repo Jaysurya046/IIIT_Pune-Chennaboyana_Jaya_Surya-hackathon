@@ -3,8 +3,8 @@
 **Candidate Name:** Chennaboyana Jaya Surya
 **College Email ID:** 112315046@cse.iiitp.ac.in
 **College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Phase 16 complete - release and demo workflow ready
-**Demo Video Link:** To be added after the recorded walkthrough
+**Implementation Status:** Implementation complete; the optional larger-portfolio generator was not pursued because no permitted transaction dataset was supplied
+**Demo Video Link:** [PLACEHOLDER — user input required]
 **Slide Deck:** [Download the six-slide presentation PDF](docs/presentation.pdf)
 
 ## 1. Project Overview / Problem Statement & Approach
@@ -77,8 +77,8 @@ selection rules, metrics, and limitations are recorded in
 
 ## 4. Quickstart & Installation
 
-Runtime: Python 3.11 through 3.13. CI verifies Python 3.11 on Ubuntu; local development
-has been verified on Python 3.13 on Windows.
+Runtime: Python 3.11 through 3.13. CI verifies both Python 3.11 and 3.13 on Ubuntu;
+local development has been verified on Python 3.13 on Windows.
 
 ```bash
 git clone https://github.com/Jaysurya046/IIIT_Pune-Chennaboyana_Jaya_Surya-hackathon.git
@@ -87,26 +87,22 @@ python -m venv .venv
 ```
 
 Activate the environment with `.venv\Scripts\Activate.ps1` on Windows PowerShell or
-`source .venv/bin/activate` on macOS/Linux, then run:
+`source .venv/bin/activate` on macOS/Linux. Use `requirements.txt` for the runtime and
+demo; use `requirements-dev.txt` when developing or running the test and lint gates.
+The shortest reviewer path is:
 
 ```bash
-python -m pip install -r requirements-dev.txt
-python -m risk_engine check
-python -m risk_engine ingest-fixtures --query "portfolio risk"
-python -m risk_engine analyze-fixtures --query "portfolio risk"
-python -m risk_engine stress-fixtures --query "portfolio risk"
-python -m risk_engine replay
-python -m risk_engine validate --output data/runtime/validation-report.json
-python -m ruff check .
-python -m pytest
+python -m pip install -r requirements.txt
+python -m risk_engine validate
+python -m risk_engine demo --no-open-browser
 ```
 
 Copy `.env.example` to `.env` only when local overrides are required. Do not commit
-the resulting `.env` file. The fixture commands exercise both source types through
-validation, normalization, provenance capture, and deduplication without requiring
-network access. The separate `replay` command runs four checksummed synthetic records
-through the unchanged deterministic engine and produces an organic triggered stress
-result without editing a signal score.
+the resulting `.env` file. The validator is network-free. The separate `replay` command
+runs four checksummed synthetic records through the unchanged deterministic engine and
+produces an organic triggered stress result without editing a signal score. For the
+development gates, install `requirements-dev.txt` and run `python -m ruff check .` and
+`python -m pytest`.
 
 The analysis command defaults to a transparent deterministic NLP implementation. To
 run the pinned FinBERT sentiment and MiniLM semantic event models, install the optional
@@ -169,11 +165,11 @@ they are not forecasts, calibrated regulatory results, or investment advice.
 | Evidence | Recorded result | Interpretation boundary |
 |---|---|---|
 | Financial PhraseBank v1.0, deterministic mode | Accuracy 0.6793; macro-F1 0.4305; 0/2,264 signals above 7 | Sentiment comparison on expert-labelled text; Phase 17 bounded matching and negation rules; no trigger-quality labels |
-| Financial PhraseBank v1.0, pinned FinBERT | Accuracy 0.9717; macro-F1 0.9625; 0/2,264 signals above 7 | The model's published training data includes this dataset, so this is not an out-of-sample estimate |
+| Financial PhraseBank v1.0, pinned FinBERT | Accuracy 0.9717; macro-F1 0.9625; 0/2,264 signals above 7 | Phase 13 run; not re-run after Phase 17; the model's published training data includes this dataset, so this is not an out-of-sample estimate |
 | Synthetic NLP regression | 8/8 event, sentiment, and entity exact matches across all eight event categories | Authored regression coverage, not real-world predictive accuracy |
 | Synthetic replay | Four checksummed records produce four impact-9 signals and organic persisted triggers | Fictional Aurora Bank; unchanged deterministic engine; no copied article text |
 | Synthetic portfolio stress | USD 55.50M across eight positions; Aurora replay loss USD 3.747M; reconciliation USD 0.00 | Project-authored positions and shocks; simplified valuation paths |
-| Offline validator | 9/9 manifested artifacts; 6/6 persisted baseline signals; boundary-probe loss USD 2.35M | Reproducibility and contract evidence under the local five-second budget; Phase 17 inflection matching changes the selected event severity |
+| Offline quality gate | 154 tests passed; validator 11/11 manifested artifacts and 6/6 persisted baseline signals; boundary-probe loss USD 2.35M | Ruff and validator passed; one upstream Starlette warning is reported by Pytest; Phase 17 inflection matching changes the selected event severity |
 
 The benchmark provenance and confusion matrices are in
 [docs/benchmark.md](docs/benchmark.md). Calculation details, assumptions, and
@@ -209,8 +205,6 @@ their synthetic or hypothetical disclosures.
   up-to-ten-minute recorded walkthroughs.
 - [Presentation PDF](docs/presentation.pdf) — six-slide problem, architecture, data,
   evidence, stress result, and limitation summary.
-- [Post-implementation improvement plan](docs/improvement-plan.md) — Phases 9–20,
-  task dependencies, data gates, tests, commands, and conventional commits.
 - [API guide](docs/api.md) and [dashboard guide](docs/dashboard.md) — operational
   contracts, filters, metrics, and error semantics.
 
@@ -222,4 +216,5 @@ from an incognito window before submission.
 
 Implementation status, verification evidence, decisions, and blockers are maintained
 in [docs/progress.md](docs/progress.md). Each completed phase is delivered as a focused
-commit.
+commit. The historical development plan is retained in
+[docs/improvement-plan.md](docs/improvement-plan.md).
