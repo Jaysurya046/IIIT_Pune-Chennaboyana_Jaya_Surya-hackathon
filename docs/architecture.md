@@ -33,22 +33,29 @@ high-resolution reviewer and presentation asset required by the submission struc
 
 ```mermaid
 flowchart LR
-    A[GDELT News API] --> D[Source Adapters]
-    B[Bluesky Public API] --> D
-    C[Offline Demo Fixtures] --> D
-    D --> E[Normalize Validate Deduplicate]
-    E --> F[Entity Resolution]
-    F --> G[FinBERT Sentiment]
-    F --> H[Event Classification]
-    G --> I[Explainable Impact Scorer]
-    H --> I
-    I --> J[(SQLite Signal Store)]
-    J --> K[FastAPI Service]
-    K --> L[Stress Orchestrator]
-    M[Synthetic Portfolio and Scenario Matrix] --> L
-    L --> N[(Stress Results)]
-    K --> O[Streamlit Dashboard]
+    subgraph Sources[Explicit source modes]
+        A[GDELT DOC API<br/>live news]
+        B[Bluesky AppView<br/>live social]
+        C[Fixtures<br/>6 synthetic records]
+        R[Replay<br/>4 synthetic records]
+    end
+    W[Watchlist OR query<br/>live path] --> A
+    W --> B
+    A --> D[Source adapters<br/>schema, UTC, provenance, dedup]
+    B --> D
+    C --> D
+    R --> D
+    D --> E[RiskSignalEngine<br/>deterministic default | pinned model]
+    E --> F[Entity + sentiment<br/>8 events + impact 1-10]
+    F --> J[(SQLite schema v1<br/>signals + event log + decisions)]
+    J --> K[FastAPI v1<br/>11 routes: 10 REST + SSE]
+    K --> O[Streamlit dashboard<br/>timeline, waterfall, source health]
+    J --> L[Stress orchestrator<br/>strict trigger impact &gt; 7]
+    M[8-position synthetic portfolio<br/>USD 55.50M | 4 asset classes] --> L
+    L --> N[(Stress results<br/>4 valuation paths + reconciliation)]
     N --> O
+    K --> H[What-if API<br/>hypothetical, non-persisted]
+    K -. optional polling / auto-stress .-> L
 ```
 
 ## Component Responsibilities

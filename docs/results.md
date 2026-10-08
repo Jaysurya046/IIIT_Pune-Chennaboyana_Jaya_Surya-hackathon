@@ -69,12 +69,13 @@ environment from a clean clone. The configuration diagnostic, Ruff, all 83 tests
 `pip check`, and the validator passed there; the clean-clone validation run completed
 in 0.179 seconds against its five-second local budget.
 
-## Current Gate (recorded 2026-10-06)
+## Current Gate (recorded 2026-10-08)
 
 The current repository gate passes with Ruff clean, 154 Pytest tests passed, one
 upstream Starlette warning, `git diff --check` clean, and the offline validator reporting
 `passed: true`, 11/11 manifested artifacts, 6/6 persisted signals, USD 0.00
-reconciliation difference, and a runtime within the five-second budget.
+reconciliation difference, and a measured runtime of 0.108 seconds against the
+five-second budget.
 
 ## Explainability and Auditability
 
@@ -125,5 +126,5 @@ monitoring, and human approval.
 
 The next engineering step after the hackathon would be a governed pilot dataset with
 human-labeled events, out-of-sample evaluation, calibrated scenario design, and a
-security and deployment review. Presentation and video artifacts are intentionally
-prepared only after this implementation baseline is frozen.
+security and deployment review. The six-slide presentation PDF is committed; the
+YouTube walkthrough remains a user-supplied submission link.

@@ -1,4 +1,4 @@
-# Phase 7 Validation Evidence
+# Validation Evidence
 
 ## Readiness Assessment
 
@@ -49,7 +49,7 @@ Recorded at Phase 7 on 2026-10-03 using Python 3.13 on Windows in deterministic 
 
 | Check | Result |
 |---|---:|
-| Manifested artifacts matching checksums | 9 / 9 |
+| Manifested artifacts matching checksums | 7 / 7 |
 | Fixture records with unique source IDs | 6 / 6 |
 | Source types represented | 2 |
 | Golden taxonomy categories covered | 8 / 8 |
@@ -65,12 +65,13 @@ Recorded at Phase 7 on 2026-10-03 using Python 3.13 on Windows in deterministic 
 | Complete validation runtime | 0.119 seconds |
 | Local runtime budget | 5.000 seconds |
 
-## Current Gate (recorded 2026-10-06)
+## Current Gate (recorded 2026-10-08)
 
 The current gate recorded 154 Pytest tests passed with one upstream Starlette warning,
 Ruff clean, `git diff --check` clean, and `python -m risk_engine validate` returning
 `passed: true` with 11/11 manifested artifacts, 6/6 persisted signals, USD 0.00
-reconciliation difference, and a runtime within the five-second budget.
+reconciliation difference, and a measured runtime of 0.108 seconds against the
+five-second budget.
 
 The accuracy rows are exact-match results on a small synthetic regression set designed
 to cover code paths. They must not be presented as estimates of performance on public
@@ -105,7 +106,8 @@ one local measurement of the deterministic path and is not a latency SLA.
 - Live GDELT and Bluesky behavior is mocked for deterministic tests; real services can
   rate-limit, deny unauthenticated search, change schemas, or become unavailable.
 - Model mode requires separately installed dependencies and downloaded pinned weights;
-  Phase 7 validates failure behavior but does not download or benchmark those models.
+  the offline gate validates explicit failure behavior, while the optional benchmark
+  records one separately measured model run and is not part of CI.
 - Synthetic scenarios and valuations demonstrate explainable calculation paths, not
   calibrated market, credit, regulatory-capital, or investment results.
 - Performance and visual checks cover a local prototype scale, not concurrency,

@@ -3,13 +3,16 @@
 ## What This Guide Reproduces
 
 This guide starts the complete RiskSignal Engine prototype from a clean checkout. The
-default path is deliberately offline: it reads two committed synthetic source bundles,
-normalizes and analyzes six records, persists explainable signals in SQLite, exposes
-them through FastAPI, and renders the Streamlit monitoring and stress-testing UI.
+repository has two explicit offline source modes: the six-record `fixtures` bundle for
+regression and the four-record `replay` bundle for the organic trigger demonstration.
+Both normalize and analyze synthetic records, persist explainable signals in SQLite,
+expose them through FastAPI, and render the Streamlit monitoring and stress-testing UI.
 
 The offline path is the reviewer path because it is deterministic and does not depend
-on third-party availability, credentials, or downloaded model weights. Live public
-adapters and pinned-model mode are optional extensions, not hidden prerequisites.
+on third-party availability, credentials, or downloaded model weights. The one-command
+`demo` defaults to `replay`; the fixture action remains the six-record regression path.
+Live public adapters and pinned-model mode are optional extensions, not hidden
+prerequisites.
 
 ## Prerequisites
 

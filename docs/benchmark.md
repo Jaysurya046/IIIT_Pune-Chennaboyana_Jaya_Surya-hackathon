@@ -2,7 +2,7 @@
 
 ## Scope and Claim Boundary
 
-Phases 12 and 13 add a local benchmark command that evaluates the same ordered CSV with
+The repository includes a local benchmark command that evaluates one ordered CSV with
 the project's explicit `deterministic` and `model` NLP implementations:
 
 ```bash
@@ -20,10 +20,10 @@ dependencies, or unavailable weights. It never replaces model mode with determin
 mode. JSON is written to standard output; the optional output paths retain the same JSON
 and a presentation-ready Markdown table.
 
-The classification metrics measure three-class financial sentiment. Phase 13 also runs
-each record through entity resolution, event classification, and impact scoring, then
-reports how often `impact_score > 7`. It does not run portfolio valuation or persist the
-generated benchmark signals.
+The classification metrics measure three-class financial sentiment. The full-engine
+benchmark also runs each record through entity resolution, event classification, and
+impact scoring, then reports how often `impact_score > 7`. It does not run portfolio
+valuation or persist the generated benchmark signals.
 
 ## Dataset Source and Permission
 

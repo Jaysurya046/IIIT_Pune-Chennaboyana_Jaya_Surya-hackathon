@@ -1,6 +1,6 @@
 # Implementation Progress
 
-Last updated: 2026-10-06
+Last updated: 2026-10-08
 
 ## Phase Status
 
@@ -515,6 +515,17 @@ detailed historical sequence and task gates are in [improvement-plan.md](improve
   invented.
 - The final gate records 154 Pytest tests, Ruff clean, a passing 11-artifact validator,
   and a clean `git diff --check`; the only test warning is upstream Starlette/httpx.
+
+### 2026-10-08 Documentation consistency audit
+
+- Audited every tracked file under `docs/` against the current routes, source modes,
+  validator report, benchmark record, dashboard screenshots, and package version.
+- Corrected the Phase 7 historical artifact count to 7/7, while retaining the current
+  11-artifact gate separately; refreshed current-gate evidence to the 154-test,
+  0.108-second validator run.
+- Clarified that fixture mode contains six records, replay mode contains four records,
+  and the one-command demo defaults to replay; no checksummed data or screenshots were
+  changed.
 
 ## Risks and Blockers
 
