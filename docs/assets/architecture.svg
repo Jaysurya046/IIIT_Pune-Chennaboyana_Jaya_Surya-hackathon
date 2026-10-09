@@ -165,7 +165,7 @@
     <text x="905" y="898" class="inverse-small">portfolio and loss reconcile to cents</text>
     <rect x="1265" y="812" width="425" height="105" rx="14" fill="#173c5d"/>
     <text x="1290" y="849" class="inverse-title">Quality gates and runtime scope</text>
-    <text x="1290" y="878" class="inverse-small">154 tests | Ruff | validator | CI 3.11 / 3.13</text>
+    <text x="1290" y="878" class="inverse-small">153 tests | Ruff | validator | CI 3.11 / 3.13</text>
     <text x="1290" y="898" class="inverse-small">no Module A, Kafka, cloud, or client data</text>
   </g>
 

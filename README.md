@@ -1,18 +1,23 @@
 # RiskSignal Engine - S&P Global & Crisil Campus Hackathon
 
-**Candidate Name:** Chennaboyana Jaya Surya
-**College Email ID:** 112315046@cse.iiitp.ac.in
-**College / Campus:** Indian Institute of Information Technology, Pune
-**Implementation Status:** Implementation complete; the optional larger-portfolio generator was not pursued because no permitted transaction dataset was supplied
-**Demo Video Link:** [PLACEHOLDER — user input required]
-**Slide Deck:** [Download the seven-page presentation PDF](docs/presentation.pdf)
+-**Candidate Name:** Chennaboyana Jaya Surya
+-**College Email ID:** 112315046@cse.iiitp.ac.in
+-**College / Campus:** Indian Institute of Information Technology, Pune
+-**Implementation Status:** Implementation complete; the optional larger-portfolio generator was not pursued because no permitted transaction dataset was supplied
+-**Demo Video Link:** [PLACEHOLDER — user input required]
+-**Slide Deck:** [Download the seven-page presentation PDF](docs/presentation.pdf)
 
 ## 1. Project Overview / Problem Statement & Approach
 
-RiskSignal Engine is a modular financial-risk prototype that converts unstructured
-news and social-media text into machine-readable risk signals. Each signal includes
-a sentiment score, event classification, impact score, entity references, source
-provenance, and an explanation of the factors that produced the score.
+RiskSignal Engine is a modular financial-risk prototype that:
+
+- ingests unstructured news and social-media text through GDELT and Bluesky adapters,
+  with deterministic fixtures and replay records for offline evaluation;
+- validates, normalizes, deduplicates, and retains source provenance for every record;
+- resolves fictional watchlist entities and produces sentiment, event classification,
+  impact, and factor-level explanations for each signal; and
+- exposes the persisted signals through FastAPI and a Streamlit dashboard, where
+  above-threshold signals can be applied to the synthetic portfolio stress engine.
 
 The implemented downstream application is strategic portfolio stress testing. Events with
 an impact score greater than 7 trigger an appropriate scenario against a fictional
@@ -40,14 +45,16 @@ demo runbook use the same tested synthetic evidence as the application.
 The implemented flow is:
 
 ```text
-GDELT / Bluesky / fixtures
-        -> normalization and deduplication
-        -> entity resolution
-        -> FinBERT sentiment + event classification
-        -> explainable impact scoring
-        -> SQLite + FastAPI
-        -> portfolio stress engine
-        -> Streamlit dashboard
+GDELT / Bluesky (live) / fixtures / replay
+        -> source validation, UTC normalization, provenance, and deduplication
+        -> entity resolution against the fictional watchlist
+        -> deterministic sentiment + event classification
+           (optional pinned FinBERT/MiniLM model mode)
+        -> explainable impact scoring (1-10)
+        -> SQLite signal and event log
+        -> FastAPI (10 REST routes + 1 SSE stream)
+        -> synthetic portfolio stress engine for impact > 7
+        -> Streamlit dashboard (timeline, waterfall, health, what-if)
 ```
 
 Stack: Python 3.11–3.13, FastAPI, Pydantic, SQLite, Hugging Face
@@ -169,7 +176,7 @@ they are not forecasts, calibrated regulatory results, or investment advice.
 | Synthetic NLP regression | 8/8 event, sentiment, and entity exact matches across all eight event categories | Authored regression coverage, not real-world predictive accuracy |
 | Synthetic replay | Four checksummed records produce four impact-9 signals and organic persisted triggers | Fictional Aurora Bank; unchanged deterministic engine; no copied article text |
 | Synthetic portfolio stress | USD 55.50M across eight positions; Aurora replay loss USD 3.747M; reconciliation USD 0.00 | Project-authored positions and shocks; simplified valuation paths |
-| Offline quality gate | 154 tests passed; validator 11/11 manifested artifacts and 6/6 persisted baseline signals; boundary-probe loss USD 2.35M | Ruff and validator passed; one upstream Starlette warning is reported by Pytest; Phase 17 inflection matching changes the selected event severity |
+| Offline quality gate | 153 tests passed; validator 11/11 manifested artifacts and 6/6 persisted baseline signals; boundary-probe loss USD 2.35M | Ruff and validator passed; one upstream Starlette warning is reported by Pytest; Phase 17 inflection matching changes the selected event severity |
 
 The benchmark provenance and confusion matrices are in
 [docs/benchmark.md](docs/benchmark.md). Calculation details, assumptions, and
@@ -209,10 +216,3 @@ their synthetic or hypothetical disclosures.
 The presentation PDF is committed and linked above. The remaining submission handoff
 is the unlisted YouTube walkthrough; its link and the public repository should be tested
 from an incognito window before submission.
-
-## Development Progress
-
-Implementation status, verification evidence, decisions, and blockers are maintained
-in local-only development notes that are intentionally ignored from the reviewer
-checkout. Public documentation describes the current implementation and reproducible
-quality gates; each completed phase was delivered as a focused commit.
