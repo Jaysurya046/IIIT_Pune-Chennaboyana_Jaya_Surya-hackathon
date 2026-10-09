@@ -3,7 +3,7 @@
 - **Candidate Name:** Chennaboyana Jaya Surya
 - **College Email ID:** `112315046@cse.iiitp.ac.in`
 - **College / Campus:** Indian Institute of Information Technology, Pune
-- **Demo Video Link:** [PLACEHOLDER — user input required]
+- **Demo Video Link:** [Watch the RiskSignal Engine walkthrough](https://youtu.be/B59E9kMTN50)
 - **Slide Deck:** [Download Presentation PDF](docs/presentation.pdf)
 
 ## 1. Project Overview / Problem Statement & Approach
@@ -226,6 +226,5 @@ their synthetic or hypothetical disclosures.
 - [API guide](docs/api.md) and [dashboard guide](docs/dashboard.md) — operational
   contracts, filters, metrics, and error semantics.
 
-The presentation PDF is committed and linked above. The remaining submission handoff
-is the unlisted YouTube walkthrough; its link and the public repository should be tested
-from an incognito window before submission.
+The presentation PDF and unlisted YouTube walkthrough are linked above. Test both links
+and the public repository from an incognito window before submission.
