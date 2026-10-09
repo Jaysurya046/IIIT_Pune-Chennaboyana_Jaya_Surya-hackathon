@@ -1,11 +1,11 @@
 # RiskSignal Engine - S&P Global & Crisil Campus Hackathon
 
--**Candidate Name:** Chennaboyana Jaya Surya
--**College Email ID:** 112315046@cse.iiitp.ac.in
--**College / Campus:** Indian Institute of Information Technology, Pune
--**Implementation Status:** Implementation complete; the optional larger-portfolio generator was not pursued because no permitted transaction dataset was supplied
--**Demo Video Link:** [PLACEHOLDER — user input required]
--**Slide Deck:** [Download the seven-page presentation PDF](docs/presentation.pdf)
+- **Candidate Name:** Chennaboyana Jaya Surya
+- **College Email ID:** `112315046@cse.iiitp.ac.in`
+- **College / Campus:** Indian Institute of Information Technology, Pune
+- **Implementation Status:** Complete *(The optional larger-portfolio generator was not pursued because no permitted transaction dataset was supplied)*
+- **Demo Video Link:** [PLACEHOLDER — user input required]
+- **Slide Deck:** [Download Presentation PDF](docs/presentation.pdf)
 
 ## 1. Project Overview / Problem Statement & Approach
 
