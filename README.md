@@ -3,7 +3,6 @@
 - **Candidate Name:** Chennaboyana Jaya Surya
 - **College Email ID:** `112315046@cse.iiitp.ac.in`
 - **College / Campus:** Indian Institute of Information Technology, Pune
-- **Implementation Status:** Complete *(The optional larger-portfolio generator was not pursued because no permitted transaction dataset was supplied)*
 - **Demo Video Link:** [PLACEHOLDER — user input required]
 - **Slide Deck:** [Download Presentation PDF](docs/presentation.pdf)
 
@@ -44,17 +43,31 @@ demo runbook use the same tested synthetic evidence as the application.
 
 The implemented flow is:
 
-```text
-GDELT / Bluesky (live) / fixtures / replay
-        -> source validation, UTC normalization, provenance, and deduplication
-        -> entity resolution against the fictional watchlist
-        -> deterministic sentiment + event classification
-           (optional pinned FinBERT/MiniLM model mode)
-        -> explainable impact scoring (1-10)
-        -> SQLite signal and event log
-        -> FastAPI (10 REST routes + 1 SSE stream)
-        -> synthetic portfolio stress engine for impact > 7
-        -> Streamlit dashboard (timeline, waterfall, health, what-if)
+```mermaid
+flowchart LR
+    %% Inputs
+    IN["<b>Raw Feeds</b><br/>GDELT / Bluesky (live)<br/>Fixtures / Replay"]
+    
+    %% Processing
+    NORM["<b>Data Processing</b><br/>Validation, UTC Norm,<br/>Provenance, Deduplication"]
+    RES["<b>Entity Resolution</b><br/>Fictional Watchlist"]
+    CLS["<b>Classification</b><br/>Sentiment & Event<br/><i>(FinBERT / MiniLM)</i>"]
+    SCORE["<b>Impact Scoring</b><br/>1 – 10 Scale"]
+    
+    %% Storage & API
+    DB[("<b>SQLite</b><br/>Signal & Event Log")]
+    API["<b>FastAPI</b><br/>10 REST + 1 SSE"]
+    
+    %% Conditional Branch
+    STRESS["<b>Stress Engine</b><br/>Portfolio Impact > 7"]
+    
+    %% UI
+    DASH["<b>Streamlit UI</b><br/>Timeline, Waterfall,<br/>Health, What-If"]
+
+    %% Edges
+    IN --> NORM --> RES --> CLS --> SCORE
+    SCORE --> DB --> API --> DASH
+    SCORE -->|Score > 7| STRESS --> API
 ```
 
 Stack: Python 3.11–3.13, FastAPI, Pydantic, SQLite, Hugging Face
