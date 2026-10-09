@@ -67,10 +67,10 @@ Recorded at Phase 7 on 2026-10-03 using Python 3.13 on Windows in deterministic 
 
 ## Current Gate (recorded 2026-10-08)
 
-The current gate recorded 154 Pytest tests passed with one upstream Starlette warning,
+The current gate recorded 153 Pytest tests passed with one upstream Starlette warning,
 Ruff clean, `git diff --check` clean, and `python -m risk_engine validate` returning
 `passed: true` with 11/11 manifested artifacts, 6/6 persisted signals, USD 0.00
-reconciliation difference, and a measured runtime of 0.108 seconds against the
+reconciliation difference, and a measured runtime of 0.194 seconds against the
 five-second budget.
 
 The accuracy rows are exact-match results on a small synthetic regression set designed

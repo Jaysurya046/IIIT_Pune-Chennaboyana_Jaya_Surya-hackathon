@@ -149,4 +149,4 @@ When a committed data or configuration artifact changes:
 3. Recalculate the SHA-256 value in `data/sources.yaml`.
 4. Update the affected golden expectations or tests deliberately.
 5. Run `python -m risk_engine validate` and the full test suite.
-6. Record the change and evidence in `docs/progress.md`.
+6. Record the change and evidence in the local-only progress tracker.

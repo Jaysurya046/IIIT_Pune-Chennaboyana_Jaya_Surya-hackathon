@@ -22,7 +22,6 @@ def test_submission_readme_contains_required_sections_and_links() -> None:
 
     assert "docs/architecture.png" in content
     assert "docs/dataset-guide.md" in content
-    assert "docs/demo-script.md" in content
     assert "git clone https://github.com/Jaysurya046/" in content
     assert "python -m risk_engine dashboard" in content
 
@@ -34,7 +33,6 @@ def test_required_submission_artifacts_exist() -> None:
         "docs/implementation-guide.md",
         "docs/dataset-guide.md",
         "docs/results.md",
-        "docs/demo-script.md",
         "docs/presentation.pdf",
     )
 
@@ -120,15 +118,6 @@ def test_external_benchmark_documents_source_license_and_claim_boundary() -> Non
     assert "not a labelled trigger-quality metric" in benchmark
 
 
-def test_demo_runbook_covers_both_time_limits_and_data_disclosure() -> None:
-    content = (ROOT / "docs" / "demo-script.md").read_text(encoding="utf-8")
-
-    assert "Five-Minute Functional Demonstration" in content
-    assert "Up-to-Ten-Minute Recorded Walkthrough" in content
-    assert "synthetic" in content.lower()
-    assert "incognito" in content.lower()
-
-
 def test_directional_and_derivative_assumptions_are_explicit() -> None:
     architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
     dashboard = (ROOT / "docs" / "dashboard.md").read_text(encoding="utf-8")
@@ -176,13 +165,10 @@ def test_readme_results_are_one_evidence_table_plus_screenshots() -> None:
         assert f"docs/img/{filename}" in results
 
 
-def test_release_docs_use_current_progress_path_and_ci_matrix() -> None:
+def test_release_docs_use_current_ci_matrix() -> None:
     readme = README.read_text(encoding="utf-8")
     workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
 
-    assert (ROOT / "docs" / "progress.md").is_file()
-    assert not (ROOT / "progress.md").exists()
-    assert "docs/progress.md" in readme
     assert "python-version: [\"3.11\", \"3.13\"]" in workflow
     assert "HF_HUB_OFFLINE" in workflow
     assert "TRANSFORMERS_OFFLINE" in workflow

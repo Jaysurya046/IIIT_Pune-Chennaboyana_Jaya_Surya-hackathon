@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.pytest-tmp/
 .ruff_cache/
 .mypy_cache/
 .coverage
@@ -38,3 +39,8 @@ huggingface/
 
 # Generated presentation and video artifacts are added deliberately later
 docs/rendered/
+
+# Local-only development history and demonstration notes
+/docs/progress.md
+/docs/improvement-plan.md
+/docs/demo-script.md

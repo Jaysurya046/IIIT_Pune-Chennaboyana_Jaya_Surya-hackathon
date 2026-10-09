@@ -5,7 +5,7 @@
 **College / Campus:** Indian Institute of Information Technology, Pune
 **Implementation Status:** Implementation complete; the optional larger-portfolio generator was not pursued because no permitted transaction dataset was supplied
 **Demo Video Link:** [PLACEHOLDER — user input required]
-**Slide Deck:** [Download the six-slide presentation PDF](docs/presentation.pdf)
+**Slide Deck:** [Download the seven-page presentation PDF](docs/presentation.pdf)
 
 ## 1. Project Overview / Problem Statement & Approach
 
@@ -201,9 +201,7 @@ their synthetic or hypothetical disclosures.
   reproducible command, real-data metrics, confusion matrices, and limitations.
 - [Results and domain impact](docs/results.md) — implemented capability, evidence,
   usefulness, limitations, and next steps.
-- [Demonstration runbook](docs/demo-script.md) — separate five-minute live and
-  up-to-ten-minute recorded walkthroughs.
-- [Presentation PDF](docs/presentation.pdf) — six-slide problem, architecture, data,
+- [Presentation PDF](docs/presentation.pdf) — seven-page problem, architecture, data,
   evidence, stress result, and limitation summary.
 - [API guide](docs/api.md) and [dashboard guide](docs/dashboard.md) — operational
   contracts, filters, metrics, and error semantics.
@@ -215,6 +213,6 @@ from an incognito window before submission.
 ## Development Progress
 
 Implementation status, verification evidence, decisions, and blockers are maintained
-in [docs/progress.md](docs/progress.md). Each completed phase is delivered as a focused
-commit. The historical development plan is retained in
-[docs/improvement-plan.md](docs/improvement-plan.md).
+in local-only development notes that are intentionally ignored from the reviewer
+checkout. Public documentation describes the current implementation and reproducible
+quality gates; each completed phase was delivered as a focused commit.

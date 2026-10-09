@@ -365,15 +365,15 @@ multi-user authentication, production-scale streaming infrastructure, Module A,
 cloud deployment, and video recording.
 
 The recorded walkthrough may run for up to ten minutes under the submission guidance,
-while the deterministic live demonstration runbook fits within five minutes as
-required by the problem statement. Both paths are defined in `docs/demo-script.md`.
+while the deterministic live demonstration fits within five minutes as required by
+the problem statement. The private runbook is maintained as a local development note,
+not as a reviewer-facing repository artifact.
 
 ## Repository Layout
 
 ```text
 README.md
 LICENSE
-docs/progress.md
 pyproject.toml
 requirements.txt
 .env.example
@@ -384,5 +384,5 @@ src/risk_engine/
 tests/
 ```
 
-Large generated artifacts, model caches, runtime data, and local environment files
-remain outside version control.
+Large generated artifacts, model caches, runtime data, local environment files, and
+internal progress/runbook notes remain outside version control.
